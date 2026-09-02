@@ -1,0 +1,2506 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MetroCheck | Legal Metrology</title>
+
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        body {
+
+            min-height: 100vh;
+
+            color: #ffffff;
+
+            background:
+                radial-gradient(
+                    circle at 50% 20%,
+                    #123653 0%,
+                    #081522 45%,
+                    #030910 100%
+                );
+
+            overflow-x: hidden;
+        }
+
+
+        /* =====================================================
+           BACKGROUND GLOW
+        ===================================================== */
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            width: 600px;
+            height: 600px;
+
+            top: 35%;
+            left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            background: rgba(0, 180, 255, 0.08);
+
+            filter: blur(130px);
+
+            pointer-events: none;
+
+            z-index: -10;
+        }
+
+
+        /* =====================================================
+           PRODUCT BACKGROUND
+        ===================================================== */
+
+        .products {
+
+            position: fixed;
+
+            top: 90px;
+            bottom: 0;
+
+            width: 19%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            gap: 50px;
+
+            pointer-events: none;
+
+            z-index: -2;
+        }
+
+
+        .products.left {
+            left: 1%;
+            align-items: flex-start;
+        }
+
+
+        .products.right {
+            right: 1%;
+            align-items: flex-end;
+        }
+
+
+        .product {
+
+            width: 120px;
+            height: 150px;
+
+            object-fit: contain;
+
+            opacity: 0.16;
+
+            filter:
+                drop-shadow(
+                    0 0 25px
+                    rgba(0,190,255,0.25)
+                );
+        }
+
+
+        .product:nth-child(1) {
+            transform: rotate(-8deg);
+        }
+
+
+        .product:nth-child(2) {
+            transform: rotate(7deg);
+        }
+
+
+        .product:nth-child(3) {
+            transform: rotate(-5deg);
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        header {
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
+
+            padding: 16px 5%;
+
+            background:
+                rgba(3,12,23,0.85);
+
+            backdrop-filter: blur(18px);
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,0.08);
+        }
+
+
+        .navbar {
+
+            max-width: 1300px;
+
+            margin: auto;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+        }
+
+
+        .logo {
+
+            font-size: 23px;
+
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+
+        .logo span {
+            color: #00c6ff;
+        }
+
+
+        nav {
+
+            display: flex;
+
+            gap: 5px;
+
+            overflow-x: auto;
+
+            scrollbar-width: none;
+        }
+
+
+        nav::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        nav button {
+
+            background: transparent;
+
+            border: none;
+
+            color: #9eafc2;
+
+            padding: 10px 12px;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            white-space: nowrap;
+
+            font-size: 13px;
+
+            transition: 0.25s;
+        }
+
+
+        nav button:hover,
+        nav button.active {
+
+            color: white;
+
+            background:
+                rgba(0,180,255,0.12);
+        }
+
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        main {
+
+            width: 90%;
+
+            max-width: 1200px;
+
+            margin: 40px auto 80px;
+        }
+
+
+        .page {
+            display: none;
+        }
+
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.35s ease;
+        }
+
+
+        @keyframes fadeIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        /* =====================================================
+           HEADINGS
+        ===================================================== */
+
+        .page-title {
+
+            margin-bottom: 30px;
+        }
+
+
+        .page-title h1 {
+
+            font-size:
+                clamp(26px, 5vw, 38px);
+
+            margin-bottom: 8px;
+        }
+
+
+        .page-title p {
+
+            color: #91a5b8;
+
+            font-size: 15px;
+        }
+
+
+        /* =====================================================
+           CARDS
+        ===================================================== */
+
+        .card {
+
+            background:
+                rgba(10,27,43,0.78);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.09);
+
+            border-radius: 17px;
+
+            padding: 25px;
+
+            backdrop-filter: blur(20px);
+
+            box-shadow:
+                0 15px 45px
+                rgba(0,0,0,0.35);
+
+            margin-bottom: 22px;
+        }
+
+
+        /* =====================================================
+           DASHBOARD STATS
+        ===================================================== */
+
+        .stats {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .stat {
+
+            padding: 22px;
+
+            background:
+                rgba(255,255,255,0.035);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.07);
+
+            border-radius: 13px;
+        }
+
+
+        .stat-number {
+
+            font-size: 28px;
+
+            font-weight: bold;
+
+            margin-bottom: 7px;
+        }
+
+
+        .stat-label {
+
+            color: #91a5b8;
+
+            font-size: 13px;
+        }
+
+
+        .blue {
+            color: #25c7ff;
+        }
+
+
+        .green {
+            color: #00e59a;
+        }
+
+
+        .red {
+            color: #ff6575;
+        }
+
+
+        .yellow {
+            color: #ffb84d;
+        }
+
+
+        /* =====================================================
+           DASHBOARD GRID
+        ===================================================== */
+
+        .dashboard-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                1.5fr 1fr;
+
+            gap: 20px;
+        }
+
+
+        /* =====================================================
+           SCANNER
+        ===================================================== */
+
+        .upload-area {
+
+            border:
+                2px dashed
+                rgba(50,190,255,0.4);
+
+            border-radius: 14px;
+
+            padding: 55px 20px;
+
+            text-align: center;
+
+            background:
+                rgba(0,150,255,0.03);
+
+            transition: 0.3s;
+        }
+
+
+        .upload-area:hover {
+
+            border-color: #29c7ff;
+
+            background:
+                rgba(0,180,255,0.07);
+
+            box-shadow:
+                0 0 30px
+                rgba(0,190,255,0.12);
+        }
+
+
+        .upload-icon {
+
+            font-size: 45px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .upload-area h2 {
+
+            margin-bottom: 8px;
+
+            font-size: 23px;
+        }
+
+
+        .upload-area p {
+
+            color: #91a5b8;
+
+            margin-bottom: 23px;
+
+            font-size: 14px;
+        }
+
+
+        input[type="file"] {
+            display: none;
+        }
+
+
+        .btn {
+
+            border: none;
+
+            border-radius: 8px;
+
+            padding: 13px 22px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            color: white;
+
+            transition: 0.25s;
+        }
+
+
+        .btn-blue {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #168cff,
+                    #00c6ff
+                );
+
+            box-shadow:
+                0 0 20px
+                rgba(0,174,255,0.22);
+        }
+
+
+        .btn-green {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #00a968,
+                    #00e59a
+                );
+
+            box-shadow:
+                0 0 20px
+                rgba(0,220,150,0.18);
+        }
+
+
+        .btn:hover {
+
+            transform:
+                translateY(-2px);
+
+            filter: brightness(1.1);
+        }
+
+
+        .full {
+            width: 100%;
+            margin-top: 18px;
+        }
+
+
+        #preview {
+
+            display: none;
+
+            width: 100%;
+
+            max-height: 330px;
+
+            object-fit: contain;
+
+            margin-top: 22px;
+
+            border-radius: 12px;
+
+            border:
+                1px solid
+                rgba(255,255,255,0.1);
+        }
+
+
+        /* =====================================================
+           COMPLIANCE SCORE
+        ===================================================== */
+
+        .score-box {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 25px;
+        }
+
+
+        .score-circle {
+
+            width: 125px;
+            height: 125px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            background:
+                conic-gradient(
+                    #00e59a 0deg 295deg,
+                    rgba(255,255,255,0.08)
+                    295deg 360deg
+                );
+        }
+
+
+        .score-inner {
+
+            width: 95px;
+            height: 95px;
+
+            border-radius: 50%;
+
+            background: #0b1d2d;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            color: #00e59a;
+        }
+
+
+        /* =====================================================
+           RESULT ITEMS
+        ===================================================== */
+
+        .result-item {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            padding: 15px 5px;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,0.07);
+
+            font-size: 14px;
+        }
+
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+
+        .status {
+
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+
+        /* =====================================================
+           PRODUCT INFO
+        ===================================================== */
+
+        .info-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 12px;
+        }
+
+
+        .info {
+
+            padding: 17px;
+
+            background:
+                rgba(255,255,255,0.035);
+
+            border-radius: 10px;
+
+            border:
+                1px solid
+                rgba(255,255,255,0.06);
+        }
+
+
+        .info-label {
+
+            color: #8196aa;
+
+            font-size: 12px;
+
+            margin-bottom: 6px;
+        }
+
+
+        .info-value {
+
+            font-size: 15px;
+
+            font-weight: bold;
+        }
+
+
+        /* =====================================================
+           VIOLATIONS
+        ===================================================== */
+
+        .violation {
+
+            display: flex;
+
+            gap: 15px;
+
+            padding: 18px;
+
+            margin-bottom: 12px;
+
+            border-radius: 11px;
+
+            background:
+                rgba(255,80,95,0.055);
+
+            border:
+                1px solid
+                rgba(255,80,95,0.13);
+        }
+
+
+        .violation-icon {
+
+            font-size: 25px;
+        }
+
+
+        .violation h3 {
+
+            font-size: 15px;
+
+            margin-bottom: 6px;
+        }
+
+
+        .violation p {
+
+            color: #91a5b8;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           CHATBOT
+        ===================================================== */
+
+        .chat {
+
+            height: 550px;
+
+            display: flex;
+
+            flex-direction: column;
+        }
+
+
+        .chat-header {
+
+            padding-bottom: 18px;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,0.08);
+
+            margin-bottom: 15px;
+        }
+
+
+        .bot-status {
+
+            color: #00e59a;
+
+            font-size: 12px;
+
+            margin-top: 5px;
+        }
+
+
+        .messages {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding: 10px 5px;
+        }
+
+
+        .message {
+
+            max-width: 75%;
+
+            padding: 12px 15px;
+
+            margin-bottom: 12px;
+
+            border-radius: 12px;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+
+        .bot {
+
+            background:
+                rgba(0,170,255,0.09);
+
+            border:
+                1px solid
+                rgba(0,180,255,0.1);
+        }
+
+
+        .user {
+
+            margin-left: auto;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #168cff,
+                    #0074d9
+                );
+        }
+
+
+        .chat-input {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 10px;
+        }
+
+
+        .chat-input input {
+
+            flex: 1;
+
+            padding: 13px;
+
+            border-radius: 8px;
+
+            border:
+                1px solid
+                rgba(255,255,255,0.1);
+
+            background:
+                rgba(255,255,255,0.05);
+
+            color: white;
+
+            outline: none;
+        }
+
+
+        .chat-input input:focus {
+
+            border-color:
+                rgba(0,190,255,0.5);
+        }
+
+
+        .chat-input button {
+
+            width: 50px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #168cff;
+
+            color: white;
+
+            cursor: pointer;
+
+            font-size: 18px;
+        }
+
+
+        /* =====================================================
+           HISTORY
+        ===================================================== */
+
+        .history-item {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 17px;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,0.07);
+        }
+
+
+        .history-name {
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+        }
+
+
+        .history-date {
+
+            color: #71869a;
+
+            font-size: 12px;
+        }
+
+
+        .history-score {
+
+            font-weight: bold;
+
+            color: #00e59a;
+        }
+
+
+        /* =====================================================
+           RULES
+        ===================================================== */
+
+        .rule {
+
+            padding: 20px;
+
+            margin-bottom: 12px;
+
+            background:
+                rgba(255,255,255,0.035);
+
+            border-radius: 11px;
+
+            border:
+                1px solid
+                rgba(255,255,255,0.06);
+        }
+
+
+        .rule h3 {
+
+            color: #25c7ff;
+
+            font-size: 16px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .rule p {
+
+            color: #91a5b8;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           ABOUT
+        ===================================================== */
+
+        .about {
+
+            text-align: center;
+
+            max-width: 800px;
+
+            margin: auto;
+        }
+
+
+        .about-icon {
+
+            font-size: 60px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .about h1 {
+
+            font-size: 32px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .about p {
+
+            color: #91a5b8;
+
+            line-height: 1.7;
+
+            margin-bottom: 20px;
+        }
+
+
+        .tech-list {
+
+            display: flex;
+
+            justify-content: center;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+        }
+
+
+        .tech {
+
+            padding: 9px 14px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(0,170,255,0.08);
+
+            border:
+                1px solid
+                rgba(0,170,255,0.15);
+
+            color: #75d8ff;
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1000px) {
+
+            .products {
+                width: 12%;
+            }
+
+            .product {
+
+                width: 75px;
+                height: 110px;
+
+                opacity: 0.08;
+            }
+
+            .stats {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .dashboard-grid {
+
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        @media (max-width: 700px) {
+
+            header {
+
+                padding: 13px 4%;
+            }
+
+
+            .navbar {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+
+            nav {
+
+                width: 100%;
+            }
+
+
+            main {
+
+                width: 94%;
+
+                margin-top: 25px;
+            }
+
+
+            .products {
+                display: none;
+            }
+
+
+            .stats {
+
+                grid-template-columns: 1fr 1fr;
+            }
+
+
+            .info-grid {
+
+                grid-template-columns: 1fr;
+            }
+
+
+            .card {
+
+                padding: 20px;
+            }
+
+
+            .score-box {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+        }
+
+
+        @media (max-width: 450px) {
+
+            .stats {
+
+                grid-template-columns: 1fr;
+            }
+
+
+            .logo {
+
+                font-size: 20px;
+            }
+
+
+            .upload-area {
+
+                padding: 40px 15px;
+            }
+
+
+            .result-item {
+
+                flex-direction: column;
+
+                gap: 6px;
+            }
+
+
+            .message {
+
+                max-width: 90%;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     BACKGROUND PRODUCTS
+===================================================== -->
+
+<div class="products left">
+
+    <img class="product"
+         src="https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?auto=format&fit=crop&w=300&q=70">
+
+    <img class="product"
+         src="https://images.unsplash.com/photo-1553456558-aff63285bdd1?auto=format&fit=crop&w=300&q=70">
+
+    <img class="product"
+         src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=300&q=70">
+
+</div>
+
+
+<div class="products right">
+
+    <img class="product"
+         src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=300&q=70">
+
+    <img class="product"
+         src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=300&q=70">
+
+    <img class="product"
+         src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=300&q=70">
+
+</div>
+
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<header>
+
+    <div class="navbar">
+
+        <div class="logo">
+            📦 <span>Metro</span>Check
+        </div>
+
+
+        <nav>
+
+            <button class="active"
+                    onclick="showPage('dashboard', this)">
+                Dashboard
+            </button>
+
+            <button onclick="showPage('scanner', this)">
+                Scan Product
+            </button>
+
+            <button onclick="showPage('compliance', this)">
+                Compliance
+            </button>
+
+            <button onclick="showPage('product', this)">
+                Product Info
+            </button>
+
+            <button onclick="showPage('violations', this)">
+                Violations
+            </button>
+
+            <button onclick="showPage('assistant', this)">
+                🤖 AI Assistant
+            </button>
+
+            <button onclick="showPage('history', this)">
+                History
+            </button>
+
+            <button onclick="showPage('rules', this)">
+                Rules
+            </button>
+
+            <button onclick="showPage('about', this)">
+                About
+            </button>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+
+<main>
+
+
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+<section id="dashboard" class="page active">
+
+    <div class="page-title">
+
+        <h1>Compliance Dashboard</h1>
+
+        <p>
+            Monitor packaged commodity compliance
+            under Legal Metrology requirements.
+        </p>
+
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <div class="stat-number blue">
+                128
+            </div>
+
+            <div class="stat-label">
+                Products Scanned
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-number green">
+                94
+            </div>
+
+            <div class="stat-label">
+                Compliant Products
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-number red">
+                34
+            </div>
+
+            <div class="stat-label">
+                Violations Detected
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-number yellow">
+                82%
+            </div>
+
+            <div class="stat-label">
+                Average Compliance
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="dashboard-grid">
+
+
+        <div class="card">
+
+            <h2 style="margin-bottom:10px;">
+                Quick Product Scan
+            </h2>
+
+            <p style="color:#91a5b8;
+                      font-size:14px;
+                      margin-bottom:20px;">
+
+                Upload a packaged product label
+                and check its declarations.
+
+            </p>
+
+
+            <button class="btn btn-blue"
+                    onclick="showPage('scanner')">
+
+                📷 Start Scanning
+
+            </button>
+
+        </div>
+
+
+
+        <div class="card">
+
+            <h2 style="margin-bottom:18px;">
+                Recent Scan
+            </h2>
+
+
+            <div class="history-item">
+
+                <div>
+
+                    <div class="history-name">
+                        Biscuit Package
+                    </div>
+
+                    <div class="history-date">
+                        Today
+                    </div>
+
+                </div>
+
+                <div class="history-score">
+                    92%
+                </div>
+
+            </div>
+
+
+            <div class="history-item">
+
+                <div>
+
+                    <div class="history-name">
+                        Shampoo
+                    </div>
+
+                    <div class="history-date">
+                        Yesterday
+                    </div>
+
+                </div>
+
+                <div class="yellow">
+                    71%
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     SCANNER
+===================================================== -->
+
+<section id="scanner" class="page">
+
+    <div class="page-title">
+
+        <h1>Scan Product</h1>
+
+        <p>
+            Upload an image of the product label
+            for compliance analysis.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+
+        <div class="upload-area">
+
+            <div class="upload-icon">
+                📦
+            </div>
+
+
+            <h2>
+                Upload Product Label
+            </h2>
+
+
+            <p>
+                Use a clear image showing the
+                product declarations.
+            </p>
+
+
+            <label for="productImage"
+                   class="btn btn-blue">
+
+                📷 Choose Image
+
+            </label>
+
+
+            <input type="file"
+                   id="productImage"
+                   accept="image/*">
+
+
+            <img id="preview"
+                 alt="Product Preview">
+
+        </div>
+
+
+        <button class="btn btn-green full"
+                onclick="checkProduct()">
+
+            🔍 Analyze Compliance
+
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     COMPLIANCE
+===================================================== -->
+
+<section id="compliance" class="page">
+
+    <div class="page-title">
+
+        <h1>Compliance Analysis</h1>
+
+        <p>
+            Detailed rule-by-rule analysis of the
+            scanned product.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="score-box">
+
+            <div class="score-circle">
+
+                <div class="score-inner">
+                    82%
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Mostly Compliant
+                </h2>
+
+                <p style="color:#91a5b8;
+                          margin-top:8px;
+                          line-height:1.5;">
+
+                    Most required declarations were
+                    detected. Some information needs
+                    verification.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 style="margin-bottom:15px;">
+            Declaration Checklist
+        </h2>
+
+
+        <div class="result-item">
+
+            <span>Product Name</span>
+
+            <span class="status green">
+                ✓ Found
+            </span>
+
+        </div>
+
+
+        <div class="result-item">
+
+            <span>MRP</span>
+
+            <span class="status green">
+                ✓ Found
+            </span>
+
+        </div>
+
+
+        <div class="result-item">
+
+            <span>Net Quantity</span>
+
+            <span class="status green">
+                ✓ Found
+            </span>
+
+        </div>
+
+
+        <div class="result-item">
+
+            <span>Manufacturer Details</span>
+
+            <span class="status green">
+                ✓ Found
+            </span>
+
+        </div>
+
+
+        <div class="result-item">
+
+            <span>Consumer Care Details</span>
+
+            <span class="status red">
+                ✗ Missing
+            </span>
+
+        </div>
+
+
+        <div class="result-item">
+
+            <span>Date of Manufacturing</span>
+
+            <span class="status yellow">
+                ⚠ Verify
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PRODUCT INFO
+===================================================== -->
+
+<section id="product" class="page">
+
+    <div class="page-title">
+
+        <h1>Product Information</h1>
+
+        <p>
+            Information extracted from the product label.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="info-grid">
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    PRODUCT NAME
+                </div>
+
+                <div class="info-value">
+                    Parle-G Biscuits
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    CATEGORY
+                </div>
+
+                <div class="info-value">
+                    Food Product
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    MRP
+                </div>
+
+                <div class="info-value">
+                    ₹10
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    NET QUANTITY
+                </div>
+
+                <div class="info-value">
+                    79 g
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    MANUFACTURER
+                </div>
+
+                <div class="info-value">
+                    Parle Products Pvt. Ltd.
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    MANUFACTURING DATE
+                </div>
+
+                <div class="info-value">
+                    Detected
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    CONSUMER CARE
+                </div>
+
+                <div class="info-value">
+                    Not Detected
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-label">
+                    BARCODE
+                </div>
+
+                <div class="info-value">
+                    Detected
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     VIOLATIONS
+===================================================== -->
+
+<section id="violations" class="page">
+
+    <div class="page-title">
+
+        <h1>Detected Violations</h1>
+
+        <p>
+            Potential compliance issues identified
+            from the scanned label.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+
+        <div class="violation">
+
+            <div class="violation-icon">
+                ❌
+            </div>
+
+            <div>
+
+                <h3>
+                    Consumer Care Details
+                </h3>
+
+                <p>
+                    Required consumer-care information
+                    could not be detected from the
+                    scanned label.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="violation">
+
+            <div class="violation-icon">
+                ⚠️
+            </div>
+
+            <div>
+
+                <h3>
+                    Manufacturing Date
+                </h3>
+
+                <p>
+                    Date information was detected but
+                    requires verification against the
+                    applicable declaration format.
+                </p>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     AI ASSISTANT
+===================================================== -->
+
+<section id="assistant" class="page">
+
+    <div class="page-title">
+
+        <h1>AI Legal Metrology Assistant</h1>
+
+        <p>
+            Ask questions about packaging compliance
+            and detected violations.
+        </p>
+
+    </div>
+
+
+    <div class="card chat">
+
+
+        <div class="chat-header">
+
+            <h2>
+                🤖 MetroCheck Assistant
+            </h2>
+
+            <div class="bot-status">
+                ● Online
+            </div>
+
+        </div>
+
+
+        <div class="messages"
+             id="messages">
+
+
+            <div class="message bot">
+
+                Hello! I'm the MetroCheck
+                compliance assistant.
+
+                <br><br>
+
+                You can ask me things like:
+
+                <br><br>
+
+                • Why is this product non-compliant?
+                <br>
+                • What information is missing?
+                <br>
+                • What does MRP declaration mean?
+                <br>
+                • What is net quantity?
+
+            </div>
+
+
+        </div>
+
+
+        <div class="chat-input">
+
+            <input
+                type="text"
+                id="chatInput"
+                placeholder="Ask about compliance..."
+            >
+
+
+            <button onclick="sendMessage()">
+                ➤
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     HISTORY
+===================================================== -->
+
+<section id="history" class="page">
+
+    <div class="page-title">
+
+        <h1>Scan History</h1>
+
+        <p>
+            Previously analyzed products.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+
+        <div class="history-item">
+
+            <div>
+
+                <div class="history-name">
+                    Parle-G Biscuits
+                </div>
+
+                <div class="history-date">
+                    September 2, 2026
+                </div>
+
+            </div>
+
+            <div class="history-score">
+                92%
+            </div>
+
+        </div>
+
+
+        <div class="history-item">
+
+            <div>
+
+                <div class="history-name">
+                    Shampoo
+                </div>
+
+                <div class="history-date">
+                    September 1, 2026
+                </div>
+
+            </div>
+
+            <div class="yellow">
+                71%
+            </div>
+
+        </div>
+
+
+        <div class="history-item">
+
+            <div>
+
+                <div class="history-name">
+                    Packaged Rice
+                </div>
+
+                <div class="history-date">
+                    August 30, 2026
+                </div>
+
+            </div>
+
+            <div class="history-score">
+                100%
+            </div>
+
+        </div>
+
+
+        <div class="history-item">
+
+            <div>
+
+                <div class="history-name">
+                    Cooking Oil
+                </div>
+
+                <div class="history-date">
+                    August 28, 2026
+                </div>
+
+            </div>
+
+            <div class="red">
+                64%
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     RULES
+===================================================== -->
+
+<section id="rules" class="page">
+
+    <div class="page-title">
+
+        <h1>Legal Metrology Guidelines</h1>
+
+        <p>
+            Important packaged commodity declarations
+            checked by the system.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+
+        <div class="rule">
+
+            <h3>
+                01 — Product Name
+            </h3>
+
+            <p>
+                The package should clearly identify
+                the name or description of the commodity.
+            </p>
+
+        </div>
+
+
+        <div class="rule">
+
+            <h3>
+                02 — Net Quantity
+            </h3>
+
+            <p>
+                The net quantity of the commodity should
+                be declared using the appropriate unit
+                of measurement.
+            </p>
+
+        </div>
+
+
+        <div class="rule">
+
+            <h3>
+                03 — Maximum Retail Price
+            </h3>
+
+            <p>
+                The maximum retail sale price should be
+                declared on the package in the required
+                manner.
+            </p>
+
+        </div>
+
+
+        <div class="rule">
+
+            <h3>
+                04 — Manufacturer / Packer
+            </h3>
+
+            <p>
+                Required manufacturer, packer or importer
+                details should be available on the package.
+            </p>
+
+        </div>
+
+
+        <div class="rule">
+
+            <h3>
+                05 — Consumer Information
+            </h3>
+
+            <p>
+                Appropriate consumer-care or contact
+                information should be declared where
+                required.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     ABOUT
+===================================================== -->
+
+<section id="about" class="page">
+
+    <div class="card about">
+
+
+        <div class="about-icon">
+            📦
+        </div>
+
+
+        <h1>
+            MetroCheck
+        </h1>
+
+
+        <p>
+
+            MetroCheck is a software prototype designed
+            to assist in checking packaged commodity
+            declarations against Legal Metrology
+            requirements.
+
+            <br><br>
+
+            The system uses image processing and OCR
+            to extract information from product labels,
+            followed by rule-based compliance analysis.
+
+        </p>
+
+
+        <div class="tech-list">
+
+            <div class="tech">
+                HTML
+            </div>
+
+            <div class="tech">
+                CSS
+            </div>
+
+            <div class="tech">
+                JavaScript
+            </div>
+
+            <div class="tech">
+                Python
+            </div>
+
+            <div class="tech">
+                FastAPI
+            </div>
+
+            <div class="tech">
+                EasyOCR
+            </div>
+
+            <div class="tech">
+                AI Assistant
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+
+    /* =====================================================
+       PAGE NAVIGATION
+    ===================================================== */
+
+    function showPage(pageId, button) {
+
+
+        // Hide every page
+
+        const pages =
+            document.querySelectorAll(".page");
+
+
+        pages.forEach(function(page) {
+
+            page.classList.remove("active");
+
+        });
+
+
+        // Show selected page
+
+        document
+            .getElementById(pageId)
+            .classList.add("active");
+
+
+        // Remove active navbar state
+
+        const buttons =
+            document.querySelectorAll("nav button");
+
+
+        buttons.forEach(function(btn) {
+
+            btn.classList.remove("active");
+
+        });
+
+
+        // Add active state
+
+        if (button) {
+
+            button.classList.add("active");
+
+        }
+
+
+        // Go to top
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+
+
+    /* =====================================================
+       IMAGE UPLOAD
+    ===================================================== */
+
+    document
+        .getElementById("productImage")
+        .addEventListener(
+            "change",
+            function(event) {
+
+
+                const file =
+                    event.target.files[0];
+
+
+                if (file) {
+
+
+                    const preview =
+                        document
+                        .getElementById("preview");
+
+
+                    preview.src =
+                        URL.createObjectURL(file);
+
+
+                    preview.style.display =
+                        "block";
+
+                }
+
+            }
+        );
+
+
+
+    /* =====================================================
+       DEMO COMPLIANCE CHECK
+    ===================================================== */
+
+    function checkProduct() {
+
+
+        const file =
+            document
+            .getElementById("productImage")
+            .files[0];
+
+
+        if (!file) {
+
+            alert(
+                "Please upload a product image first."
+            );
+
+            return;
+
+        }
+
+
+        // Show compliance page
+
+        showPage("compliance");
+
+
+        // Find compliance navbar button
+
+        const buttons =
+            document
+            .querySelectorAll("nav button");
+
+
+        buttons.forEach(function(btn) {
+
+            btn.classList.remove("active");
+
+        });
+
+
+        buttons[2].classList.add("active");
+
+    }
+
+
+
+    /* =====================================================
+       CHATBOT
+       TEMPORARY DEMO
+    ===================================================== */
+
+    function sendMessage() {
+
+
+        const input =
+            document.getElementById("chatInput");
+
+
+        const text =
+            input.value.trim();
+
+
+        if (text === "") {
+            return;
+        }
+
+
+        const messages =
+            document.getElementById("messages");
+
+
+        // User message
+
+        const userMessage =
+            document.createElement("div");
+
+
+        userMessage.className =
+            "message user";
+
+
+        userMessage.textContent =
+            text;
+
+
+        messages.appendChild(
+            userMessage
+        );
+
+
+        input.value = "";
+
+
+        // Demo AI response
+
+        setTimeout(function() {
+
+
+            const botMessage =
+                document.createElement("div");
+
+
+            botMessage.className =
+                "message bot";
+
+
+            botMessage.textContent =
+                "Based on the current scan, " +
+                "the system would analyze the " +
+                "product label against the applicable " +
+                "Legal Metrology requirements. " +
+                "The AI assistant will be connected " +
+                "to the compliance engine in the next stage.";
+
+
+            messages.appendChild(
+                botMessage
+            );
+
+
+            messages.scrollTop =
+                messages.scrollHeight;
+
+
+        }, 600);
+
+    }
+
+
+
+    /* Enter key for chatbot */
+
+    document
+        .getElementById("chatInput")
+        .addEventListener(
+            "keypress",
+            function(event) {
+
+                if (event.key === "Enter") {
+
+                    sendMessage();
+
+                }
+
+            }
+        );
+
+
+</script>
+
+
+</body>
+
+</html>
+
