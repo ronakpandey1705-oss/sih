@@ -65,3 +65,19 @@ def test_parse_paddle_result_object_with_get():
     })]
     lines = parse_paddle_ocr_results(results, "img-5")
     assert lines[0]["text"].startswith("Unit Sale Price")
+
+
+def test_parse_numpy_rec_arrays_without_truthiness():
+    import numpy as np
+
+    results = [{
+        "rec_texts": ["MRP Rs 10"],
+        "rec_scores": np.array([0.999], dtype=np.float32),
+        "rec_boxes": np.array([[8, 12, 120, 40]], dtype=np.int32),
+        "rec_polys": np.array([[[8, 12], [120, 12], [120, 40], [8, 40]]], dtype=np.int32),
+    }]
+    lines = parse_paddle_ocr_results(results, "img-np")
+    assert len(lines) == 1
+    assert lines[0]["text"] == "MRP Rs 10"
+    assert lines[0]["bbox"] == [8, 12, 120, 40]
+    assert lines[0]["polygon"][0] == [8, 12]

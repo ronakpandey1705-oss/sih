@@ -282,7 +282,13 @@ async function analyze() {
   busy.style.display = "block";
   btn.disabled = true;
   try {
-    const scanId = await ensureSession();
+    const created = await api("/api/scans/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sessionPayload()),
+    });
+    setSession(created);
+    const scanId = state.scanId;
     const form = new FormData();
     form.append("file", file);
     const loc = document.getElementById("location").value.trim();

@@ -210,23 +210,27 @@ def download_pdf_endpoint(scan_id: str, db: Session = Depends(get_db)):
 def _handle_analyze(scan_id: str, db: Session) -> UnifiedAnalysisResponse:
     scan = _verify_scan_exists(scan_id, db)
 
-    # 1. Check if OCR results exist; if images exist without OCR, run PaddleOCR automatically
-    existing_ocr_count = db.query(OCRResult).filter(OCRResult.scan_id == scan_id).count()
-    if existing_ocr_count == 0:
-        images = db.query(UploadedImage).filter(UploadedImage.scan_id == scan_id).all()
-        if images:
-            try:
-                ocr_service = PaddleOCRService.get_instance()
-                if ocr_service.available:
-                    for img in images:
-                        target_path = img.preprocessed_path if img.preprocessed_path and os.path.exists(img.preprocessed_path) else img.original_path
-                        if os.path.exists(target_path):
-                            ocr_items = ocr_service.process_image(target_path, img.id)
-                            PaddleOCRService.save_ocr_results_to_db(db, scan_id, img.id, ocr_items)
-                else:
-                    print("[ANALYZE] PaddleOCR not installed; continuing screening without OCR text.")
-            except Exception as exc:
-                print(f"[ANALYZE] OCR unavailable, continuing with screening: {exc}")
+    # OCR every image that does not yet have stored lines (do not skip a new
+    # photo because an earlier image on the same session already has OCR).
+    images = db.query(UploadedImage).filter(UploadedImage.scan_id == scan_id).all()
+    if images:
+        try:
+            ocr_service = PaddleOCRService.get_instance()
+            if ocr_service.available:
+                for img in images:
+                    existing_for_image = (
+                        db.query(OCRResult).filter(OCRResult.image_id == img.id).count()
+                    )
+                    if existing_for_image:
+                        continue
+                    target_path = img.original_path
+                    if target_path and os.path.exists(target_path):
+                        ocr_items = ocr_service.process_image(target_path, img.id)
+                        PaddleOCRService.save_ocr_results_to_db(db, scan_id, img.id, ocr_items)
+            else:
+                print("[ANALYZE] PaddleOCR not installed; continuing screening without OCR text.")
+        except Exception as exc:
+            print(f"[ANALYZE] OCR unavailable, continuing with screening: {exc}")
 
     # 2. Extract declarations
     extracted_fields = FieldExtractor.extract_from_scan(scan_id, db)

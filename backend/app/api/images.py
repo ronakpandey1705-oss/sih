@@ -211,7 +211,7 @@ def preprocess_image(
 def run_ocr_on_image(
     scan_id: str,
     image_id: str,
-    use_preprocessed: bool = True,
+    use_preprocessed: bool = False,
     db: Session = Depends(get_db)
 ):
     """

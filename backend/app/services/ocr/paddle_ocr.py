@@ -55,9 +55,29 @@ def _has_rec_texts(obj: Any) -> bool:
     return texts is not None and not isinstance(obj, (list, tuple))
 
 
-def _as_int_list(values: Any) -> List[int]:
+def _as_sequence(values: Any) -> List[Any]:
+    """Turn lists / tuples / numpy arrays into a plain list without using truthiness."""
+    if values is None:
+        return []
+    if isinstance(values, (str, bytes)):
+        return [values]
+    if hasattr(values, "tolist") and not isinstance(values, (list, tuple)):
+        try:
+            values = values.tolist()
+        except Exception:
+            pass
+    if isinstance(values, (list, tuple)):
+        return list(values)
     try:
-        return [int(v) for v in values]
+        return list(values)
+    except TypeError:
+        return []
+
+
+def _as_int_list(values: Any) -> List[int]:
+    seq = _as_sequence(values)
+    try:
+        return [int(v) for v in seq]
     except (TypeError, ValueError):
         return [0, 0, 0, 0]
 
@@ -95,10 +115,10 @@ def _parse_classic_page(page: Any, image_id: str, order_start: int) -> List[Dict
 
 
 def _parse_rec_mapping(res: Any, image_id: str, order_start: int) -> List[Dict[str, Any]]:
-    rec_texts = list(_mapping_get(res, "rec_texts", []) or [])
-    rec_scores = list(_mapping_get(res, "rec_scores", []) or [])
-    rec_boxes = list(_mapping_get(res, "rec_boxes", []) or [])
-    rec_polys = list(_mapping_get(res, "rec_polys", []) or [])
+    rec_texts = _as_sequence(_mapping_get(res, "rec_texts", None))
+    rec_scores = _as_sequence(_mapping_get(res, "rec_scores", None))
+    rec_boxes = _as_sequence(_mapping_get(res, "rec_boxes", None))
+    rec_polys = _as_sequence(_mapping_get(res, "rec_polys", None))
     extracted = []
     for idx, text in enumerate(rec_texts):
         clean_text = str(text).strip()
@@ -234,7 +254,9 @@ class PaddleOCRService:
                 results = self._ocr_engine.predict(image_path)
             else:
                 results = self._ocr_engine.ocr(image_path)
-            return parse_paddle_ocr_results(results, image_id)
+            lines = parse_paddle_ocr_results(results, image_id)
+            logger.info("OCR extracted %s line(s) from %s", len(lines), image_path)
+            return lines
         except Exception as e:
             logger.error(f"OCR processing failed for {image_path}: {e}")
             raise

@@ -193,6 +193,32 @@ class FieldExtractor:
                     }
                     break
 
+        # MRP split across OCR lines (e.g. "MRP" then "Rs 10")
+        if "mrp" not in extracted_fields_dict:
+            blob = " ".join(full_text_lines)
+            if re.search(r"m\.?r\.?p\.?|max(?:imum)?\s*retail\s*price", blob, re.IGNORECASE):
+                price_match = re.search(
+                    r"(?:rs|inr|₹)\.?\s*([0-9]+(?:\.[0-9]{1,2})?)",
+                    blob,
+                    re.IGNORECASE,
+                )
+                if not price_match:
+                    price_match = re.search(
+                        r"m\.?r\.?p\.?\D{0,12}([0-9]+(?:\.[0-9]{1,2})?)",
+                        blob,
+                        re.IGNORECASE,
+                    )
+                if price_match and price_match.group(1):
+                    has_tax = bool(cls.TAX_INCLUSIVE_PATTERN.search(blob))
+                    extracted_fields_dict["mrp"] = {
+                        "value": f"₹ {price_match.group(1)}" + (" (incl. of all taxes)" if has_tax else ""),
+                        "raw_text": blob[:240],
+                        "confidence": 0.75,
+                        "method": "REGEX_JOINED_TEXT",
+                        "image_id": ocr_results[0].image_id if ocr_results else None,
+                        "bbox_json": ocr_results[0].bbox_json if ocr_results else None,
+                    }
+
         # 4. Unit Sale Price (USP)
         for r in ocr_results:
             text = r.text.strip()
