@@ -1,0 +1,13 @@
+# Python virtual environments (root or nested)
+.venv/
+venv/
+env/
+ENV/
+backend/.venv/
+backend/venv/
+
+# Secrets
+.env
+**/.env
+!.env.example
+!**/.env.example

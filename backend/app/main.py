@@ -2,6 +2,8 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.database import engine, Base, SessionLocal
 from app.models import (
@@ -27,6 +29,7 @@ from app.api.reports import (
     router as reports_router,
     inspections_reports_router
 )
+from app.api.chat import router as chat_router
 
 
 def _ensure_sqlite_columns():
@@ -74,11 +77,15 @@ async def lifespan(app: FastAPI):
     yield
 
 
+FRONTEND_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "frontend")
+)
+
 app = FastAPI(
     title=settings.APP_NAME,
     description=(
-        "SIH 2026 (Problem Statement SIH26034) AI-Assisted Packaged Commodity "
-        "Legal Metrology Compliance Screening & Violation Detection Backend."
+        "PackSure — SIH 2026 (Problem Statement SIH26034) AI-assisted packaged "
+        "commodity Legal Metrology compliance screening."
     ),
     version="0.1.0",
     lifespan=lifespan,
@@ -103,7 +110,7 @@ def health_check():
     """Health check endpoint required by system specification."""
     return {
         "status": "ok",
-        "service": "legal-metrology-backend"
+        "service": "packsure-backend"
     }
 
 
@@ -118,12 +125,20 @@ app.include_router(inspections_compliance_router, prefix="/api")
 app.include_router(public_compliance_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")
 app.include_router(inspections_reports_router, prefix="/api")
+app.include_router(chat_router, prefix="/api")
 
 
-@app.get("/", summary="Root Endpoint")
-def root():
+if os.path.isdir(FRONTEND_DIR):
+    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def serve_packsure():
+    index_path = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
     return {
-        "message": "Welcome to Legal Metrology AI Screening Backend",
+        "message": "PackSure backend is running. Frontend files were not found.",
         "docs": "/docs",
-        "health": "/api/health"
+        "health": "/api/health",
     }

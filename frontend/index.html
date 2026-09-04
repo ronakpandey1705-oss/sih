@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PackSure · Legal Metrology Screening</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;650;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=3" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="app">
+    <header>
+      <div class="nav">
+        <a class="brand" href="#" data-page="dashboard">
+          <div class="mark">P</div>
+          <div>
+            PackSure
+            <small>Legal Metrology · SIH26034</small>
+          </div>
+        </a>
+        <nav>
+          <button class="active" data-page="dashboard">Dashboard</button>
+          <button data-page="inspect">Inspect</button>
+          <button data-page="results">Results</button>
+          <button data-page="catalog">Catalog</button>
+          <button data-page="rules">Rules</button>
+          <button data-page="assistant">Assistant</button>
+          <button data-page="about">About</button>
+        </nav>
+        <div class="health-dot" id="healthDot"><i></i><span>API…</span></div>
+      </div>
+    </header>
+
+    <main>
+      <section id="dashboard" class="page active">
+        <h1>PackSure</h1>
+        <p class="lede">AI-assisted Legal Metrology screening for packaged commodities (SIH problem SIH26034). Officers look up a barcode, photograph the pack label, and review OCR, declaration extraction, rule flags, and catalog mismatches before recording a determination.</p>
+        <div class="card">
+          <h2>What this app does</h2>
+          <ul class="info-list">
+            <li><strong>Catalog lookup</strong> — match a barcode against the demo reference products, or continue if the pack is unknown.</li>
+            <li><strong>Label photograph</strong> — upload a JPG, PNG, or WebP of the declarations on the pack.</li>
+            <li><strong>Screening pipeline</strong> — OCR → field extraction → Legal Metrology rules → catalog discrepancy check.</li>
+            <li><strong>Inspection record</strong> — generate a PDF notice and record the officer’s decision. Screening is assistive; the officer remains responsible for the final call.</li>
+          </ul>
+        </div>
+        <div class="stats">
+          <div class="stat"><b class="cyan" id="statScans">0</b><span>Inspections in this browser</span></div>
+          <div class="stat"><b id="statProducts">—</b><span>Reference products</span></div>
+          <div class="stat"><b id="statRules">—</b><span>Active rules</span></div>
+          <div class="stat"><b id="statLast">—</b><span>Last score</span></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Start an inspection</h2>
+            <p class="muted">Attach a package photo and run screening. A session is created automatically if you have not made one yet (OCR → fields → rules → catalog check).</p>
+            <div class="row" style="margin-top:16px">
+              <button class="btn btn-cyan" data-page="inspect">Open inspector</button>
+              <button class="btn btn-ghost" data-page="catalog">Browse demo catalog</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Recent sessions</h2>
+            <div id="recentList" class="muted">No inspections yet.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="inspect" class="page">
+        <h1>Inspect a pack</h1>
+        <p class="lede">Use a demo barcode or type any EAN. Unknown barcodes still continue — PackSure screens the label even without a catalog match.</p>
+        <div class="grid-2">
+          <div class="card">
+            <h2>1. Pack details</h2>
+            <p class="muted">Optional. Used when you upload &amp; analyze, or if you create a session first.</p>
+            <label class="field">Barcode</label>
+            <input id="barcode" placeholder="8901234567890" />
+            <div class="chips" id="demoChips"></div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn btn-ghost" id="lookupBtn">Lookup catalog</button>
+            </div>
+            <div id="lookupBox" class="muted" style="margin-top:10px"></div>
+            <label class="field">Officer ID</label>
+            <input id="officerId" placeholder="LM-INSP-2026-441" />
+            <label class="field">Establishment</label>
+            <input id="establishment" placeholder="Retail premises name" />
+            <label class="field">Location</label>
+            <input id="location" placeholder="City / premises" />
+            <label class="field">Notes</label>
+            <textarea id="notes" placeholder="Optional inspection notes"></textarea>
+            <button class="btn btn-cyan" id="createBtn" style="margin-top:14px">Create inspection</button>
+            <p class="muted" id="sessionMeta" style="margin-top:10px"></p>
+          </div>
+          <div class="card">
+            <h2>2. Label photograph</h2>
+            <div class="drop" id="dropZone">
+              <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp" />
+              <div class="drop-copy">Drop a JPG, PNG, or WebP here, or click to choose a pack label</div>
+              <img id="preview" alt="Preview" />
+            </div>
+            <div class="row" style="margin-top:14px">
+              <button type="button" class="btn btn-ghost" id="chooseBtn">Choose photo</button>
+              <button type="button" class="btn btn-gold" id="analyzeBtn">Upload & analyze</button>
+            </div>
+            <p class="busy" id="busy">Running OCR and Legal Metrology screening… this can take a minute.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="results" class="page">
+        <h1>Screening results</h1>
+        <p class="lede" id="resultLede">Run an inspection to populate this view.</p>
+        <div class="card score">
+          <div class="ring" id="scoreRing"><span id="scoreValue">—</span></div>
+          <div>
+            <h2 id="riskTitle">Awaiting analysis</h2>
+            <p class="muted" id="summaryText"></p>
+            <div class="row" style="margin-top:12px">
+              <button class="btn btn-gold" id="reportBtn" disabled>Generate PDF report</button>
+              <a class="btn btn-ghost" id="pdfLink" href="#" style="display:none;text-decoration:none">Download PDF</a>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Rule evaluations</h2>
+            <div id="rulesTable" class="muted">No results yet.</div>
+          </div>
+          <div class="card">
+            <h2>Catalog discrepancies</h2>
+            <div id="discList" class="muted">No comparison yet.</div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Extracted declarations</h2>
+          <div id="fieldsGrid" class="product-grid"></div>
+        </div>
+        <div class="card">
+          <h2>Officer determination</h2>
+          <label class="field">Decision</label>
+          <select id="determination">
+            <option value="COMPLIANT">COMPLIANT</option>
+            <option value="POTENTIAL_NON_COMPLIANCE_CONFIRMED">POTENTIAL_NON_COMPLIANCE_CONFIRMED</option>
+            <option value="FURTHER_INVESTIGATION">FURTHER_INVESTIGATION</option>
+            <option value="DISMISSED">DISMISSED</option>
+          </select>
+          <label class="field">Remarks</label>
+          <textarea id="remarks" placeholder="Official remarks"></textarea>
+          <button class="btn btn-cyan" id="reviewBtn" style="margin-top:12px" disabled>Record review</button>
+        </div>
+      </section>
+
+      <section id="catalog" class="page">
+        <h1>Reference catalog</h1>
+        <p class="lede">Fictional demo products seeded for SIH 2026. Tap a barcode to start an inspection.</p>
+        <div id="catalogGrid" class="product-grid"></div>
+      </section>
+
+      <section id="rules" class="page">
+        <h1>Legal Metrology ruleset</h1>
+        <p class="lede">Loaded live from the backend <code>rules/rules.json</code> configuration.</p>
+        <div id="rulesCards"></div>
+      </section>
+
+      <section id="assistant" class="page">
+        <h1>PackSure assistant</h1>
+        <p class="lede">Ask about PackSure, Legal Metrology declarations, this scan, or anything else. Answers come from Groq.</p>
+        <div class="card">
+          <div class="messages" id="messages">
+            <div class="msg bot">Hi — I can explain PackSure and Legal Metrology screening, walk through the current inspection if you have run one, or answer other questions too.</div>
+          </div>
+          <div class="row">
+            <input id="chatInput" placeholder="Ask anything…" />
+            <button class="btn btn-cyan" id="chatSend">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="page">
+        <div class="card">
+          <h1>PackSure</h1>
+          <p class="lede">AI-assisted Legal Metrology (Packaged Commodities) screening for SIH problem SIH26034. PackSure is the officer-facing web app over the FastAPI inspection backend: barcode lookup, evidence photos, OCR, declaration extraction, rule evaluation, catalog discrepancy checks, and inspection notices.</p>
+          <p class="muted">Screening is assistive. Final determination stays with the inspecting officer. Demo catalog items are fictional.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="/static/app.js?v=3"></script>
+</body>
+</html>

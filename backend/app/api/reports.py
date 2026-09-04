@@ -215,12 +215,18 @@ def _handle_analyze(scan_id: str, db: Session) -> UnifiedAnalysisResponse:
     if existing_ocr_count == 0:
         images = db.query(UploadedImage).filter(UploadedImage.scan_id == scan_id).all()
         if images:
-            ocr_service = PaddleOCRService.get_instance()
-            for img in images:
-                target_path = img.preprocessed_path if img.preprocessed_path and os.path.exists(img.preprocessed_path) else img.original_path
-                if os.path.exists(target_path):
-                    ocr_items = ocr_service.process_image(target_path, img.id)
-                    PaddleOCRService.save_ocr_results_to_db(db, scan_id, img.id, ocr_items)
+            try:
+                ocr_service = PaddleOCRService.get_instance()
+                if ocr_service.available:
+                    for img in images:
+                        target_path = img.preprocessed_path if img.preprocessed_path and os.path.exists(img.preprocessed_path) else img.original_path
+                        if os.path.exists(target_path):
+                            ocr_items = ocr_service.process_image(target_path, img.id)
+                            PaddleOCRService.save_ocr_results_to_db(db, scan_id, img.id, ocr_items)
+                else:
+                    print("[ANALYZE] PaddleOCR not installed; continuing screening without OCR text.")
+            except Exception as exc:
+                print(f"[ANALYZE] OCR unavailable, continuing with screening: {exc}")
 
     # 2. Extract declarations
     extracted_fields = FieldExtractor.extract_from_scan(scan_id, db)
