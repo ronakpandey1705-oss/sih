@@ -1,0 +1,409 @@
+{
+  "metadata": {
+    "title": "Legal Metrology (Packaged Commodities) Compliance Ruleset",
+    "version": "1.0.0",
+    "effective_ruleset": "Legal Metrology (Packaged Commodities) Rules, 2011 (as amended up to 2022/2023)",
+    "jurisdiction": "India",
+    "governing_act": "The Legal Metrology Act, 2009 (Act No. 1 of 2010)",
+    "rules_source": "Department of Consumer Affairs, Ministry of Consumer Affairs, Food and Public Distribution, Government of India"
+  },
+  "rules": [
+    {
+      "id": "LM-01",
+      "rule_number": "Rule 6(1)(b)",
+      "name": "Product Name and Identity",
+      "field": "product_name",
+      "mandatory": true,
+      "description": "The common or generic names of the commodity contained in the package and, in case of packages with more than one product, the name and number or quantity of each product.",
+      "severity": "HIGH",
+      "evaluation_type": "presence_and_format",
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "non_compliance_reason": "Common or generic name / product identity could not be verified on the packaging label under Rule 6(1)(b).",
+      "legal_reference": "Rule 6(1)(b) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    },
+    {
+      "id": "LM-02",
+      "rule_number": "Rule 6(1)(c)",
+      "name": "Net Quantity Declaration",
+      "field": "net_quantity",
+      "mandatory": true,
+      "description": "The net quantity, in terms of standard unit of weight or measure, of the commodity contained in the package or where the commodity is packed or sold by number, the number of the commodity contained in the package.",
+      "severity": "CRITICAL",
+      "evaluation_type": "standard_units",
+      "allowed_units": [
+        "g",
+        "kg",
+        "ml",
+        "l",
+        "cl",
+        "m",
+        "cm",
+        "mm",
+        "N",
+        "pcs",
+        "count",
+        "pieces",
+        "units",
+        "u",
+        "ग्राम",
+        "किग्रा",
+        "मिली",
+        "लीटर",
+        "नग"
+      ],
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "non_compliance_reason": "Net quantity declaration is missing or does not conform to standard metric unit specifications under Rule 6(1)(c).",
+      "legal_reference": "Rule 6(1)(c) and Rule 11, 12, 13 of Legal Metrology (Packaged Commodities) Rules, 2011"
+    },
+    {
+      "id": "LM-03",
+      "rule_number": "Rule 6(1)(e)",
+      "name": "Retail Sale Price (MRP) & Unit Sale Price",
+      "field": "mrp",
+      "mandatory": true,
+      "description": "The retail sale price of the package clearly indicating that it is the Maximum Retail Price inclusive of all taxes in Indian Rupees (₹ or Rs.), and for applicable packages, the Unit Sale Price (USP) per g/kg/ml/l/N.",
+      "severity": "CRITICAL",
+      "evaluation_type": "currency_and_tax_statement",
+      "required_elements": [
+        "mrp_indicator",
+        "currency_or_symbol",
+        "numeric_price"
+      ],
+      "tax_inclusive_indicator_required": true,
+      "unit_sale_price_applicable": true,
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "non_compliance_reason": "Maximum Retail Price (MRP) is either missing, lacks currency/tax inclusive notation ('incl. of all taxes'), or lacks mandatory Unit Sale Price under Rule 6(1)(e).",
+      "legal_reference": "Rule 6(1)(e) of Legal Metrology (Packaged Commodities) Rules, 2011 (as amended in 2021/2022)"
+    },
+    {
+      "id": "LM-04",
+      "rule_number": "Rule 6(1)(a)",
+      "name": "Name and Address of Manufacturer / Packer / Importer",
+      "field": "manufacturer_name_and_address",
+      "mandatory": true,
+      "description": "The name and complete address of the manufacturer, or where the manufacturer is not the packer, the name and complete address of the manufacturer and packer, or for imported packages, the name and complete address of the importer.",
+      "severity": "HIGH",
+      "evaluation_type": "entity_and_address",
+      "required_keywords": [
+        "manufactured by",
+        "mfg by",
+        "packed by",
+        "pkd by",
+        "imported by",
+        "marketed by",
+        "mfd by",
+        "mfg. by",
+        "pkd. by",
+        "imp. by",
+        "निर्माता",
+        "पैककर्ता",
+        "आयातकर्ता"
+      ],
+      "address_indicators": [
+        "pin",
+        "street",
+        "road",
+        "dist",
+        "district",
+        "state",
+        "city",
+        "nagar",
+        "plot",
+        "industrial area",
+        "phase",
+        "taluk",
+        "pincode"
+      ],
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "non_compliance_reason": "Manufacturer/Packer/Importer complete name or verifiable postal address could not be identified on packaging under Rule 6(1)(a).",
+      "legal_reference": "Rule 6(1)(a) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    },
+    {
+      "id": "LM-05",
+      "rule_number": "Rule 6(2)",
+      "name": "Consumer Care Details",
+      "field": "consumer_care",
+      "mandatory": true,
+      "description": "Every package shall bear the name, address, telephone number, and e-mail address of the person who can be or the office which can be contacted, in case of consumer complaints.",
+      "severity": "HIGH",
+      "evaluation_type": "contact_channels",
+      "required_channels": [
+        "contact_person_or_cell",
+        "phone_or_email"
+      ],
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "non_compliance_reason": "Consumer-care grievance contact details (helpline number, email, or contact address) are missing under Rule 6(2).",
+      "legal_reference": "Rule 6(2) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    },
+    {
+      "id": "LM-06",
+      "rule_number": "Rule 6(1)(d)",
+      "name": "Date Declaration (Month and Year of Manufacture / Packing / Import)",
+      "field": "manufacture_or_import_date",
+      "mandatory": true,
+      "description": "The month and year in which the commodity is manufactured or pre-packed or imported shall be mentioned in standard format (e.g., MM/YYYY or Month Year).",
+      "severity": "HIGH",
+      "evaluation_type": "date_format",
+      "accepted_formats": [
+        "MM/YY",
+        "MM/YYYY",
+        "MMM YYYY",
+        "MM-YYYY",
+        "DD/MM/YYYY",
+        "Month YYYY"
+      ],
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "non_compliance_reason": "Month and year of manufacture, packing, or import could not be determined on packaging under Rule 6(1)(d).",
+      "legal_reference": "Rule 6(1)(d) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    },
+    {
+      "id": "LM-07",
+      "rule_number": "Rule 7",
+      "name": "Declaration Font and Numeral Size",
+      "field": "declaration_size",
+      "mandatory": true,
+      "description": "Minimum prescribed height of numerals and letters for net quantity and mandatory declarations based on the area of the Principal Display Panel (PDP).",
+      "severity": "MEDIUM",
+      "evaluation_type": "physical_or_pixel_ratio",
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "uncertainty_reason": "Image resolution or perspective prevents calibrated physical millimeter measurement of numeral height. Physical measurement by inspecting officer is required.",
+      "legal_reference": "Rule 7 and Table thereunder, Legal Metrology (Packaged Commodities) Rules, 2011"
+    },
+    {
+      "id": "LM-08",
+      "rule_number": "Rule 8",
+      "name": "Placement and Clear Spacing on Principal Display Panel",
+      "field": "placement",
+      "mandatory": true,
+      "description": "All mandatory declarations should appear prominently on the Principal Display Panel (PDP) or designated display areas, and the net quantity declaration must have surrounding clear space not less than the height of the numeral.",
+      "severity": "MEDIUM",
+      "evaluation_type": "bounding_box_clearance",
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "non_compliance_reason": "Net quantity declaration or mandatory declarations are overcrowded or improperly placed on the display surface under Rule 8.",
+      "legal_reference": "Rule 8 of Legal Metrology (Packaged Commodities) Rules, 2011"
+    },
+    {
+      "id": "LM-09",
+      "rule_number": "Rule 9",
+      "name": "Legibility, Language and Visual Contrast",
+      "field": "legibility",
+      "mandatory": true,
+      "description": "Every declaration shall be conspicuous, legible and distinct, in either Hindi in Devanagari script or English, with prominent contrast against the packaging background.",
+      "severity": "MEDIUM",
+      "evaluation_type": "script_and_contrast",
+      "allowed_scripts": [
+        "English (Latin)",
+        "Hindi (Devanagari)"
+      ],
+      "ocr_confidence_threshold_pass": 0.65,
+      "fallback_status_on_uncertainty": "NEEDS_REVIEW",
+      "uncertainty_reason": "Low OCR character confidence or complex textured background detected. Manual officer review recommended to ensure legal legibility.",
+      "legal_reference": "Rule 9 of Legal Metrology (Packaged Commodities) Rules, 2011"
+    },
+    {
+      "id": "LM-10",
+      "rule_number": "Rule 26",
+      "name": "Package Size and Category Exemptions",
+      "field": "exemption",
+      "mandatory": false,
+      "description": "Exemptions applicable to packages containing quantities of 10 g or 10 ml or less, or packages meant for institutional/industrial consumers, subject to statutory provisos (e.g., tobacco products).",
+      "severity": "LOW",
+      "evaluation_type": "threshold_and_category",
+      "exemption_quantity_threshold": 10.0,
+      "exemption_units": [
+        "g",
+        "ml",
+        "gm",
+        "मिली",
+        "ग्राम"
+      ],
+      "proviso_non_exempt_categories": [
+        "tobacco",
+        "cigarettes",
+        "bidi",
+        "pan masala"
+      ],
+      "fallback_status_on_uncertainty": "NOT_APPLICABLE",
+      "legal_reference": "Rule 26(a) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    }
+  ],
+  "rule_7_font_matrix": {
+    "description": "Prescribed minimum numeral height for net quantity declarations under Table 1 of Rule 7",
+    "unit_of_height": "millimeter (mm)",
+    "tiers": [
+      {
+        "area_pdp_max_sq_cm": 50,
+        "min_numeral_height_normal_mm": 1.0,
+        "min_numeral_height_blown_moulded_mm": 1.5
+      },
+      {
+        "area_pdp_min_sq_cm": 50,
+        "area_pdp_max_sq_cm": 200,
+        "min_numeral_height_normal_mm": 2.0,
+        "min_numeral_height_blown_moulded_mm": 3.0
+      },
+      {
+        "area_pdp_min_sq_cm": 200,
+        "area_pdp_max_sq_cm": 1000,
+        "min_numeral_height_normal_mm": 4.0,
+        "min_numeral_height_blown_moulded_mm": 6.0
+      },
+      {
+        "area_pdp_min_sq_cm": 1000,
+        "min_numeral_height_normal_mm": 6.0,
+        "min_numeral_height_blown_moulded_mm": 6.0
+      }
+    ]
+  },
+  "schedules": {
+    "schedule_1_tolerance_limits": {
+      "title": "First Schedule - Maximum Permissible Error (MPE) on Net Quantity",
+      "description": "Maximum permissible error in excess and deficiency for pre-packaged commodities",
+      "quantity_ranges": [
+        {
+          "min_qty": 0,
+          "max_qty": 50,
+          "unit": "g_or_ml",
+          "mpe_percent": 9.0,
+          "mpe_fixed": null
+        },
+        {
+          "min_qty": 50,
+          "max_qty": 100,
+          "unit": "g_or_ml",
+          "mpe_percent": null,
+          "mpe_fixed": 4.5
+        },
+        {
+          "min_qty": 100,
+          "max_qty": 200,
+          "unit": "g_or_ml",
+          "mpe_percent": 4.5,
+          "mpe_fixed": null
+        },
+        {
+          "min_qty": 200,
+          "max_qty": 300,
+          "unit": "g_or_ml",
+          "mpe_percent": null,
+          "mpe_fixed": 9.0
+        },
+        {
+          "min_qty": 300,
+          "max_qty": 500,
+          "unit": "g_or_ml",
+          "mpe_percent": 3.0,
+          "mpe_fixed": null
+        },
+        {
+          "min_qty": 500,
+          "max_qty": 1000,
+          "unit": "g_or_ml",
+          "mpe_percent": null,
+          "mpe_fixed": 15.0
+        },
+        {
+          "min_qty": 1000,
+          "max_qty": 10000,
+          "unit": "g_or_ml",
+          "mpe_percent": 1.5,
+          "mpe_fixed": null
+        },
+        {
+          "min_qty": 10000,
+          "max_qty": 15000,
+          "unit": "g_or_ml",
+          "mpe_percent": null,
+          "mpe_fixed": 150.0
+        },
+        {
+          "min_qty": 15000,
+          "unit": "g_or_ml",
+          "mpe_percent": 1.0,
+          "mpe_fixed": null
+        }
+      ]
+    },
+    "schedule_2_status": {
+      "title": "Second Schedule - Standard Pack Sizes (Post-2022 Amendment Status)",
+      "is_mandatory": false,
+      "amendment_note": "By virtue of the Legal Metrology (Packaged Commodities) (Second Amendment) Rules, 2022 (G.S.R. 501(E)), the rigid specification of standard pack quantities was omitted/relaxed. Manufacturers may now pack products in any quantities provided the mandatory Unit Sale Price is declared."
+    },
+    "schedule_3_dimensions": {
+      "title": "Third Schedule - Commodities Sold by Dimensions",
+      "applicable_fields": [
+        "length",
+        "width",
+        "height",
+        "thickness",
+        "diameter"
+      ],
+      "units": [
+        "m",
+        "cm",
+        "mm"
+      ]
+    }
+  },
+  "exemptions": {
+    "rule_26": {
+      "small_package_threshold": {
+        "max_net_quantity": 10.0,
+        "units": [
+          "g",
+          "ml",
+          "gm",
+          "मिली",
+          "ग्राम"
+        ],
+        "exempt_declarations": [
+          "declaration_size",
+          "placement"
+        ],
+        "non_exempt_declarations": [
+          "product_name",
+          "mrp",
+          "manufacturer_name_and_address"
+        ],
+        "statutory_exceptions": [
+          "tobacco",
+          "cigarettes",
+          "bidi",
+          "pan masala"
+        ]
+      },
+      "institutional_consumers": {
+        "description": "Packages meant for direct use by service institutions (hotels, airlines, hospitals) marked 'For Institutional Consumer only, Not for retail sale'",
+        "is_exempt_from_mrp": true
+      },
+      "wholesale_packages": {
+        "description": "Wholesale packages containing more than 25 kg or 25 litres, or fertilizer packages > 50 kg",
+        "regulated_under_chapter": "Chapter III"
+      }
+    }
+  },
+  "amendments": [
+    {
+      "id": "AMEND-2022-USP",
+      "notification": "G.S.R. 779(E) & G.S.R. 501(E)",
+      "effective_date": "2022-12-01",
+      "title": "Unit Sale Price (USP) Mandatory Declaration",
+      "description": "Where the package contains commodity less than one kilogram/litre, unit sale price per gram/ml shall be declared. Where package contains more than 1 kg/litre, unit sale price per kg/litre shall be declared. For packages sold by number, unit price per item/piece (Rs. X / N) shall be declared.",
+      "applies_to_rule": "LM-03"
+    },
+    {
+      "id": "AMEND-2022-PACK-SIZES",
+      "notification": "G.S.R. 501(E)",
+      "effective_date": "2022-12-01",
+      "title": "Omission of Restrictive Standard Pack Sizes",
+      "description": "Pre-packaged commodities are no longer restricted to rigid quantities specified in Second Schedule, provided Unit Sale Price is declared clearly for consumer price transparency."
+    },
+    {
+      "id": "AMEND-2020-MEDICAL-DEVICES",
+      "notification": "G.S.R. 132(E)",
+      "effective_date": "2020-01-01",
+      "title": "Medical Devices Classification as Drugs/Commodities",
+      "description": "Medical devices notified under Medical Devices Rules, 2017 are subject to mandatory Legal Metrology declarations without obscuring medical licensing information."
+    }
+  ]
+}
