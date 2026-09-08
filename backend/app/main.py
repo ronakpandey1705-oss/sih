@@ -31,10 +31,13 @@ from app.api.reports import (
     inspections_reports_router
 )
 from app.api.chat import router as chat_router
+from app.api.officers import router as officers_router
 
 
 def _ensure_sqlite_columns():
     """Ensure newly added columns exist in existing SQLite database tables."""
+    if not str(engine.url).startswith("sqlite"):
+        return
     from sqlalchemy import text
     with engine.connect() as conn:
         try:
@@ -56,6 +59,75 @@ def _ensure_sqlite_columns():
             print(f"[STARTUP] Notice during column check: {e}")
 
 
+def _seed_demo_officers(db) -> int:
+    """Seed authorized Legal Metrology Enforcement Officers into database."""
+    from app.models.officer import Officer
+    DEMO_OFFICERS = [
+        {
+            "officer_badge": "LM-2026-001",
+            "name": "Ronak Pandey",
+            "email": "ronak.pandey@gmail.com",
+            "provider": "gmail",
+            "designation": "Senior Legal Metrology Enforcement Officer",
+            "jurisdiction": "National Directorate, New Delhi",
+            "status": "ACTIVE"
+        },
+        {
+            "officer_badge": "LM-2026-001-GOV",
+            "name": "Ronak Pandey",
+            "email": "ronak.pandey@gov.in",
+            "provider": "gov",
+            "designation": "Senior Legal Metrology Enforcement Officer",
+            "jurisdiction": "National Directorate, New Delhi",
+            "status": "ACTIVE"
+        },
+        {
+            "officer_badge": "LM-2026-002",
+            "name": "Himanshu Verma",
+            "email": "himanshu.verma@gmail.com",
+            "provider": "gmail",
+            "designation": "Inspector Legal Metrology (Packaging Verification)",
+            "jurisdiction": "Western Zone, Mumbai",
+            "status": "ACTIVE"
+        },
+        {
+            "officer_badge": "LM-2026-003",
+            "name": "Vibha Pawar",
+            "email": "vibha.pawar@yahoo.com",
+            "provider": "yahoo",
+            "designation": "Assistant Controller Legal Metrology",
+            "jurisdiction": "Northern Zone, Chandigarh",
+            "status": "ACTIVE"
+        },
+        {
+            "officer_badge": "LM-2026-004",
+            "name": "Harsh Nagvekar",
+            "email": "harsh.nagvekar@icloud.com",
+            "provider": "apple",
+            "designation": "State Metrology Verification Specialist",
+            "jurisdiction": "Southern Zone, Bengaluru",
+            "status": "ACTIVE"
+        },
+    ]
+    updated = 0
+    for item in DEMO_OFFICERS:
+        existing = db.query(Officer).filter(Officer.email == item["email"]).first()
+        if not existing:
+            db.add(Officer(**item))
+            updated += 1
+        else:
+            for k, v in item.items():
+                setattr(existing, k, v)
+            updated += 1
+    # Clean out any legacy mock officers
+    allowed_emails = {item["email"] for item in DEMO_OFFICERS}
+    legacy = db.query(Officer).filter(~Officer.email.in_(allowed_emails)).all()
+    for leg in legacy:
+        db.delete(leg)
+    db.commit()
+    return updated
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager to handle startup and shutdown."""
@@ -66,16 +138,20 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     _ensure_sqlite_columns()
 
-    # Seed demo fictional products if database is newly created
+    # Seed demo fictional products and authorized officers
     db = SessionLocal()
     try:
         seeded = ProductService.seed_demo_products(db)
         if seeded > 0:
             print(f"[STARTUP] Seeded {seeded} fictional demo products into SQLite database.")
+        seeded_officers = _seed_demo_officers(db)
+        if seeded_officers > 0:
+            print(f"[STARTUP] Seeded {seeded_officers} authorized legal metrology officers.")
     finally:
         db.close()
 
     yield
+
 
 
 FRONTEND_DIR = os.path.abspath(
@@ -127,6 +203,7 @@ app.include_router(public_compliance_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")
 app.include_router(inspections_reports_router, prefix="/api")
 app.include_router(chat_router, prefix="/api")
+app.include_router(officers_router, prefix="/api")
 
 
 if os.path.isdir(FRONTEND_DIR):

@@ -31,6 +31,8 @@ def setup_test_db():
     Base.metadata.create_all(bind=test_engine)
     db = TestingSessionLocal()
     ProductService.seed_demo_products(db)
+    from app.main import _seed_demo_officers
+    _seed_demo_officers(db)
     db.close()
 
     yield

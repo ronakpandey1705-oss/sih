@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: packsure
+    env: python
+    region: singapore
+    plan: free
+    branch: main
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 10
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: FLAGS_allocator_strategy
+        value: naive_best_fit
+      - key: FLAGS_fraction_of_cpu_memory_to_use
+        value: "0.05"
+      - key: FLAGS_eager_delete_tensor_gb
+        value: "0.0"
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: MKL_NUM_THREADS
+        value: "1"
+      - key: OPENBLAS_NUM_THREADS
+        value: "1"
+      - key: DISABLE_HEAVY_OCR
+        value: "false"

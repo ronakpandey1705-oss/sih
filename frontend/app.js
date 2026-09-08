@@ -24,6 +24,7 @@ const PAGE_TITLES = {
   terms: "Terms & Conditions",
   privacy: "Privacy Policy",
   about: "System Documentation",
+  login: "Officer Authentication Portal",
 };
 
 const state = {
@@ -34,6 +35,7 @@ const state = {
   products: [],
   evidenceFiles: [],
   history: JSON.parse(localStorage.getItem("packsure_history") || "[]"),
+  officer: JSON.parse(localStorage.getItem("packsure_officer") || "null"),
 };
 
 function toast(msg) {
@@ -61,6 +63,9 @@ async function api(path, opts = {}) {
 }
 
 function showPage(id) {
+  if (id === "inspect" && !state.officer) {
+    openOfficerModal();
+  }
   document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
   const target = document.getElementById(id);
   if (target) {
@@ -273,9 +278,11 @@ async function lookup() {
 }
 
 function sessionPayload() {
+  const customOfficer = document.getElementById("officerId") ? document.getElementById("officerId").value.trim() : "";
+  const officerId = customOfficer || (state.officer ? state.officer.officer_badge : null);
   return {
     barcode: document.getElementById("barcode").value.trim() || null,
-    officer_id: document.getElementById("officerId").value.trim() || null,
+    officer_id: officerId,
     establishment_name: document.getElementById("establishment").value.trim() || null,
     inspection_location: document.getElementById("location").value.trim() || null,
     notes: document.getElementById("notes").value.trim() || null,
@@ -1020,8 +1027,287 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// ==========================================
+// Officer Authentication & Verification Gate
+// ==========================================
+function renderOfficerStatus() {
+  const topContainer = document.getElementById("topbarOfficerContainer");
+  const headerArea = document.getElementById("headerOfficerArea");
+  const bannerContainer = document.getElementById("officerInspectBannerContainer");
+  const officerInput = document.getElementById("officerId");
+
+  const loginActiveCard = document.getElementById("loginActiveOfficerCard");
+  const loginFormCard = document.getElementById("loginFormCard");
+  const loginActiveName = document.getElementById("loginActiveName");
+  const loginActiveBadge = document.getElementById("loginActiveBadge");
+  const loginActiveJurisdiction = document.getElementById("loginActiveJurisdiction");
+  const loginActiveProvider = document.getElementById("loginActiveProvider");
+
+  if (state.officer) {
+    // Masthead Topbar
+    if (topContainer) {
+      topContainer.innerHTML = `
+        <span class="officer-topbar-active">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          Officer: ${escapeHtml(state.officer.name)} (${escapeHtml(state.officer.officer_badge)})
+        </span>
+        <button type="button" class="officer-logout-btn" id="topbarLogoutBtn" title="Sign out of official terminal">Sign Out</button>
+      `;
+      const outBtn = document.getElementById("topbarLogoutBtn");
+      if (outBtn) outBtn.addEventListener("click", logoutOfficer);
+    }
+
+    // Main Header Officer Area
+    if (headerArea) {
+      headerArea.innerHTML = `
+        <div class="header-officer-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span class="officer-name">${escapeHtml(state.officer.name)}</span>
+          <span class="officer-badge-tag">${escapeHtml(state.officer.officer_badge)}</span>
+          <button type="button" class="btn-officer-logout" id="headerLogoutBtn" title="Logout of Officer Account">Logout</button>
+        </div>
+      `;
+      const hLogout = document.getElementById("headerLogoutBtn");
+      if (hLogout) hLogout.addEventListener("click", logoutOfficer);
+    }
+
+    // Inspection Banner
+    if (bannerContainer) {
+      bannerContainer.innerHTML = `
+        <div class="officer-inspect-banner">
+          <div>
+            <strong>Authorized Enforcement Officer:</strong> ${escapeHtml(state.officer.name)} &middot; Badge <span class="badge">${escapeHtml(state.officer.officer_badge)}</span> &middot; Jurisdiction: ${escapeHtml(state.officer.jurisdiction || "National")}
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button type="button" class="btn btn-ghost btn-sm" id="inspectSwitchOfficerBtn" style="padding:4px 8px;font-size:11.5px;color:#cbd5e1;border-color:#334155;">Switch Officer</button>
+            <button type="button" class="btn-officer-logout" id="inspectLogoutBtn" style="padding:4px 8px;font-size:11.5px;">Logout</button>
+          </div>
+        </div>
+      `;
+      const switchBtn = document.getElementById("inspectSwitchOfficerBtn");
+      if (switchBtn) switchBtn.addEventListener("click", openOfficerModal);
+      const bannerLogout = document.getElementById("inspectLogoutBtn");
+      if (bannerLogout) bannerLogout.addEventListener("click", logoutOfficer);
+    }
+
+    // Dedicated Login Page Card
+    if (loginActiveCard) loginActiveCard.style.display = "block";
+    if (loginFormCard) loginFormCard.style.display = "none";
+    if (loginActiveName) loginActiveName.textContent = state.officer.name;
+    if (loginActiveBadge) loginActiveBadge.textContent = state.officer.officer_badge;
+    if (loginActiveJurisdiction) loginActiveJurisdiction.textContent = state.officer.jurisdiction || "National Directorate, New Delhi";
+    if (loginActiveProvider) loginActiveProvider.textContent = (state.officer.authorized_provider || "Government Identity").toUpperCase();
+
+    // Auto-fill officer input
+    if (officerInput && (!officerInput.value || officerInput.dataset.autoFilled === "true")) {
+      officerInput.value = state.officer.officer_badge;
+      officerInput.dataset.autoFilled = "true";
+    }
+  } else {
+    // Masthead Topbar
+    if (topContainer) {
+      topContainer.innerHTML = `
+        <button type="button" class="officer-topbar-btn" id="openOfficerAuthBtn" title="Official Government Access">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Officer Sign In
+        </button>
+      `;
+      const inBtn = document.getElementById("openOfficerAuthBtn");
+      if (inBtn) inBtn.addEventListener("click", openOfficerModal);
+    }
+
+    // Main Header Officer Area
+    if (headerArea) {
+      headerArea.innerHTML = `
+        <button type="button" class="btn-header-login" id="headerLoginBtn" data-page="login">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Officer Login
+        </button>
+      `;
+      const hLogin = document.getElementById("headerLoginBtn");
+      if (hLogin) {
+        hLogin.addEventListener("click", () => showPage("login"));
+      }
+    }
+
+    // Inspection Banner
+    if (bannerContainer) {
+      bannerContainer.innerHTML = `
+        <div class="helpdesk-alert" style="margin-bottom:20px">
+          <div style="font-weight:700;margin-bottom:2px">Official Access Required</div>
+          <div>Package compliance screening is restricted to authorized Legal Metrology enforcement officers under Section 18 of the Legal Metrology Act, 2009. Please authenticate your credentials to conduct an inspection.</div>
+          <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm" id="inspectLoginPromptBtn">Authenticate Officer ID</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="inspectPortalPromptBtn" data-page="login">Open Officer Portal</button>
+          </div>
+        </div>
+      `;
+      const promptBtn = document.getElementById("inspectLoginPromptBtn");
+      if (promptBtn) promptBtn.addEventListener("click", openOfficerModal);
+      const portalBtn = document.getElementById("inspectPortalPromptBtn");
+      if (portalBtn) portalBtn.addEventListener("click", () => showPage("login"));
+    }
+
+    // Dedicated Login Page Card
+    if (loginActiveCard) loginActiveCard.style.display = "none";
+    if (loginFormCard) loginFormCard.style.display = "block";
+
+    // Clear officer input if previously auto-filled
+    if (officerInput && officerInput.dataset.autoFilled === "true") {
+      officerInput.value = "";
+      delete officerInput.dataset.autoFilled;
+    }
+  }
+}
+
+function openOfficerModal() {
+  const modal = document.getElementById("officerAuthModal");
+  if (modal) modal.style.display = "flex";
+  const notice = document.getElementById("officerHelpdeskNotice");
+  if (notice) notice.style.display = "none";
+}
+
+function closeOfficerModal() {
+  const modal = document.getElementById("officerAuthModal");
+  if (modal) modal.style.display = "none";
+}
+
+function logoutOfficer() {
+  state.officer = null;
+  localStorage.removeItem("packsure_officer");
+  renderOfficerStatus();
+  toast("Officer session ended. Logged out successfully.");
+}
+
+async function verifyOfficerEmail(email, provider = "gmail", claimedName = null) {
+  if (!email || !email.trim()) {
+    toast("Please enter an official email address.");
+    return;
+  }
+  toast("Verifying credentials against National Legal Metrology Officer Database...");
+  const noticeModal = document.getElementById("officerHelpdeskNotice");
+  const noticePage = document.getElementById("loginPageHelpdeskNotice");
+  if (noticeModal) noticeModal.style.display = "none";
+  if (noticePage) noticePage.style.display = "none";
+
+  try {
+    const res = await api("/api/officers/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), provider, claimed_name: claimedName }),
+    });
+
+    if (res.verified && res.officer) {
+      state.officer = res.officer;
+      localStorage.setItem("packsure_officer", JSON.stringify(res.officer));
+      renderOfficerStatus();
+      closeOfficerModal();
+      toast(res.message);
+      showPage("inspect");
+    } else {
+      if (noticeModal) {
+        noticeModal.style.display = "block";
+        const msgEl = document.getElementById("officerHelpdeskMessage");
+        if (msgEl) msgEl.textContent = res.message;
+        const ticketEl = document.getElementById("officerHelpdeskTicket");
+        if (ticketEl) ticketEl.textContent = res.ticket_no || "LM-HLP-QUEUED";
+      }
+      if (noticePage) {
+        noticePage.style.display = "block";
+        const msgEl = document.getElementById("loginPageHelpdeskMsg");
+        if (msgEl) msgEl.textContent = res.message;
+        const ticketEl = document.getElementById("loginPageHelpdeskTicket");
+        if (ticketEl) ticketEl.textContent = res.ticket_no || "LM-HLP-QUEUED";
+      }
+      toast(`Access Denied: Ticket ${res.ticket_no} created.`);
+    }
+  } catch (err) {
+    toast("Verification service error: " + err.message);
+  }
+}
+
+// Wire up Officer Authentication listeners
+const closeAuthBtn = document.getElementById("closeOfficerAuthBtn");
+if (closeAuthBtn) closeAuthBtn.addEventListener("click", closeOfficerModal);
+
+const officerForm = document.getElementById("officerVerifyForm");
+if (officerForm) {
+  officerForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("officerEmailInput").value;
+    verifyOfficerEmail(email, "email");
+  });
+}
+
+// Quick pre-authorized test officer buttons in modal
+document.querySelectorAll("#officerDemoCardsGrid .officer-card-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const email = btn.dataset.officerEmail;
+    if (email) verifyOfficerEmail(email, "demo");
+  });
+});
+
+// Identity Provider Buttons in modal (Gmail, Yahoo, Apple ID, NIC)
+const providerGmail = document.getElementById("providerGmailBtn");
+if (providerGmail) {
+  providerGmail.addEventListener("click", () => {
+    verifyOfficerEmail("ronak.pandey@gmail.com", "gmail", "Ronak Pandey");
+  });
+}
+const providerYahoo = document.getElementById("providerYahooBtn");
+if (providerYahoo) {
+  providerYahoo.addEventListener("click", () => {
+    verifyOfficerEmail("vibha.pawar@yahoo.com", "yahoo", "Vibha Pawar");
+  });
+}
+const providerApple = document.getElementById("providerAppleBtn");
+if (providerApple) {
+  providerApple.addEventListener("click", () => {
+    verifyOfficerEmail("harsh.nagvekar@icloud.com", "apple", "Harsh Nagvekar");
+  });
+}
+const providerGov = document.getElementById("providerGovBtn");
+if (providerGov) {
+  providerGov.addEventListener("click", () => {
+    verifyOfficerEmail("ronak.pandey@gov.in", "gov", "Ronak Pandey");
+  });
+}
+
+// Dedicated Login Page Listeners
+const loginPageForm = document.getElementById("loginPageOfficerForm");
+if (loginPageForm) {
+  loginPageForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("loginPageEmailInput");
+    if (input) verifyOfficerEmail(input.value, "email");
+  });
+}
+
+document.querySelectorAll(".page-provider-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const email = btn.dataset.email;
+    const provider = btn.dataset.provider || "gov";
+    const name = btn.dataset.name || null;
+    if (email) verifyOfficerEmail(email, provider, name);
+  });
+});
+
+document.querySelectorAll(".page-card-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const email = btn.dataset.officerEmail;
+    if (email) verifyOfficerEmail(email, "demo");
+  });
+});
+
+const loginPageLogout = document.getElementById("loginPageLogoutBtn");
+if (loginPageLogout) {
+  loginPageLogout.addEventListener("click", logoutOfficer);
+}
+
 renderDemoChips();
 renderDashboard();
+renderOfficerStatus();
 ping();
 loadBootstrap();
 setInterval(ping, 20000);
+

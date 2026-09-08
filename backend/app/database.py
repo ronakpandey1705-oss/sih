@@ -2,15 +2,31 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from app.config import settings
 
-# SQLite configuration for FastAPI multi-threading
+# Normalize database URL (Render provides URLs starting with postgres://)
+raw_db_url = settings.DATABASE_URL
+if raw_db_url.startswith("postgres://"):
+    db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+else:
+    db_url = raw_db_url
+
+# Engine arguments based on database dialect
 connect_args = {}
-if settings.DATABASE_URL.startswith("sqlite"):
+engine_kwargs = {"echo": False}
+if db_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
+else:
+    # PostgreSQL connection pool settings for cloud deployment
+    engine_kwargs.update({
+        "pool_size": 5,
+        "max_overflow": 10,
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+    })
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    db_url,
     connect_args=connect_args,
-    echo=False
+    **engine_kwargs
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

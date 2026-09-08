@@ -178,9 +178,19 @@ def parse_paddle_ocr_results(results: Any, image_id: str) -> List[Dict[str, Any]
     return extracted_lines
 
 
-def _apply_windows_paddle_cpu_patch():
+# Low-memory allocator configuration to prevent exceeding 512MB RAM on cloud hosts like Render
+os.environ.setdefault("FLAGS_allocator_strategy", "naive_best_fit")
+os.environ.setdefault("FLAGS_fraction_of_cpu_memory_to_use", "0.05")
+os.environ.setdefault("FLAGS_eager_delete_tensor_gb", "0.0")
+os.environ.setdefault("FLAGS_memory_cleanup_on_every_batch", "1")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+
+
+def _apply_paddle_cpu_patch():
     """
-    Applies compatibility patch for PaddlePaddle 3.x / PaddleX on Windows CPU.
+    Applies compatibility patch for PaddlePaddle 3.x / PaddleX on CPU.
     Resolves PIR (New IR) / oneDNN attribute mismatch:
     (ConvertPirAttribute2RuntimeAttribute not support [pir::ArrayAttribute<pir::DoubleAttribute>]).
     Forces stable legacy IR and native CPU execution mode.
@@ -199,21 +209,22 @@ def _apply_windows_paddle_cpu_patch():
 
             runner.PaddleStaticRunner._create = safe_cpu_create
             runner._sih_cpu_patched = True
-            logger.info("PaddleX Windows CPU compatibility patch applied successfully.")
+            logger.info("PaddleX CPU compatibility patch applied successfully.")
     except Exception as e:
-        logger.warning(f"Could not apply PaddleX Windows CPU patch: {e}")
+        logger.warning(f"Could not apply PaddleX CPU patch: {e}")
 
 
 class PaddleOCRService:
     """
     Singleton service wrapper around PaddleOCR for fast, deterministic text
     and bounding box extraction from packaging label images.
+    Optimized for low-memory cloud instances (e.g. Render 512MB RAM).
     """
     _instance: Optional["PaddleOCRService"] = None
     _ocr_engine = None
 
     def __init__(self):
-        _apply_windows_paddle_cpu_patch()
+        _apply_paddle_cpu_patch()
         self._init_engine()
 
     @classmethod
@@ -223,12 +234,30 @@ class PaddleOCRService:
         return cls._instance
 
     def _init_engine(self):
+        if os.environ.get("DISABLE_HEAVY_OCR", "").lower() in ("true", "1", "yes"):
+            logger.info("DISABLE_HEAVY_OCR active: PaddleOCR disabled to preserve memory on micro instances.")
+            self._ocr_engine = None
+            return
+
         if self._ocr_engine is None:
             try:
                 from paddleocr import PaddleOCR
-                # Initialize English OCR pipeline
-                self._ocr_engine = PaddleOCR(lang="en")
-                logger.info("PaddleOCR engine initialized successfully.")
+                # Lightweight mobile models save ~200MB RAM over medium models + unwarping
+                opts = {
+                    "use_doc_orientation_classify": False,
+                    "use_doc_unwarping": False,
+                    "use_textline_orientation": False,
+                }
+                try:
+                    self._ocr_engine = PaddleOCR(
+                        text_detection_model_name="PP-OCRv4_mobile_det",
+                        text_recognition_model_name="PP-OCRv4_mobile_rec",
+                        **opts
+                    )
+                    logger.info("PaddleOCR engine initialized with low-memory mobile models.")
+                except Exception:
+                    self._ocr_engine = PaddleOCR(lang="en", **opts)
+                    logger.info("PaddleOCR engine initialized with default language models.")
             except Exception as e:
                 logger.error(f"Error initializing PaddleOCR engine: {e}")
                 self._ocr_engine = None
@@ -246,12 +275,12 @@ class PaddleOCRService:
             raise FileNotFoundError(f"Image not found at path: {image_path}")
 
         if self._ocr_engine is None:
-            logger.warning("PaddleOCR is not installed; skipping OCR for %s", image_path)
+            logger.warning("PaddleOCR is not installed or disabled; skipping OCR for %s", image_path)
             return []
 
         try:
             if hasattr(self._ocr_engine, "predict"):
-                results = self._ocr_engine.predict(image_path)
+                results = list(self._ocr_engine.predict(image_path))
             else:
                 results = self._ocr_engine.ocr(image_path)
             lines = parse_paddle_ocr_results(results, image_id)
@@ -260,6 +289,9 @@ class PaddleOCRService:
         except Exception as e:
             logger.error(f"OCR processing failed for {image_path}: {e}")
             raise
+        finally:
+            import gc
+            gc.collect()
 
     @staticmethod
     def save_ocr_results_to_db(

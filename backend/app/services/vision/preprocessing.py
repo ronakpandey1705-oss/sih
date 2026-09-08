@@ -42,10 +42,11 @@ class ImagePreprocessor:
         return False
 
     @staticmethod
-    def resize_for_ocr(image: np.ndarray, min_dimension: int = 1000, max_dimension: int = 2400) -> Tuple[np.ndarray, float]:
+    def resize_for_ocr(image: np.ndarray, min_dimension: int = 640, max_dimension: int = 1280) -> Tuple[np.ndarray, float]:
         """
         Resize image so text is sufficiently large for OCR detection,
         without consuming excessive memory for ultra-high-resolution images.
+        Constrained to max 1280px to stay well within 512MB RAM budgets.
         """
         h, w = image.shape[:2]
         max_side = max(h, w)
@@ -203,6 +204,9 @@ class ImagePreprocessor:
         cls.write_image_safe(output_path, final_img)
 
         proc_h, proc_w = final_img.shape[:2]
+        del img, resized_img, gray, denoised, enhanced, final_img
+        import gc
+        gc.collect()
 
         return {
             "preprocessed_path": output_path,

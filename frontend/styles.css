@@ -1424,9 +1424,437 @@ footer {
 }
 
 .modal-close:hover {
+  background: var(--line);
   color: var(--text);
-  background: #e2e8f0;
 }
+
+/* Officer Topbar Indicators */
+.officer-topbar-btn {
+  background: #1e3a8a;
+  border: 1px solid #3b82f6;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.12s ease;
+}
+
+.officer-topbar-btn:hover {
+  background: #1d4ed8;
+}
+
+.officer-topbar-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #059669;
+  color: #34d399;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.officer-logout-btn {
+  background: transparent;
+  border: 1px solid #475569;
+  color: #94a3b8;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.officer-logout-btn:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+/* Officer Access Gate Modal & Provider Buttons */
+.modal-box.officer-modal-box {
+  max-width: 660px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.officer-modal-body {
+  padding: 22px 24px;
+  overflow-y: auto;
+}
+
+.officer-statutory-notice {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #d97706;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  font-size: 12.5px;
+  color: #92400e;
+  line-height: 1.55;
+}
+
+.officer-statutory-notice strong {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+  color: #b45309;
+}
+
+.auth-providers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.auth-provider-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.14s ease;
+  font-family: inherit;
+}
+
+.auth-provider-btn:hover {
+  border-color: #0f172a;
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-provider-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.auth-provider-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.auth-provider-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 18px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--line);
+}
+
+.auth-divider span {
+  padding: 0 10px;
+}
+
+.officer-quick-select-section {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.officer-quick-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.officer-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.officer-card-btn {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+  font-family: inherit;
+}
+
+.officer-card-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.officer-card-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.04em;
+}
+
+.officer-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 2px 0;
+}
+
+.officer-card-designation {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.officer-card-email {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  font-family: monospace;
+  margin-top: 3px;
+}
+
+.helpdesk-alert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #991b1b;
+}
+
+.helpdesk-ticket-tag {
+  display: inline-block;
+  background: #ffffff;
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  font-weight: 700;
+  font-family: monospace;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  margin: 6px 0;
+}
+
+.officer-inspect-banner {
+  background: #090d16;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.officer-inspect-banner strong {
+  color: #ffffff;
+}
+
+.officer-inspect-banner .badge {
+  background: #1e3a8a;
+  color: #93c5fd;
+  border: 1px solid #2563eb;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Header Officer Status & Logout Controls */
+.header-officer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.header-officer-pill .officer-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.header-officer-pill .officer-badge-tag {
+  background: #1e3a8a;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.04em;
+}
+
+.btn-officer-logout {
+  background: #fee2e2;
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  margin-left: 4px;
+}
+
+.btn-officer-logout:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+.btn-header-login {
+  background: #f8fafc;
+  border: 1px solid var(--line-strong);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+}
+
+.btn-header-login:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+
+/* Professional Full Login Page */
+.login-page-wrap {
+  max-width: 800px;
+  margin: 10px auto 40px;
+}
+
+.login-emblem-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-emblem-img {
+  width: 58px;
+  height: auto;
+  margin-bottom: 10px;
+  filter: contrast(1.1);
+}
+
+.login-emblem-header h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.login-emblem-header p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.login-card {
+  background: #ffffff;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 28px 32px;
+}
+
+.active-officer-dashboard {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-left: 4px solid #10b981;
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.active-officer-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #047857;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.active-officer-details {
+  font-size: 16px;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 6px;
+}
+
+.active-officer-sub {
+  font-size: 13px;
+  color: #047857;
+  margin-bottom: 16px;
+}
+
+.active-officer-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 
 .modal-close svg {
   width: 18px;
