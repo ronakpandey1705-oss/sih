@@ -34,29 +34,41 @@ from app.api.chat import router as chat_router
 from app.api.officers import router as officers_router
 
 
-def _ensure_sqlite_columns():
-    """Ensure newly added columns exist in existing SQLite database tables."""
-    if not str(engine.url).startswith("sqlite"):
-        return
+def _ensure_database_compatibility():
+    """Ensure column types and migrations are aligned across SQLite and PostgreSQL."""
     from sqlalchemy import text
+    url_str = str(engine.url)
     with engine.connect() as conn:
-        try:
-            result = conn.execute(text("PRAGMA table_info(scans)"))
-            existing_cols = {row[1] for row in result.fetchall()}
-            migrations = [
-                ("officer_id", "VARCHAR(64)"),
-                ("establishment_name", "VARCHAR(255)"),
-                ("inspection_location", "VARCHAR(255)"),
-                ("officer_determination", "VARCHAR(64)"),
-                ("officer_remarks", "TEXT"),
-                ("officer_reviewed_at", "DATETIME"),
-            ]
-            for col_name, col_type in migrations:
-                if col_name not in existing_cols:
-                    conn.execute(text(f"ALTER TABLE scans ADD COLUMN {col_name} {col_type}"))
-                    conn.commit()
-        except Exception as e:
-            print(f"[STARTUP] Notice during column check: {e}")
+        if "postgresql" in url_str:
+            try:
+                # Widen product columns in PostgreSQL to prevent StringDataRightTruncation
+                conn.execute(text("ALTER TABLE products ALTER COLUMN expected_net_quantity TYPE VARCHAR(512);"))
+                conn.execute(text("ALTER TABLE products ALTER COLUMN expected_mrp TYPE VARCHAR(128);"))
+                conn.execute(text("ALTER TABLE products ALTER COLUMN brand TYPE VARCHAR(255);"))
+                conn.execute(text("ALTER TABLE products ALTER COLUMN category TYPE VARCHAR(255);"))
+                conn.execute(text("ALTER TABLE products ALTER COLUMN manufacturer_address TYPE VARCHAR(1024);"))
+                conn.execute(text("ALTER TABLE products ALTER COLUMN consumer_care_details TYPE VARCHAR(1024);"))
+                conn.commit()
+            except Exception as e:
+                print(f"[STARTUP] PostgreSQL column check notice: {e}")
+        elif "sqlite" in url_str:
+            try:
+                result = conn.execute(text("PRAGMA table_info(scans)"))
+                existing_cols = {row[1] for row in result.fetchall()}
+                migrations = [
+                    ("officer_id", "VARCHAR(64)"),
+                    ("establishment_name", "VARCHAR(255)"),
+                    ("inspection_location", "VARCHAR(255)"),
+                    ("officer_determination", "VARCHAR(64)"),
+                    ("officer_remarks", "TEXT"),
+                    ("officer_reviewed_at", "DATETIME"),
+                ]
+                for col_name, col_type in migrations:
+                    if col_name not in existing_cols:
+                        conn.execute(text(f"ALTER TABLE scans ADD COLUMN {col_name} {col_type}"))
+                        conn.commit()
+            except Exception as e:
+                print(f"[STARTUP] SQLite column check notice: {e}")
 
 
 def _seed_demo_officers(db) -> int:
@@ -136,7 +148,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize database tables
     Base.metadata.create_all(bind=engine)
-    _ensure_sqlite_columns()
+    _ensure_database_compatibility()
 
     # Seed demo fictional products and authorized officers
     db = SessionLocal()
