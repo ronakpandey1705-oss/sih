@@ -30,6 +30,8 @@ inspections_images_router = APIRouter(prefix="/inspections/{scan_id}", tags=["In
 ALLOWED_MIME_TYPES = {
     "image/jpeg": ".jpg",
     "image/jpg": ".jpg",
+    "image/pjpeg": ".jpg",
+    "image/jfif": ".jpg",
     "image/png": ".png",
     "image/webp": ".webp"
 }
@@ -57,9 +59,9 @@ async def upload_image(
     """
     Upload a package photo associated with a scan session.
     - Validates file type (JPG, PNG, WebP)
-    - Saves original image securely
-    - Updates scan session status to IMAGES_UPLOADED
-    - Location is OPTIONAL: stored if provided, scan proceeds normally if omitted.
+    - Normalizes mobile camera orientation (EXIF transpose)
+    - Constrains massive mobile resolutions to max 1600px for lightning-fast, low-memory OCR
+    - Saves image securely and creates database record
     """
     scan = _verify_scan_exists(scan_id, db)
 
@@ -96,6 +98,24 @@ async def upload_image(
         )
     finally:
         file.file.close()
+
+    # Mobile camera normalization: correct EXIF orientation (portrait) and optimize resolution
+    try:
+        from PIL import Image, ImageOps
+        with Image.open(dest_path) as pil_img:
+            transposed = ImageOps.exif_transpose(pil_img)
+            if transposed is not None:
+                if transposed.mode not in ("RGB", "L"):
+                    transposed = transposed.convert("RGB")
+                w, h = transposed.size
+                max_side = max(w, h)
+                # Rescale high-megapixel phone photos (> 1600px) to prevent 512MB RAM spikes on Render
+                if max_side > 1600:
+                    scale = 1600.0 / max_side
+                    transposed = transposed.resize((int(w * scale), int(h * scale)), Image.Resampling.LANCZOS)
+                transposed.save(dest_path, format="JPEG", quality=90, optimize=True)
+    except Exception as norm_err:
+        print(f"[IMAGE UPLOAD] Mobile normalization notice: {norm_err}")
 
     file_size = os.path.getsize(dest_path)
     if file_size > MAX_FILE_SIZE_BYTES:

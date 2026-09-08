@@ -278,11 +278,37 @@ class PaddleOCRService:
             logger.warning("PaddleOCR is not installed or disabled; skipping OCR for %s", image_path)
             return []
 
+        target_ocr_path = image_path
+        temp_scaled_path = None
+        try:
+            from PIL import Image, ImageOps
+            with Image.open(image_path) as pil_img:
+                transposed = ImageOps.exif_transpose(pil_img)
+                if transposed is not None:
+                    w, h = transposed.size
+                    max_dim = max(w, h)
+                    needs_resize = max_dim > 1600
+                    needs_save = needs_resize or (transposed is not pil_img)
+                    if needs_save:
+                        if transposed.mode not in ("RGB", "L"):
+                            transposed = transposed.convert("RGB")
+                        if needs_resize:
+                            scale = 1600.0 / max_dim
+                            transposed = transposed.resize((int(w * scale), int(h * scale)), Image.Resampling.LANCZOS)
+                        import tempfile
+                        tmp_f = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+                        temp_scaled_path = tmp_f.name
+                        tmp_f.close()
+                        transposed.save(temp_scaled_path, format="JPEG", quality=90)
+                        target_ocr_path = temp_scaled_path
+        except Exception as norm_err:
+            logger.warning("Could not normalize image for OCR: %s", norm_err)
+
         try:
             if hasattr(self._ocr_engine, "predict"):
-                results = list(self._ocr_engine.predict(image_path))
+                results = list(self._ocr_engine.predict(target_ocr_path))
             else:
-                results = self._ocr_engine.ocr(image_path)
+                results = self._ocr_engine.ocr(target_ocr_path)
             lines = parse_paddle_ocr_results(results, image_id)
             logger.info("OCR extracted %s line(s) from %s", len(lines), image_path)
             return lines
@@ -290,6 +316,11 @@ class PaddleOCRService:
             logger.error(f"OCR processing failed for {image_path}: {e}")
             raise
         finally:
+            if temp_scaled_path and os.path.exists(temp_scaled_path):
+                try:
+                    os.remove(temp_scaled_path)
+                except Exception:
+                    pass
             import gc
             gc.collect()
 

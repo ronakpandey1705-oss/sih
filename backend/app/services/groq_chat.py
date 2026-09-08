@@ -96,31 +96,59 @@ class GroqChatService:
 
         messages.append({"role": "user", "content": message.strip()})
 
+        # Candidate models to try in order of preference
+        candidate_models = [settings.GROQ_MODEL]
+        for fallback in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"]:
+            if fallback not in candidate_models:
+                candidate_models.append(fallback)
+
+        response = None
+        last_error = None
+
         try:
             async with httpx.AsyncClient(timeout=45.0) as client:
-                response = await client.post(
-                    GROQ_CHAT_URL,
-                    headers={
-                        "Authorization": f"Bearer {api_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": settings.GROQ_MODEL,
-                        "messages": messages,
-                        "temperature": 0.5,
-                        "max_tokens": 1536,
-                    },
-                )
-        except httpx.RequestError as exc:
+                for mod in candidate_models:
+                    try:
+                        resp = await client.post(
+                            GROQ_CHAT_URL,
+                            headers={
+                                "Authorization": f"Bearer {api_key}",
+                                "Content-Type": "application/json",
+                            },
+                            json={
+                                "model": mod,
+                                "messages": messages,
+                                "temperature": 0.5,
+                                "max_tokens": 1536,
+                            },
+                        )
+                        response = resp
+                        if resp.status_code == 200:
+                            break
+                        elif resp.status_code in (400, 404):
+                            # Model not recognized or unavailable on this tier, try next candidate
+                            continue
+                        else:
+                            break
+                    except httpx.RequestError as exc:
+                        last_error = exc
+                        continue
+        except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=f"Could not reach Groq: {exc}",
             ) from exc
 
+        if response is None:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Could not reach Groq: {last_error}",
+            )
+
         if response.status_code == 401:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="Groq rejected the API key. Check GROQ_API_KEY in backend/.env.",
+                detail="Groq rejected the API key. Please configure GROQ_API_KEY in Render Environment Variables.",
             )
         if response.status_code >= 400:
             detail = response.text

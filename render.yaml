@@ -28,3 +28,5 @@ services:
         value: "1"
       - key: DISABLE_HEAVY_OCR
         value: "false"
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
