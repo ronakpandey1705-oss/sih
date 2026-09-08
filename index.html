@@ -1,3082 +1,826 @@
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>MetroCheck | Legal Metrology</title>
-
-
-<style>
-
-/* =====================================================
-   GLOBAL
-===================================================== */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-
-    min-height: 100vh;
-
-    color: white;
-
-    background:
-        radial-gradient(
-            circle at 50% 20%,
-            #123653 0%,
-            #081522 45%,
-            #030910 100%
-        );
-
-    overflow-x: hidden;
-}
-
-
-/* =====================================================
-   BACKGROUND GLOW
-===================================================== */
-
-body::before {
-
-    content: "";
-
-    position: fixed;
-
-    width: 600px;
-    height: 600px;
-
-    top: 35%;
-    left: 50%;
-
-    transform: translate(-50%, -50%);
-
-    background: rgba(0,180,255,0.08);
-
-    filter: blur(130px);
-
-    pointer-events: none;
-
-    z-index: -10;
-}
-
-
-/* =====================================================
-   PRODUCT BACKGROUND
-===================================================== */
-
-.products {
-
-    position: fixed;
-
-    top: 90px;
-    bottom: 0;
-
-    width: 19%;
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-
-    gap: 50px;
-
-    pointer-events: none;
-
-    z-index: -2;
-}
-
-.products.left {
-    left: 1%;
-}
-
-.products.right {
-    right: 1%;
-    align-items: flex-end;
-}
-
-.product {
-
-    width: 120px;
-    height: 150px;
-
-    object-fit: contain;
-
-    opacity: 0.15;
-
-    filter:
-        drop-shadow(
-            0 0 25px
-            rgba(0,190,255,0.25)
-        );
-}
-
-.product:nth-child(1) {
-    transform: rotate(-8deg);
-}
-
-.product:nth-child(2) {
-    transform: rotate(7deg);
-}
-
-.product:nth-child(3) {
-    transform: rotate(-5deg);
-}
-
-
-/* =====================================================
-   NAVBAR
-===================================================== */
-
-header {
-
-    position: sticky;
-
-    top: 0;
-
-    z-index: 100;
-
-    padding: 16px 5%;
-
-    background:
-        rgba(3,12,23,0.88);
-
-    backdrop-filter: blur(18px);
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,0.08);
-}
-
-.navbar {
-
-    max-width: 1300px;
-
-    margin: auto;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    gap: 20px;
-}
-
-.logo {
-
-    font-size: 23px;
-
-    font-weight: bold;
-
-    white-space: nowrap;
-}
-
-.logo span {
-    color: #00c6ff;
-}
-
-nav {
-
-    display: flex;
-
-    gap: 4px;
-
-    overflow-x: auto;
-
-    scrollbar-width: none;
-}
-
-nav::-webkit-scrollbar {
-    display: none;
-}
-
-nav button {
-
-    background: transparent;
-
-    border: none;
-
-    color: #9eafc2;
-
-    padding: 10px 11px;
-
-    border-radius: 7px;
-
-    cursor: pointer;
-
-    white-space: nowrap;
-
-    font-size: 12px;
-
-    transition: 0.25s;
-}
-
-nav button:hover,
-nav button.active {
-
-    color: white;
-
-    background:
-        rgba(0,180,255,0.12);
-}
-
-
-/* =====================================================
-   MAIN
-===================================================== */
-
-main {
-
-    width: 90%;
-
-    max-width: 1200px;
-
-    margin: 40px auto 80px;
-}
-
-.page {
-    display: none;
-}
-
-.page.active {
-
-    display: block;
-
-    animation:
-        fadeIn 0.35s ease;
-}
-
-@keyframes fadeIn {
-
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-
-/* =====================================================
-   TITLES
-===================================================== */
-
-.page-title {
-
-    margin-bottom: 30px;
-}
-
-.page-title h1 {
-
-    font-size:
-        clamp(26px,5vw,38px);
-
-    margin-bottom: 8px;
-}
-
-.page-title p {
-
-    color: #91a5b8;
-
-    font-size: 15px;
-}
-
-
-/* =====================================================
-   CARDS
-===================================================== */
-
-.card {
-
-    background:
-        rgba(10,27,43,0.78);
-
-    border:
-        1px solid
-        rgba(255,255,255,0.09);
-
-    border-radius: 17px;
-
-    padding: 25px;
-
-    backdrop-filter: blur(20px);
-
-    box-shadow:
-        0 15px 45px
-        rgba(0,0,0,0.35);
-
-    margin-bottom: 22px;
-}
-
-
-/* =====================================================
-   DASHBOARD STATS
-===================================================== */
-
-.stats {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(4,1fr);
-
-    gap: 15px;
-
-    margin-bottom: 25px;
-}
-
-.stat {
-
-    padding: 22px;
-
-    background:
-        rgba(255,255,255,0.035);
-
-    border:
-        1px solid
-        rgba(255,255,255,0.07);
-
-    border-radius: 13px;
-}
-
-.stat-number {
-
-    font-size: 28px;
-
-    font-weight: bold;
-
-    margin-bottom: 7px;
-}
-
-.stat-label {
-
-    color: #91a5b8;
-
-    font-size: 13px;
-}
-
-.blue {
-    color: #25c7ff;
-}
-
-.green {
-    color: #00e59a;
-}
-
-.red {
-    color: #ff6575;
-}
-
-.yellow {
-    color: #ffb84d;
-}
-
-
-/* =====================================================
-   DASHBOARD GRID
-===================================================== */
-
-.dashboard-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        1.5fr 1fr;
-
-    gap: 20px;
-}
-
-
-/* =====================================================
-   BUTTONS
-===================================================== */
-
-.btn {
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 13px 22px;
-
-    cursor: pointer;
-
-    font-weight: bold;
-
-    color: white;
-
-    transition: 0.25s;
-}
-
-.btn:hover {
-
-    transform:
-        translateY(-2px);
-
-    filter: brightness(1.1);
-}
-
-.btn-blue {
-
-    background:
-        linear-gradient(
-            135deg,
-            #168cff,
-            #00c6ff
-        );
-}
-
-.btn-green {
-
-    background:
-        linear-gradient(
-            135deg,
-            #00a968,
-            #00e59a
-        );
-}
-
-.full {
-
-    width: 100%;
-
-    margin-top: 18px;
-}
-
-
-/* =====================================================
-   SCANNER
-===================================================== */
-
-.upload-area {
-
-    border:
-        2px dashed
-        rgba(50,190,255,0.4);
-
-    border-radius: 14px;
-
-    padding: 60px 20px;
-
-    text-align: center;
-
-    background:
-        rgba(0,150,255,0.03);
-
-    transition: 0.3s;
-}
-
-.upload-area:hover {
-
-    border-color: #29c7ff;
-
-    background:
-        rgba(0,180,255,0.07);
-}
-
-.upload-icon {
-
-    font-size: 45px;
-
-    margin-bottom: 15px;
-}
-
-.upload-area h2 {
-
-    margin-bottom: 8px;
-
-    font-size: 23px;
-}
-
-.upload-area p {
-
-    color: #91a5b8;
-
-    margin-bottom: 23px;
-
-    font-size: 14px;
-}
-
-input[type="file"] {
-    display: none;
-}
-
-#preview {
-
-    display: none;
-
-    width: 100%;
-
-    max-height: 330px;
-
-    object-fit: contain;
-
-    margin-top: 22px;
-
-    border-radius: 12px;
-}
-
-
-/* =====================================================
-   COMPLIANCE SCORE
-===================================================== */
-
-.score-box {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 25px;
-}
-
-.score-circle {
-
-    width: 125px;
-
-    height: 125px;
-
-    border-radius: 50%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background:
-        conic-gradient(
-            #00e59a 0deg 295deg,
-            rgba(255,255,255,0.08)
-            295deg 360deg
-        );
-
-    flex-shrink: 0;
-}
-
-.score-inner {
-
-    width: 95px;
-
-    height: 95px;
-
-    border-radius: 50%;
-
-    background: #0b1d2d;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size: 24px;
-
-    font-weight: bold;
-
-    color: #00e59a;
-}
-
-
-/* =====================================================
-   RESULT ITEMS
-===================================================== */
-
-.result-item {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    gap: 15px;
-
-    padding: 15px 5px;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,0.07);
-
-    font-size: 14px;
-}
-
-.result-item:last-child {
-    border-bottom: none;
-}
-
-.status {
-
-    font-weight: bold;
-
-    white-space: nowrap;
-}
-
-
-/* =====================================================
-   PRODUCT INFO
-===================================================== */
-
-.info-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2,1fr);
-
-    gap: 12px;
-}
-
-.info {
-
-    padding: 17px;
-
-    background:
-        rgba(255,255,255,0.035);
-
-    border-radius: 10px;
-
-    border:
-        1px solid
-        rgba(255,255,255,0.06);
-}
-
-.info-label {
-
-    color: #8196aa;
-
-    font-size: 12px;
-
-    margin-bottom: 6px;
-}
-
-.info-value {
-
-    font-size: 15px;
-
-    font-weight: bold;
-}
-
-
-/* =====================================================
-   VIOLATIONS
-===================================================== */
-
-.violation {
-
-    display: flex;
-
-    gap: 15px;
-
-    padding: 18px;
-
-    margin-bottom: 12px;
-
-    border-radius: 11px;
-
-    background:
-        rgba(255,80,95,0.055);
-
-    border:
-        1px solid
-        rgba(255,80,95,0.13);
-}
-
-.violation-icon {
-    font-size: 25px;
-}
-
-.violation h3 {
-
-    font-size: 15px;
-
-    margin-bottom: 6px;
-}
-
-.violation p {
-
-    color: #91a5b8;
-
-    font-size: 13px;
-
-    line-height: 1.5;
-}
-
-
-/* =====================================================
-   HEALTH SECTION
-===================================================== */
-
-.health-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1.5fr;
-
-    gap: 20px;
-
-    margin-bottom: 20px;
-}
-
-
-/* HEALTH SCORE */
-
-.health-score {
-
-    text-align: center;
-
-    padding: 30px;
-}
-
-.health-circle {
-
-    width: 180px;
-
-    height: 180px;
-
-    border-radius: 50%;
-
-    margin: 10px auto 20px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background:
-        conic-gradient(
-            #00e59a 0deg 259deg,
-            rgba(255,255,255,0.08)
-            259deg 360deg
-        );
-}
-
-.health-inner {
-
-    width: 140px;
-
-    height: 140px;
-
-    border-radius: 50%;
-
-    background: #0b1d2d;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-}
-
-.health-number {
-
-    font-size: 38px;
-
-    font-weight: bold;
-
-    color: #00e59a;
-}
-
-.health-outof {
-
-    color: #71869a;
-
-    font-size: 12px;
-}
-
-
-/* NUTRITION BARS */
-
-.nutrition-item {
-
-    margin-bottom: 22px;
-}
-
-.nutrition-top {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    margin-bottom: 8px;
-
-    font-size: 14px;
-}
-
-.nutrition-value {
-
-    color: #91a5b8;
-}
-
-.bar {
-
-    height: 9px;
-
-    border-radius: 10px;
-
-    background:
-        rgba(255,255,255,0.08);
-
-    overflow: hidden;
-}
-
-.bar-fill {
-
-    height: 100%;
-
-    border-radius: 10px;
-
-    background:
-        linear-gradient(
-            90deg,
-            #00a968,
-            #00e59a
-        );
-}
-
-
-/* =====================================================
-   INGREDIENTS
-===================================================== */
-
-.ingredients-grid {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 10px;
-
-    margin-top: 18px;
-}
-
-.ingredient {
-
-    padding: 10px 14px;
-
-    border-radius: 20px;
-
-    background:
-        rgba(0,180,255,0.07);
-
-    border:
-        1px solid
-        rgba(0,180,255,0.15);
-
-    color: #bdeaff;
-
-    font-size: 13px;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-.ingredient:hover {
-
-    background:
-        rgba(0,180,255,0.16);
-
-    transform:
-        translateY(-2px);
-}
-
-
-/* INGREDIENT EXPLANATION */
-
-.explanation {
-
-    margin-top: 20px;
-
-    padding: 18px;
-
-    background:
-        rgba(255,255,255,0.035);
-
-    border-radius: 10px;
-
-    border-left:
-        3px solid #25c7ff;
-}
-
-.explanation h3 {
-
-    margin-bottom: 7px;
-}
-
-.explanation p {
-
-    color: #91a5b8;
-
-    line-height: 1.6;
-
-    font-size: 13px;
-}
-
-
-/* HEALTH WARNINGS */
-
-.health-warning {
-
-    display: flex;
-
-    gap: 12px;
-
-    align-items: flex-start;
-
-    padding: 15px;
-
-    margin-top: 12px;
-
-    border-radius: 10px;
-
-    background:
-        rgba(255,184,77,0.06);
-
-    border:
-        1px solid
-        rgba(255,184,77,0.15);
-}
-
-.health-warning p {
-
-    color: #aab9c8;
-
-    font-size: 13px;
-
-    line-height: 1.5;
-}
-
-
-/* =====================================================
-   CHATBOT
-===================================================== */
-
-.chat {
-
-    height: 550px;
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-.chat-header {
-
-    padding-bottom: 18px;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,0.08);
-
-    margin-bottom: 15px;
-}
-
-.bot-status {
-
-    color: #00e59a;
-
-    font-size: 12px;
-
-    margin-top: 5px;
-}
-
-.messages {
-
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 10px 5px;
-}
-
-.message {
-
-    max-width: 75%;
-
-    padding: 12px 15px;
-
-    margin-bottom: 12px;
-
-    border-radius: 12px;
-
-    font-size: 14px;
-
-    line-height: 1.5;
-}
-
-.bot {
-
-    background:
-        rgba(0,170,255,0.09);
-}
-
-.user {
-
-    margin-left: auto;
-
-    background:
-        linear-gradient(
-            135deg,
-            #168cff,
-            #0074d9
-        );
-}
-
-.chat-input {
-
-    display: flex;
-
-    gap: 10px;
-
-    margin-top: 10px;
-}
-
-.chat-input input {
-
-    flex: 1;
-
-    padding: 13px;
-
-    border-radius: 8px;
-
-    border:
-        1px solid
-        rgba(255,255,255,0.1);
-
-    background:
-        rgba(255,255,255,0.05);
-
-    color: white;
-
-    outline: none;
-}
-
-.chat-input button {
-
-    width: 50px;
-
-    border: none;
-
-    border-radius: 8px;
-
-    background: #168cff;
-
-    color: white;
-
-    cursor: pointer;
-
-    font-size: 18px;
-}
-
-
-/* =====================================================
-   HISTORY
-===================================================== */
-
-.history-item {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    padding: 17px;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,0.07);
-}
-
-.history-name {
-
-    font-weight: bold;
-
-    margin-bottom: 5px;
-}
-
-.history-date {
-
-    color: #71869a;
-
-    font-size: 12px;
-}
-
-.history-score {
-
-    font-weight: bold;
-
-    color: #00e59a;
-}
-
-
-/* =====================================================
-   RULES
-===================================================== */
-
-.rule {
-
-    padding: 20px;
-
-    margin-bottom: 12px;
-
-    background:
-        rgba(255,255,255,0.035);
-
-    border-radius: 11px;
-}
-
-.rule h3 {
-
-    color: #25c7ff;
-
-    font-size: 16px;
-
-    margin-bottom: 7px;
-}
-
-.rule p {
-
-    color: #91a5b8;
-
-    font-size: 13px;
-
-    line-height: 1.6;
-}
-
-
-/* =====================================================
-   ABOUT
-===================================================== */
-
-.about {
-
-    text-align: center;
-
-    max-width: 800px;
-
-    margin: auto;
-}
-
-.about-icon {
-
-    font-size: 60px;
-
-    margin-bottom: 20px;
-}
-
-.about h1 {
-
-    font-size: 32px;
-
-    margin-bottom: 15px;
-}
-
-.about p {
-
-    color: #91a5b8;
-
-    line-height: 1.7;
-
-    margin-bottom: 20px;
-}
-
-.tech-list {
-
-    display: flex;
-
-    justify-content: center;
-
-    flex-wrap: wrap;
-
-    gap: 10px;
-}
-
-.tech {
-
-    padding: 9px 14px;
-
-    border-radius: 20px;
-
-    background:
-        rgba(0,170,255,0.08);
-
-    color: #75d8ff;
-
-    font-size: 12px;
-}
-
-
-/* =====================================================
-   RESPONSIVE
-===================================================== */
-
-@media(max-width:1000px) {
-
-    .products {
-        display: none;
-    }
-
-    .stats {
-
-        grid-template-columns:
-            repeat(2,1fr);
-    }
-
-    .dashboard-grid {
-
-        grid-template-columns: 1fr;
-    }
-
-    .health-grid {
-
-        grid-template-columns: 1fr;
-    }
-}
-
-
-@media(max-width:700px) {
-
-    header {
-        padding: 13px 4%;
-    }
-
-    .navbar {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-    }
-
-    nav {
-        width: 100%;
-    }
-
-    main {
-
-        width: 94%;
-
-        margin-top: 25px;
-    }
-
-    .card {
-        padding: 20px;
-    }
-
-    .info-grid {
-
-        grid-template-columns: 1fr;
-    }
-
-    .score-box {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-    }
-}
-
-
-@media(max-width:450px) {
-
-    .stats {
-
-        grid-template-columns: 1fr;
-    }
-
-    .logo {
-        font-size: 20px;
-    }
-
-    .upload-area {
-        padding: 40px 15px;
-    }
-
-    .result-item {
-
-        flex-direction: column;
-
-        gap: 6px;
-    }
-
-    .message {
-
-        max-width: 90%;
-    }
-
-    .health-circle {
-
-        width: 150px;
-        height: 150px;
-    }
-
-    .health-inner {
-
-        width: 115px;
-        height: 115px;
-    }
-}
-
-</style>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>PackSure - Legal Metrology Verification System</title>
+  <meta name="description" content="Official Legal Metrology compliance screening portal for pre-packaged commodities under the Legal Metrology (Packaged Commodities) Rules, 2011. Automated barcode lookup, OCR declaration extraction, and rule verification." />
+  <meta name="keywords" content="Legal Metrology, Packaged Commodities Rules 2011, PackSure, Department of Consumer Affairs, MRP verification, Net quantity, SIH26034" />
+  <meta name="application-name" content="PackSure" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://packsure.gov.in" />
+  <meta property="og:title" content="PackSure - Legal Metrology Verification System" />
+  <meta property="og:description" content="Official statutory compliance screening and declaration verification for packaged commodities under Indian Legal Metrology Rules." />
+  <meta property="og:url" content="https://packsure.gov.in" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="./frontend/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./frontend/styles.css?v=7" />
 </head>
-
-
 <body>
-
-
-<!-- =====================================================
-     BACKGROUND PRODUCTS
-===================================================== -->
-
-<div class="products left">
-
-<img class="product"
-src="https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d?auto=format&fit=crop&w=300&q=70">
-
-<img class="product"
-src="https://images.unsplash.com/photo-1553456558-aff63285bdd1?auto=format&fit=crop&w=300&q=70">
-
-<img class="product"
-src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=300&q=70">
-
-</div>
-
-
-<div class="products right">
-
-<img class="product"
-src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=300&q=70">
-
-<img class="product"
-src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=300&q=70">
-
-<img class="product"
-src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=300&q=70">
-
-</div>
-
-
-
-<!-- =====================================================
-     NAVBAR
-===================================================== -->
-
-<header>
-
-<div class="navbar">
-
-<div class="logo">
-📦 <span>Metro</span>Check
-</div>
-
-
-<nav>
-
-<button class="active"
-onclick="showPage('dashboard',this)">
-Dashboard
-</button>
-
-<button onclick="showPage('scanner',this)">
-Scan
-</button>
-
-<button onclick="showPage('compliance',this)">
-Compliance
-</button>
-
-<button onclick="showPage('product',this)">
-Product
-</button>
-
-<button onclick="showPage('ingredients',this)">
-Ingredients
-</button>
-
-<button onclick="showPage('health',this)">
-❤️ Health
-</button>
-
-<button onclick="showPage('violations',this)">
-Violations
-</button>
-
-<button onclick="showPage('assistant',this)">
-🤖 AI
-</button>
-
-<button onclick="showPage('history',this)">
-History
-</button>
-
-<button onclick="showPage('rules',this)">
-Rules
-</button>
-
-<button onclick="showPage('about',this)">
-About
-</button>
-
-</nav>
-
-</div>
-
-</header>
-
-
-
-<main>
-
-
-<!-- =====================================================
-     DASHBOARD
-===================================================== -->
-
-<section id="dashboard"
-class="page active">
-
-
-<div class="page-title">
-
-<h1>
-Compliance Dashboard
-</h1>
-
-<p>
-Monitor packaged commodity compliance
-and product information.
-</p>
-
-</div>
-
-
-<div class="stats">
-
-<div class="stat">
-
-<div class="stat-number blue">
-128
-</div>
-
-<div class="stat-label">
-Products Scanned
-</div>
-
-</div>
-
-
-<div class="stat">
-
-<div class="stat-number green">
-94
-</div>
-
-<div class="stat-label">
-Compliant
-</div>
-
-</div>
-
-
-<div class="stat">
-
-<div class="stat-number red">
-34
-</div>
-
-<div class="stat-label">
-Violations
-</div>
-
-</div>
-
-
-<div class="stat">
-
-<div class="stat-number yellow">
-82%
-</div>
-
-<div class="stat-label">
-Average Compliance
-</div>
-
-</div>
-
-</div>
-
-
-<div class="dashboard-grid">
-
-
-<div class="card">
-
-<h2>
-Quick Product Scan
-</h2>
-
-<p style="color:#91a5b8;
-margin:10px 0 20px;
-font-size:14px;">
-
-Upload a product label to check
-compliance and analyze ingredients.
-
-</p>
-
-<button class="btn btn-blue"
-onclick="showPage('scanner')">
-
-📷 Start Scanning
-
-</button>
-
-</div>
-
-
-<div class="card">
-
-<h2 style="margin-bottom:15px;">
-Latest Product
-</h2>
-
-<div class="history-item">
-
-<div>
-
-<div class="history-name">
-Parle-G Biscuits
-</div>
-
-<div class="history-date">
-Scanned today
-</div>
-
-</div>
-
-<div class="history-score">
-92%
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     SCANNER
-===================================================== -->
-
-<section id="scanner"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-Scan Product
-</h1>
-
-<p>
-Upload a clear image of the product label.
-</p>
-
-</div>
-
-
-<div class="card">
-
-
-<div class="upload-area">
-
-<div class="upload-icon">
-📦
-</div>
-
-<h2>
-Upload Product Label
-</h2>
-
-<p>
-The system will extract text and analyze
-the package.
-</p>
-
-
-<label for="productImage"
-class="btn btn-blue">
-
-📷 Choose Image
-
-</label>
-
-
-<input type="file"
-id="productImage"
-accept="image/*">
-
-
-<img id="preview"
-alt="Product Preview">
-
-</div>
-
-
-<button class="btn btn-green full"
-onclick="checkProduct()">
-
-🔍 Analyze Product
-
-</button>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     COMPLIANCE
-===================================================== -->
-
-<section id="compliance"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-Compliance Analysis
-</h1>
-
-<p>
-Legal Metrology declaration verification.
-</p>
-
-</div>
-
-
-<div class="card">
-
-<div class="score-box">
-
-<div class="score-circle">
-
-<div class="score-inner">
-82%
-</div>
-
-</div>
-
-
-<div>
-
-<h2>
-Mostly Compliant
-</h2>
-
-<p style="color:#91a5b8;
-margin-top:8px;
-line-height:1.5;">
-
-Most required declarations were detected.
-Some information needs verification.
-
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h2 style="margin-bottom:15px;">
-Declaration Checklist
-</h2>
-
-
-<div class="result-item">
-
-<span>
-Product Name
-</span>
-
-<span class="status green">
-✓ Found
-</span>
-
-</div>
-
-
-<div class="result-item">
-
-<span>
-MRP
-</span>
-
-<span class="status green">
-✓ Found
-</span>
-
-</div>
-
-
-<div class="result-item">
-
-<span>
-Net Quantity
-</span>
-
-<span class="status green">
-✓ Found
-</span>
-
-</div>
-
-
-<div class="result-item">
-
-<span>
-Manufacturer Details
-</span>
-
-<span class="status green">
-✓ Found
-</span>
-
-</div>
-
-
-<div class="result-item">
-
-<span>
-Consumer Care Details
-</span>
-
-<span class="status red">
-✗ Missing
-</span>
-
-</div>
-
-
-<div class="result-item">
-
-<span>
-Manufacturing Date
-</span>
-
-<span class="status yellow">
-⚠ Verify
-</span>
-
-</div>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     PRODUCT INFO
-===================================================== -->
-
-<section id="product"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-Product Information
-</h1>
-
-<p>
-Information extracted from the product label.
-</p>
-
-</div>
-
-
-<div class="card">
-
-<div class="info-grid">
-
-
-<div class="info">
-
-<div class="info-label">
-PRODUCT NAME
-</div>
-
-<div class="info-value">
-Parle-G Biscuits
-</div>
-
-</div>
-
-
-<div class="info">
-
-<div class="info-label">
-CATEGORY
-</div>
-
-<div class="info-value">
-Food Product
-</div>
-
-</div>
-
-
-<div class="info">
-
-<div class="info-label">
-MRP
-</div>
-
-<div class="info-value">
-₹10
-</div>
-
-</div>
-
-
-<div class="info">
-
-<div class="info-label">
-NET QUANTITY
-</div>
-
-<div class="info-value">
-79 g
-</div>
-
-</div>
-
-
-<div class="info">
-
-<div class="info-label">
-MANUFACTURER
-</div>
-
-<div class="info-value">
-Parle Products Pvt. Ltd.
-</div>
-
-</div>
-
-
-<div class="info">
-
-<div class="info-label">
-MANUFACTURING DATE
-</div>
-
-<div class="info-value">
-Detected
-</div>
-
-</div>
-
-
-</div>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     INGREDIENTS
-===================================================== -->
-
-<section id="ingredients"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-🥗 Ingredients Analysis
-</h1>
-
-<p>
-Ingredients detected from the product label.
-</p>
-
-</div>
-
-
-<div class="card">
-
-<h2>
-Detected Ingredients
-</h2>
-
-
-<div class="ingredients-grid">
-
-
-<div class="ingredient"
-onclick="showIngredient('Wheat Flour')">
-Wheat Flour
-</div>
-
-
-<div class="ingredient"
-onclick="showIngredient('Sugar')">
-Sugar
-</div>
-
-
-<div class="ingredient"
-onclick="showIngredient('Vegetable Oil')">
-Vegetable Oil
-</div>
-
-
-<div class="ingredient"
-onclick="showIngredient('Milk Solids')">
-Milk Solids
-</div>
-
-
-<div class="ingredient"
-onclick="showIngredient('Salt')">
-Salt
-</div>
-
-
-<div class="ingredient"
-onclick="showIngredient('Raising Agents')">
-Raising Agents
-</div>
-
-
-<div class="ingredient"
-onclick="showIngredient('Emulsifier')">
-Emulsifier
-</div>
-
-
-</div>
-
-
-<div class="explanation"
-id="ingredientExplanation">
-
-<h3>
-Ingredient information
-</h3>
-
-<p>
-Click an ingredient above to see a
-simple explanation.
-</p>
-
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-<h2 style="margin-bottom:15px;">
-Ingredient Summary
-</h2>
-
-<p style="color:#91a5b8;
-line-height:1.7;
-font-size:14px;">
-
-The product contains wheat flour as the main
-ingredient along with sugar, vegetable oil,
-milk solids and other processing ingredients.
-
-</p>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     HEALTH
-===================================================== -->
-
-<section id="health"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-❤️ Health Insights
-</h1>
-
-<p>
-A simple nutritional overview based on
-detected ingredients and nutrition information.
-</p>
-
-</div>
-
-
-<div class="health-grid">
-
-
-<!-- HEALTH SCORE -->
-
-<div class="card health-score">
-
-<h2>
-Overall Product Score
-</h2>
-
-
-<div class="health-circle">
-
-<div class="health-inner">
-
-<div class="health-number">
-72
-</div>
-
-<div class="health-outof">
-OUT OF 100
-</div>
-
-</div>
-
-</div>
-
-
-<h2 class="green">
-Moderate
-</h2>
-
-
-<p style="color:#91a5b8;
-font-size:13px;
-margin-top:8px;
-line-height:1.5;">
-
-This score is an informational estimate
-based on detected nutritional information.
-It is not a medical assessment.
-
-</p>
-
-</div>
-
-
-
-<!-- NUTRITION -->
-
-<div class="card">
-
-<h2 style="margin-bottom:25px;">
-Nutritional Overview
-</h2>
-
-
-<div class="nutrition-item">
-
-<div class="nutrition-top">
-
-<span>
-🍬 Sugar
-</span>
-
-<span class="nutrition-value">
-Moderate
-</span>
-
-</div>
-
-<div class="bar">
-
-<div class="bar-fill"
-style="width:65%;">
-</div>
-
-</div>
-
-</div>
-
-
-<div class="nutrition-item">
-
-<div class="nutrition-top">
-
-<span>
-🧂 Salt
-</span>
-
-<span class="nutrition-value">
-Low
-</span>
-
-</div>
-
-<div class="bar">
-
-<div class="bar-fill"
-style="width:35%;">
-</div>
-
-</div>
-
-</div>
-
-
-<div class="nutrition-item">
-
-<div class="nutrition-top">
-
-<span>
-🥑 Saturated Fat
-</span>
-
-<span class="nutrition-value">
-Moderate
-</span>
-
-</div>
-
-<div class="bar">
-
-<div class="bar-fill"
-style="width:55%;">
-</div>
-
-</div>
-
-</div>
-
-
-<div class="nutrition-item">
-
-<div class="nutrition-top">
-
-<span>
-💪 Protein
-</span>
-
-<span class="nutrition-value">
-Good
-</span>
-
-</div>
-
-<div class="bar">
-
-<div class="bar-fill"
-style="width:75%;">
-</div>
-
-</div>
-
-</div>
-
-
-<div class="nutrition-item">
-
-<div class="nutrition-top">
-
-<span>
-🌾 Fibre
-</span>
-
-<span class="nutrition-value">
-Moderate
-</span>
-
-</div>
-
-<div class="bar">
-
-<div class="bar-fill"
-style="width:50%;">
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<!-- HEALTH WARNINGS -->
-
-<div class="card">
-
-<h2>
-⚠️ Things to Know
-</h2>
-
-
-<div class="health-warning">
-
-<div>
-🍬
-</div>
-
-<div>
-
-<strong>
-Added Sugar
-</strong>
-
-<p>
-Sugar is present in the ingredient list.
-Consumers may want to consider portion size
-and overall dietary intake.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="health-warning">
-
-<div>
-🌾
-</div>
-
-<div>
-
-<strong>
-Contains Wheat
-</strong>
-
-<p>
-The product contains wheat ingredients.
-This may be relevant for people with
-specific dietary restrictions or allergies.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="health-warning">
-
-<div>
-🥛
-</div>
-
-<div>
-
-<strong>
-Milk Ingredients
-</strong>
-
-<p>
-Milk solids were detected in the ingredient list.
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<!-- PRODUCT SUMMARY -->
-
-<div class="card">
-
-<h2 style="margin-bottom:12px;">
-💡 Product Summary
-</h2>
-
-<p style="color:#91a5b8;
-line-height:1.7;
-font-size:14px;">
-
-Based on the currently detected information,
-this product has moderate sugar and fat levels,
-while protein content is relatively better.
-The score is intended only as a quick consumer
-information tool and should not be treated as
-medical or dietary advice.
-
-</p>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     VIOLATIONS
-===================================================== -->
-
-<section id="violations"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-Detected Violations
-</h1>
-
-<p>
-Potential packaging compliance issues.
-</p>
-
-</div>
-
-
-<div class="card">
-
-
-<div class="violation">
-
-<div class="violation-icon">
-❌
-</div>
-
-<div>
-
-<h3>
-Consumer Care Details
-</h3>
-
-<p>
-Required consumer-care information
-could not be detected.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="violation">
-
-<div class="violation-icon">
-⚠️
-</div>
-
-<div>
-
-<h3>
-Manufacturing Date
-</h3>
-
-<p>
-Date information was detected but
-requires verification.
-</p>
-
-</div>
-
-</div>
-
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     AI ASSISTANT
-===================================================== -->
-
-<section id="assistant"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-🤖 AI Legal Metrology Assistant
-</h1>
-
-<p>
-Ask questions about your product,
-ingredients or compliance results.
-</p>
-
-</div>
-
-
-<div class="card chat">
-
-
-<div class="chat-header">
-
-<h2>
-MetroCheck Assistant
-</h2>
-
-<div class="bot-status">
-● Online
-</div>
-
-</div>
-
-
-<div class="messages"
-id="messages">
-
-
-<div class="message bot">
-
-Hello! 👋
-
-<br><br>
-
-I can help explain your product's
-compliance results and ingredients.
-
-<br><br>
-
-Try asking:
-
-<br>
-• Why did this product fail?
-<br>
-• What is MRP?
-<br>
-• What does this ingredient do?
-<br>
-• Is the sugar level high?
-
-</div>
-
-</div>
-
-
-<div class="chat-input">
-
-<input
-type="text"
-id="chatInput"
-placeholder="Ask something..."
->
-
-<button onclick="sendMessage()">
-➤
-</button>
-
-</div>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     HISTORY
-===================================================== -->
-
-<section id="history"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-Scan History
-</h1>
-
-<p>
-Previously analyzed products.
-</p>
-
-</div>
-
-
-<div class="card">
-
-
-<div class="history-item">
-
-<div>
-
-<div class="history-name">
-Parle-G Biscuits
-</div>
-
-<div class="history-date">
-September 2, 2026
-</div>
-
-</div>
-
-<div class="history-score">
-92%
-</div>
-
-</div>
-
-
-<div class="history-item">
-
-<div>
-
-<div class="history-name">
-Shampoo
-</div>
-
-<div class="history-date">
-September 1, 2026
-</div>
-
-</div>
-
-<div class="yellow">
-71%
-</div>
-
-</div>
-
-
-<div class="history-item">
-
-<div>
-
-<div class="history-name">
-Packaged Rice
-</div>
-
-<div class="history-date">
-August 30, 2026
-</div>
-
-</div>
-
-<div class="history-score">
-100%
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     RULES
-===================================================== -->
-
-<section id="rules"
-class="page">
-
-
-<div class="page-title">
-
-<h1>
-Legal Metrology Guidelines
-</h1>
-
-<p>
-Important package declarations checked
-by MetroCheck.
-</p>
-
-</div>
-
-
-<div class="card">
-
-
-<div class="rule">
-
-<h3>
-01 — Product Name
-</h3>
-
-<p>
-The package should clearly identify the
-name or description of the commodity.
-</p>
-
-</div>
-
-
-<div class="rule">
-
-<h3>
-02 — Net Quantity
-</h3>
-
-<p>
-The net quantity should be declared using
-the appropriate unit of measurement.
-</p>
-
-</div>
-
-
-<div class="rule">
-
-<h3>
-03 — Maximum Retail Price
-</h3>
-
-<p>
-The maximum retail sale price should be
-declared in the required manner.
-</p>
-
-</div>
-
-
-<div class="rule">
-
-<h3>
-04 — Manufacturer / Packer
-</h3>
-
-<p>
-Required manufacturer, packer or importer
-details should be available.
-</p>
-
-</div>
-
-
-<div class="rule">
-
-<h3>
-05 — Consumer Information
-</h3>
-
-<p>
-Appropriate consumer-care information
-should be declared where required.
-</p>
-
-</div>
-
-</div>
-
-</section>
-
-
-
-<!-- =====================================================
-     ABOUT
-===================================================== -->
-
-<section id="about"
-class="page">
-
-
-<div class="card about">
-
-
-<div class="about-icon">
-📦
-</div>
-
-
-<h1>
-MetroCheck
-</h1>
-
-
-<p>
-
-MetroCheck is a software prototype designed
-to assist with packaged commodity compliance.
-
-<br><br>
-
-The system uses OCR to extract information
-from product labels and analyzes the extracted
-data using compliance rules.
-
-It also provides additional consumer information
-about detected ingredients and nutrition.
-
-</p>
-
-
-<div class="tech-list">
-
-<div class="tech">
-HTML
-</div>
-
-<div class="tech">
-CSS
-</div>
-
-<div class="tech">
-JavaScript
-</div>
-
-<div class="tech">
-Python
-</div>
-
-<div class="tech">
-FastAPI
-</div>
-
-<div class="tech">
-EasyOCR
-</div>
-
-<div class="tech">
-AI
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-</main>
-
-
-
-<script>
-
-/* =====================================================
-   NAVIGATION
-===================================================== */
-
-function showPage(pageId,button) {
-
-
-    const pages =
-        document.querySelectorAll(".page");
-
-
-    pages.forEach(function(page) {
-
-        page.classList.remove("active");
-
-    });
-
-
-    document
-        .getElementById(pageId)
-        .classList.add("active");
-
-
-    const buttons =
-        document.querySelectorAll("nav button");
-
-
-    buttons.forEach(function(btn) {
-
-        btn.classList.remove("active");
-
-    });
-
-
-    if(button) {
-
-        button.classList.add("active");
-
-    }
-
-
-    window.scrollTo({
-
-        top:0,
-
-        behavior:"smooth"
-
-    });
-
-}
-
-
-
-/* =====================================================
-   IMAGE PREVIEW
-===================================================== */
-
-document
-.getElementById("productImage")
-.addEventListener(
-"change",
-function(event) {
-
-
-    const file =
-        event.target.files[0];
-
-
-    if(file) {
-
-
-        const preview =
-            document.getElementById("preview");
-
-
-        preview.src =
-            URL.createObjectURL(file);
-
-
-        preview.style.display =
-            "block";
-
-    }
-
-});
-
-
-
-/* =====================================================
-   SCAN BUTTON
-===================================================== */
-
-function checkProduct() {
-
-
-    const file =
-        document
-        .getElementById("productImage")
-        .files[0];
-
-
-    if(!file) {
-
-        alert(
-            "Please upload a product image first."
-        );
-
-        return;
-
-    }
-
-
-    showPage("compliance");
-
-}
-
-
-
-/* =====================================================
-   INGREDIENT EXPLANATIONS
-===================================================== */
-
-function showIngredient(name) {
-
-
-    const explanation =
-        document
-        .getElementById(
-            "ingredientExplanation"
-        );
-
-
-    const information = {
-
-
-        "Wheat Flour":
-        "A flour made from wheat and commonly used as the main structure-forming ingredient in biscuits and baked products.",
-
-
-        "Sugar":
-        "Sugar provides sweetness and contributes carbohydrates. The nutritional impact depends on the quantity consumed.",
-
-
-        "Vegetable Oil":
-        "Vegetable oils provide fat and are commonly used to improve texture and taste.",
-
-
-        "Milk Solids":
-        "Milk-derived ingredients can contribute protein, carbohydrates and minerals. They may also be relevant to people with milk allergies.",
-
-
-        "Salt":
-        "Salt is commonly used for taste and food formulation. Excessive sodium intake can be a dietary concern.",
-
-
-        "Raising Agents":
-        "Raising agents help baked products develop their texture and volume during processing.",
-
-
-        "Emulsifier":
-        "Emulsifiers help ingredients such as water and oil remain properly mixed and can improve product texture."
-
-    };
-
-
-    explanation.innerHTML = `
-
-        <h3>
-            ${name}
-        </h3>
-
-        <p>
-            ${information[name]}
-        </p>
-
-    `;
-
-}
-
-
-
-/* =====================================================
-   DEMO CHATBOT
-===================================================== */
-
-function sendMessage() {
-
-
-    const input =
-        document
-        .getElementById("chatInput");
-
-
-    const text =
-        input.value.trim();
-
-
-    if(text === "") {
-
-        return;
-
-    }
-
-
-    const messages =
-        document
-        .getElementById("messages");
-
-
-    const userMessage =
-        document.createElement("div");
-
-
-    userMessage.className =
-        "message user";
-
-
-    userMessage.textContent =
-        text;
-
-
-    messages.appendChild(
-        userMessage
-    );
-
-
-    input.value = "";
-
-
-    setTimeout(function() {
-
-
-        const botMessage =
-            document.createElement("div");
-
-
-        botMessage.className =
-            "message bot";
-
-
-        botMessage.textContent =
-
-            "This is currently a demo response. " +
-
-            "Once the backend and AI service are connected, " +
-
-            "I will be able to answer questions using the " +
-
-            "actual OCR and compliance results of the scanned product.";
-
-
-        messages.appendChild(
-            botMessage
-        );
-
-
-        messages.scrollTop =
-            messages.scrollHeight;
-
-
-    },600);
-
-}
-
-
-
-/* ENTER KEY FOR CHAT */
-
-document
-.getElementById("chatInput")
-.addEventListener(
-"keypress",
-function(event) {
-
-
-    if(event.key === "Enter") {
-
-        sendMessage();
-
-    }
-
-});
-
-
-</script>
-
-
+  <!-- Sovereign State Emblem Watermark -->
+  <div class="emblem-watermark" aria-hidden="true"></div>
+
+  <!-- Masthead Banner -->
+  <div class="gov-topbar">
+    <div class="gov-topbar-inner">
+      <div class="gov-topbar-flag">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="16" height="4" fill="#FF9933"/>
+          <rect y="4" width="16" height="4" fill="#FFFFFF"/>
+          <rect y="8" width="16" height="4" fill="#138808"/>
+          <circle cx="8" cy="6" r="1.5" stroke="#000080" stroke-width="0.6"/>
+        </svg>
+        <span>Department of Consumer Affairs, Legal Metrology Division</span>
+      </div>
+      <div class="gov-topbar-actions">
+        <div class="gov-access-group">
+          <button type="button" class="gov-access-btn" id="fontDec" title="Decrease font size" aria-label="Decrease font size">A-</button>
+          <button type="button" class="gov-access-btn" id="fontNormal" title="Standard font size" aria-label="Standard font size">A</button>
+          <button type="button" class="gov-access-btn" id="fontInc" title="Increase font size" aria-label="Increase font size">A+</button>
+        </div>
+        <span class="gov-lang-select" aria-label="Language selection">English | हिन्दी</span>
+        <div class="gov-topbar-domain">packsure.gov.in</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <header>
+      <div class="nav">
+        <a class="brand" href="#dashboard" data-page="dashboard" aria-label="PackSure Home">
+          <div class="brand-mark">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v18"></path>
+              <path d="m3 7 9-4 9 4"></path>
+              <path d="M3 7v10l9 4 9-4V7"></path>
+              <path d="M6 10.5 12 14l6-3.5"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title">PackSure</div>
+            <span class="brand-subtitle">Legal Metrology Verification: SIH26034</span>
+          </div>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle Navigation Menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <nav id="mainNav">
+          <button class="active" data-page="dashboard">
+            <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+            Dashboard
+          </button>
+          <button data-page="inspect">
+            <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
+            Inspect
+          </button>
+          <button data-page="results">
+            <svg viewBox="0 0 24 24"><path d="m9 11 3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Results
+          </button>
+          <button data-page="catalog">
+            <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+            Catalog
+          </button>
+          <button data-page="rules">
+            <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
+            Rules
+          </button>
+          <button data-page="assistant">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Assistant
+          </button>
+          <button data-page="terms">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            Terms
+          </button>
+          <button data-page="privacy">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Privacy
+          </button>
+          <button data-page="about">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            About
+          </button>
+        </nav>
+
+        <button class="btn-header-cta" data-page="inspect" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+          New Inspection
+        </button>
+
+        <div class="health-dot" id="healthDot">
+          <i></i>
+          <span>Connecting</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- DASHBOARD PAGE -->
+      <section id="dashboard" class="page active">
+        <!-- Modern Executive Hero Banner (Dribbble Government Portal Style) -->
+        <div class="hero-banner">
+          <div class="hero-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Official Compliance &amp; Verification Portal
+          </div>
+          <h1 class="hero-title">National Legal Metrology Verification System</h1>
+          <p class="hero-desc">Screen packaged commodities against Rule 6 statutory declarations, identify non-conforming packaging evidence, cross-reference reference catalog SKUs, and record enforcement determinations with tamper-evident audit logs.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-page="inspect" type="button">
+              <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
+              Start Packaging Inspection
+            </button>
+            <button class="btn btn-ghost" style="color:#ffffff;border-color:#334155;background:rgba(255,255,255,0.06);" data-page="catalog" type="button">
+              <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path></svg>
+              Standard Reference Catalog
+            </button>
+            <button class="btn btn-ghost" style="color:#94a3b8;border-color:#334155;" data-page="rules" type="button">
+              <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path></svg>
+              Statutory Rules Engine
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Elevated Service Cards (Dribbble/Modern Gov Layout) -->
+        <div class="service-grid">
+          <div class="service-card" data-page="inspect" role="button" tabindex="0">
+            <div>
+              <div class="service-card-top">
+                <div class="service-icon">
+                  <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
+                </div>
+                <div class="service-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+              </div>
+              <h3>Package Inspection</h3>
+              <p>Scan packaging barcode or upload multi-panel photos to automatically audit MRP, net quantity, manufacturer, and consumer care compliance.</p>
+            </div>
+            <div class="service-card-footer">
+              <span>Rule 6 Screening</span>
+              <span>Launch &rarr;</span>
+            </div>
+          </div>
+
+          <div class="service-card" data-page="catalog" role="button" tabindex="0">
+            <div>
+              <div class="service-card-top">
+                <div class="service-icon">
+                  <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+                </div>
+                <div class="service-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+              </div>
+              <h3>Standard Catalog</h3>
+              <p>Cross-reference commodity records across food, electronics, home textiles, and personal care registered under Legal Metrology schedules.</p>
+            </div>
+            <div class="service-card-footer">
+              <span>50+ Seeded SKUs</span>
+              <span>Browse &rarr;</span>
+            </div>
+          </div>
+
+          <div class="service-card" data-page="rules" role="button" tabindex="0">
+            <div>
+              <div class="service-card-top">
+                <div class="service-icon">
+                  <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
+                </div>
+                <div class="service-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+              </div>
+              <h3>Statutory Rules</h3>
+              <p>Inspect active Legal Metrology (Packaged Commodities) Rules, 2011 clauses, minimum font heights, and unit standardization mandates.</p>
+            </div>
+            <div class="service-card-footer">
+              <span>Rule 6, 7 &amp; 8</span>
+              <span>Review &rarr;</span>
+            </div>
+          </div>
+
+          <div class="service-card" data-page="assistant" role="button" tabindex="0">
+            <div>
+              <div class="service-card-top">
+                <div class="service-icon">
+                  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <div class="service-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+              </div>
+              <h3>Officer Assistant</h3>
+              <p>Query statutory advisory guidance, violation classification standards, compounding provisions, and notice generation criteria.</p>
+            </div>
+            <div class="service-card-footer">
+              <span>Legal Metrology AI</span>
+              <span>Consult &rarr;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3-Step Statutory Verification Protocol -->
+        <div class="protocol-section">
+          <div class="badge-tag">Enforcement Protocol</div>
+          <h2 style="font-size:18px;margin-bottom:4px">Standardized Packaging Audit Process</h2>
+          <p class="muted" style="font-size:13.5px">Three-stage compliance screening pipeline adhering strictly to Legal Metrology enforcement protocols.</p>
+          <div class="protocol-grid">
+            <div class="step-card">
+              <span class="step-num">STAGE 01</span>
+              <h3>SKU Registration Check</h3>
+              <p>Scan pack barcode or search catalog to confirm authorized product specifications, registered net quantity, and declared commodity category.</p>
+              <span class="step-ref">Section 18, LM Act 2009</span>
+            </div>
+            <div class="step-card">
+              <span class="step-num">STAGE 02</span>
+              <h3>Multi-Panel Photographic Evidence</h3>
+              <p>Capture front PDP, MRP declarations, importer/manufacturer details, and barcode panel in high resolution for automated optical processing.</p>
+              <span class="step-ref">Rule 6 &amp; 9, PCR 2011</span>
+            </div>
+            <div class="step-card">
+              <span class="step-num">STAGE 03</span>
+              <h3>OCR Extraction &amp; Discrepancy Notice</h3>
+              <p>Extract mandatory fields, verify against reference catalog, identify missing or non-conforming declarations, and file official inspection notice.</p>
+              <span class="step-ref">Section 36, LM Act 2009</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Audit Metrics -->
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Session Inspections</div>
+            <div class="stat-value" id="statScans">0</div>
+            <div class="stat-sub">Audits recorded in this browser</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Reference SKUs</div>
+            <div class="stat-value" id="statProducts">0</div>
+            <div class="stat-sub">Standard commodities in catalog</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Active LM Rules</div>
+            <div class="stat-value" id="statRules">0</div>
+            <div class="stat-sub">Statutory clauses from rules.json</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Latest Score</div>
+            <div class="stat-value" id="statLast">N/A</div>
+            <div class="stat-sub">Recent evaluation index</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2>
+              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              Inspection Workflow Instructions
+            </h2>
+            <p class="muted">PackSure provides an assistive inspection workflow to support authorized enforcement officers:</p>
+            <table style="margin-top:14px">
+              <tbody>
+                <tr>
+                  <td style="width:140px"><strong>1. Barcode Lookup</strong></td>
+                  <td class="muted">Check pack EAN against standard registered products, or screen unlisted packs directly.</td>
+                </tr>
+                <tr>
+                  <td><strong>2. Label Evidence</strong></td>
+                  <td class="muted">Upload clear photographic evidence of all principal display panel declarations (Front, Back, MRP &amp; Barcode panels).</td>
+                </tr>
+                <tr>
+                  <td><strong>3. Screening Pipeline</strong></td>
+                  <td class="muted">Automated OCR, field extraction, Rule 6 validation, and discrepancy analysis.</td>
+                </tr>
+                <tr>
+                  <td><strong>4. Officer Record</strong></td>
+                  <td class="muted">Record statutory determination and generate a tamper-evident inspection report.</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="row" style="margin-top:20px">
+              <button class="btn btn-primary" data-page="inspect" type="button">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                Open Inspector
+              </button>
+              <button class="btn btn-ghost" data-page="catalog" type="button">
+                Browse Reference Catalog
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+              Recent Browser Sessions
+            </h2>
+            <div id="recentList" class="muted" style="margin-top:10px">No inspections recorded in this session.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INSPECT PAGE -->
+      <section id="inspect" class="page">
+        <div class="page-header">
+          <div class="badge-tag">Verification Station</div>
+          <h1>Inspect Package Declarations</h1>
+          <p class="lede">Enter the product barcode or choose a reference item from the demo catalog. PackSure performs label compliance screening on both registered and unlisted packaged commodities.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2>
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              1. Inspection Metadata
+            </h2>
+            <p class="muted">Record inspector credentials and establishment premises information.</p>
+
+            <label class="field">Product Barcode (EAN / GTIN)</label>
+            <div class="row" style="gap:8px">
+              <input id="barcode" placeholder="Enter 13-digit EAN/GTIN barcode (e.g. 8908877665501)" style="flex:1" />
+              <button type="button" class="btn btn-navy" id="scanCameraBtn" title="Scan barcode with camera">
+                <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect width="10" height="8" x="7" y="8" rx="1"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                Scan Barcode
+              </button>
+            </div>
+            <div class="chips" id="demoChips"></div>
+
+            <div class="row" style="margin-top:12px">
+              <button type="button" class="btn btn-ghost" id="lookupBtn">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Query Catalog
+              </button>
+              <label for="barcodeImageInput" class="btn btn-ghost" style="cursor:pointer">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Decode from Photo
+              </label>
+              <input type="file" id="barcodeImageInput" accept="image/*" style="display:none" />
+            </div>
+            <div id="lookupBox" class="muted" style="margin-top:10px"></div>
+
+            <label class="field">Officer Identification</label>
+            <input id="officerId" placeholder="Official Inspector ID (e.g. LM-INSP-2026-441)" />
+
+            <label class="field">Establishment Name</label>
+            <input id="establishment" placeholder="Retail premise or distributor commercial name" />
+
+            <label class="field">Inspection Location</label>
+            <input id="location" placeholder="Premises address, city, or district" />
+
+            <label class="field">Field Notes</label>
+            <textarea id="notes" placeholder="Official observations regarding batch code, container seal integrity, or inspection context"></textarea>
+
+            <button class="btn btn-navy" id="createBtn" style="margin-top:16px;width:100%">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Initialize Inspection Session
+            </button>
+            <p class="muted" id="sessionMeta" style="margin-top:10px"></p>
+          </div>
+
+          <div class="card">
+            <h2>
+              <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              2. Package Label Evidence
+            </h2>
+            <p class="muted">Attach photographs of all packaging panels (front display, back declarations, side/MRP panel, barcode). Multiple photos supported.</p>
+
+            <div class="drop" id="dropZone" style="margin-top:14px">
+              <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple />
+              <svg class="drop-icon" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <div class="drop-copy">
+                <strong>Click to choose packaging photos</strong> or drag &amp; drop files here<br>
+                Supports multiple panels: Front PDP, Back Declarations, Side/MRP panel (JPEG, PNG, WebP)
+              </div>
+              <img id="preview" alt="Pack label evidence preview" />
+            </div>
+
+            <!-- Evidence Gallery for Multiple Packaging Photos -->
+            <div id="evidenceGallery" class="evidence-gallery" style="display:none"></div>
+
+            <div class="row" style="margin-top:16px">
+              <button type="button" class="btn btn-navy" id="snapLabelCameraBtn">
+                <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                Take Photo with Camera
+              </button>
+              <button type="button" class="btn btn-ghost" id="chooseBtn">
+                Choose Files
+              </button>
+              <button type="button" class="btn btn-primary" id="analyzeBtn">
+                <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                Execute Screening Pipeline
+              </button>
+            </div>
+            <input type="file" id="mobileCameraInput" accept="image/*" capture="environment" multiple style="display:none" />
+            <p class="busy" id="busy">Executing OCR extraction and Legal Metrology rule checks across packaging panels. Please wait.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULTS PAGE -->
+      <section id="results" class="page">
+        <div class="page-header">
+          <div class="badge-tag">Evaluation Summary</div>
+          <h1>Compliance Analysis &amp; Findings</h1>
+          <p class="lede" id="resultLede">Run an inspection session to view detailed compliance determinations.</p>
+        </div>
+
+        <div class="card score-card">
+          <div class="score-box">
+            <div class="score-box-val" id="scoreValue">0%</div>
+            <div class="score-box-lbl">Index</div>
+          </div>
+          <div>
+            <h2 id="riskTitle">Awaiting Session Analysis</h2>
+            <p class="muted" id="summaryText">Execute an inspection from the Inspect panel to review statutory findings.</p>
+            <div class="row" style="margin-top:14px">
+              <button class="btn btn-gold" id="reportBtn" disabled>
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                Generate Inspection Notice PDF
+              </button>
+              <a class="btn btn-ghost" id="pdfLink" href="#" style="display:none">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Official PDF
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2>
+              <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path></svg>
+              Legal Metrology Rule Evaluations
+            </h2>
+            <div id="rulesTable" class="muted">No evaluation data available.</div>
+          </div>
+
+          <div class="card">
+            <h2>
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Reference Catalog Discrepancies
+            </h2>
+            <div id="discList" class="muted">No catalog comparison data available.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            Extracted Declarations
+          </h2>
+          <div id="fieldsGrid" class="product-grid" style="margin-top:12px"></div>
+        </div>
+
+        <div class="card">
+          <h2>
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Official Officer Determination
+          </h2>
+          <p class="muted">Record statutory decision under Rule 32 of Legal Metrology (Packaged Commodities) Rules, 2011.</p>
+
+          <label class="field">Statutory Determination</label>
+          <select id="determination">
+            <option value="COMPLIANT">COMPLIANT: No apparent statutory violations detected</option>
+            <option value="POTENTIAL_NON_COMPLIANCE_CONFIRMED">POTENTIAL NON-COMPLIANCE CONFIRMED: Notice recommended</option>
+            <option value="FURTHER_INVESTIGATION">FURTHER INVESTIGATION: Requires laboratory or manufacturer response</option>
+            <option value="DISMISSED">DISMISSED: Minor observation, no enforcement action</option>
+          </select>
+
+          <label class="field">Inspector Remarks</label>
+          <textarea id="remarks" placeholder="Official remarks, seizure details, or notice reference number"></textarea>
+
+          <button class="btn btn-primary" id="reviewBtn" style="margin-top:14px" disabled>
+            Save Regulatory Determination
+          </button>
+        </div>
+      </section>
+
+      <!-- CATALOG PAGE -->
+      <section id="catalog" class="page">
+        <div class="page-header">
+          <div class="badge-tag">Reference Registry</div>
+          <h1>Standard Reference Catalog</h1>
+          <p class="lede">Comprehensive national reference database of packaged commodities across food, electronics, textiles and bedsheets, personal care, and household items. Select any SKU to load its baseline declarations into the inspector.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+          <div class="row" style="gap:12px">
+            <input id="catalogSearch" placeholder="Filter by product name, barcode, brand, or specification..." style="flex:1" />
+            <select id="catalogCategoryFilter" style="width:auto;min-width:220px">
+              <option value="ALL">All Categories</option>
+              <option value="Bedding &amp; Textiles">Bedding &amp; Textiles</option>
+              <option value="Consumer Electronics">Consumer Electronics</option>
+              <option value="Home &amp; Kitchen Appliances">Home &amp; Kitchen Appliances</option>
+              <option value="Electricals &amp; Lighting">Electricals &amp; Lighting</option>
+              <option value="Food &amp; Beverages">Food &amp; Beverages</option>
+              <option value="Personal Care &amp; Cosmetics">Personal Care &amp; Cosmetics</option>
+              <option value="Household &amp; Cleaning">Household &amp; Cleaning</option>
+              <option value="Baby Care &amp; Hygiene">Baby Care &amp; Hygiene</option>
+              <option value="Healthcare &amp; Hygiene">Healthcare &amp; Hygiene</option>
+              <option value="Stationery &amp; Office">Stationery &amp; Office</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="catalogGrid" class="product-grid"></div>
+      </section>
+
+      <!-- RULES PAGE -->
+      <section id="rules" class="page">
+        <div class="page-header">
+          <div class="badge-tag">Statutory Clauses</div>
+          <h1>Legal Metrology Ruleset</h1>
+          <p class="lede">Active rule definitions loaded live from the system configuration (rules/rules.json) per the Legal Metrology (Packaged Commodities) Rules, 2011.</p>
+        </div>
+        <div id="rulesCards" class="product-grid"></div>
+      </section>
+
+      <!-- ASSISTANT PAGE -->
+      <section id="assistant" class="page">
+        <div class="page-header">
+          <div class="badge-tag">Regulatory Assistant</div>
+          <h1>PackSure Query Terminal</h1>
+          <p class="lede">Technical decision-support assistant for Legal Metrology definitions, declaration standards, and scan result interpretation.</p>
+        </div>
+        <div class="card">
+          <div class="messages" id="messages">
+            <div class="msg bot">Greetings. I am the PackSure regulatory assistant. I can assist with Legal Metrology (Packaged Commodities) Rules, 2011 compliance questions, mandatory declaration requirements, and inspection analysis details.</div>
+          </div>
+          <div class="row">
+            <input id="chatInput" placeholder="Enter inquiry regarding Legal Metrology regulations or inspection findings..." style="flex:1" />
+            <button class="btn btn-navy" id="chatSend">
+              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              Transmit
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TERMS & CONDITIONS PAGE -->
+      <section id="terms" class="page">
+        <div class="page-header">
+          <div class="badge-tag">Regulatory Compliance Document</div>
+          <h1>Terms &amp; Conditions</h1>
+          <p class="lede">Standard operating conditions and legal terms governing use of the PackSure Legal Metrology Verification System.</p>
+        </div>
+
+        <div class="legal-doc">
+          <div class="legal-meta-box">
+            <div><strong>Statutory Authority:</strong> Legal Metrology Act, 2009 &amp; Packaged Commodities Rules, 2011</div>
+            <div><strong>Effective Date:</strong> 01 September 2026</div>
+            <div><strong>Version:</strong> 2.4.0-PROD</div>
+          </div>
+
+          <div class="legal-section">
+            <h2>1. Statutory Framework and Purpose</h2>
+            <p>PackSure is an automated screening and decision-support portal established to assist authorized Legal Metrology officers, state enforcement personnel, and internal compliance auditors in verifying packaged commodities against the statutory provisions of:</p>
+            <ul>
+              <li>The Legal Metrology Act, 2009 (Act No. 1 of 2010).</li>
+              <li>The Legal Metrology (Packaged Commodities) Rules, 2011 (as amended).</li>
+              <li>Relevant mandatory Bureau of Indian Standards (BIS) and FSSAI coordination schedules.</li>
+            </ul>
+          </div>
+
+          <div class="legal-section">
+            <h2>2. Scope of Assistive Automation</h2>
+            <p>The system utilizes optical character recognition (OCR), rule-based heuristic validation, and catalog comparison engines to detect mandatory declarations under Rule 6 of the Packaged Commodities Rules, 2011. Users acknowledge that:</p>
+            <ul>
+              <li>All automated outputs, risk scores, and violation flags are assistive and advisory in nature.</li>
+              <li>The automated screening score does not constitute a final compounding order, legal conviction, or conclusive judicial finding.</li>
+              <li>Physical packaging examination, test purchases, and statutory sampling procedures remain subject to the manual verification protocol prescribed by law.</li>
+            </ul>
+          </div>
+
+          <div class="legal-section">
+            <h2>3. Officer Discretion and Final Regulatory Authority</h2>
+            <p>The inspecting officer retains sole statutory discretion and personal accountability for any regulatory action, including but not limited to:</p>
+            <ul>
+              <li>Issuing statutory notices of non-compliance under Rule 32.</li>
+              <li>Authorizing physical seizure or compounding of offences under Sections 36, 48, and 49 of the Legal Metrology Act, 2009.</li>
+              <li>Dismissing advisory flags where non-compliance is determined to be an artifact of photographic degradation, partial label obstruction, or permissible packaging exemption.</li>
+            </ul>
+          </div>
+
+          <div class="legal-section">
+            <h2>4. Evidentiary Record Integrity and Audit Logging</h2>
+            <p>Inspection records, captured photographic evidence, OCR transcriptions, and officer determination notes are cryptographically indexed with session identifiers. Generated inspection notices and PDF reports constitute administrative audit documentation. Tampering with or altering saved inspection records is strictly prohibited under applicable electronic governance statutes.</p>
+          </div>
+
+          <div class="legal-section">
+            <h2>5. Acceptable Use and Authorization</h2>
+            <p>Access to this portal is authorized strictly for official regulatory audits, recognized manufacturing quality assurance routines, and authorized consumer protection evaluations. Unauthorized commercial exploitation, scraping of reference product databases, or injection of false label evidence is punishable under the Information Technology Act, 2000.</p>
+          </div>
+
+          <div class="legal-section">
+            <h2>6. Disclaimer of Warranties and Limitation of Liability</h2>
+            <p>The system is provided on an "as-is" basis. The administration makes no warranty that photographic label recognition will achieve 100 percent accuracy under suboptimal lighting, specular glare, or cylindrical surface distortion. Under no circumstances shall the software administration be liable for incidental or consequential damages resulting from administrative decisions made by users.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRIVACY POLICY PAGE -->
+      <section id="privacy" class="page">
+        <div class="page-header">
+          <div class="badge-tag">Data Protection Protocol</div>
+          <h1>Privacy Policy</h1>
+          <p class="lede">Policies governing evidence collection, photographic storage, OCR data handling, and regulatory confidentiality.</p>
+        </div>
+
+        <div class="legal-doc">
+          <div class="legal-meta-box">
+            <div><strong>Data Controller:</strong> Legal Metrology Enforcement Directorate</div>
+            <div><strong>Compliance Standard:</strong> Digital Personal Data Protection Act (DPDPA), 2023</div>
+            <div><strong>Classification:</strong> Official Administrative Use Only</div>
+          </div>
+
+          <div class="legal-section">
+            <h2>1. Categories of Information Processed</h2>
+            <p>PackSure processes specific regulatory data categories strictly necessary for statutory packaging verification:</p>
+            <ul>
+              <li><strong>Photographic Evidence:</strong> High-resolution digital imagery of consumer product packaging, principal display panels, and mandatory label declaration panels.</li>
+              <li><strong>Extracted Declaration Records:</strong> Transcribed OCR text containing product designations, manufacturer/packer/importer names and addresses, net quantities, maximum retail prices (MRP), unit sale prices, and consumer care coordinates.</li>
+              <li><strong>Inspector &amp; Premise Records:</strong> Officer ID tokens, establishment names, geographical inspection premises, and official determination remarks.</li>
+            </ul>
+          </div>
+
+          <div class="legal-section">
+            <h2>2. Image Processing and Local Server Storage</h2>
+            <p>Photographs uploaded through the PackSure inspection station are transmitted securely to the server upload repository (backend/uploads/). Files are assigned unique cryptographic UUID identifiers to prevent naming collisions and unauthorized enumeration. Uploaded image files are retained solely for evidence logging, administrative review, and official report generation.</p>
+          </div>
+
+          <div class="legal-section">
+            <h2>3. Absolute Prohibition on External Model Training</h2>
+            <p>Uploaded packaging evidence, trade brand imagery, and proprietary manufacturer label data are strictly sequestered. PackSure enforces an absolute policy that no packaging photographs or extracted text records are shared with public AI models, scraped for commercial advertising, or utilized to train external public foundation models.</p>
+          </div>
+
+          <div class="legal-section">
+            <h2>4. Client-Side Data and Local Storage</h2>
+            <p>For operational continuity and offline audit capabilities, the web interface retains inspection session history in the browser's local storage (packsure_history). This data remains strictly within the inspector's local client device and can be cleared at any time via standard browser data management controls.</p>
+          </div>
+
+          <div class="legal-section">
+            <h2>5. Security Protocols and Access Control</h2>
+            <p>Technical safeguards implemented across the PackSure infrastructure include:</p>
+            <ul>
+              <li>Strict MIME-type validation ensuring only legitimate photographic image payloads (JPEG, PNG, WebP) are processed.</li>
+              <li>Sanitization of all text extraction buffers to mitigate script injection and cross-site scripting (XSS).</li>
+              <li>Standard CORS policy restrictions limiting API invocations to authorized administrative domains.</li>
+            </ul>
+          </div>
+
+          <div class="legal-section">
+            <h2>6. Data Subject Rights and Contact</h2>
+            <p>Inquiries regarding packaging data records, formal notice rectifications, or evidentiary data retention requests should be directed to the designated nodal officer at the Legal Metrology Division, Department of Consumer Affairs, New Delhi.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT PAGE -->
+      <section id="about" class="page">
+        <div class="page-header">
+          <div class="badge-tag">System Architecture</div>
+          <h1>About PackSure</h1>
+          <p class="lede">PackSure is an automated Legal Metrology compliance screening application engineered for Smart India Hackathon problem statement SIH26034.</p>
+        </div>
+
+        <div class="card">
+          <h2>
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            System Purpose &amp; Scope
+          </h2>
+          <p class="muted">Under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011, every pre-packaged commodity distributed in the country must carry clear, legible, and unalterable mandatory declarations. PackSure accelerates field inspection workflows by automating barcode catalog matching, OCR declaration capture, statutory rule evaluation, and inspection notice compilation.</p>
+
+          <table style="margin-top:16px">
+            <tbody>
+              <tr>
+                <td style="width:180px"><strong>Problem Statement</strong></td>
+                <td>SIH26034: Automated Legal Metrology (Packaged Commodities) Compliance Screening</td>
+              </tr>
+              <tr>
+                <td><strong>Governing Ruleset</strong></td>
+                <td>Legal Metrology (Packaged Commodities) Rules, 2011 (as amended)</td>
+              </tr>
+              <tr>
+                <td><strong>Backend Service</strong></td>
+                <td>FastAPI 0.115+, SQLite / SQLAlchemy, EasyOCR / Tesseract OCR Pipeline</td>
+              </tr>
+              <tr>
+                <td><strong>Report Engine</strong></td>
+                <td>Automated ReportLab PDF notice generator with cryptographic session tracking</td>
+              </tr>
+              <tr>
+                <td><strong>Statutory Notice</strong></td>
+                <td>Automated screening is assistive. Final enforcement remains with the authorized officer.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Portal Footer -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v18"></path>
+              <path d="m3 7 9-4 9 4"></path>
+              <path d="M3 7v10l9 4 9-4V7"></path>
+              <path d="M6 10.5 12 14l6-3.5"></path>
+            </svg>
+            PackSure Verification System
+          </h3>
+          <p>National statutory compliance verification portal for pre-packaged commodities under the Legal Metrology (Packaged Commodities) Rules, 2011. Designed for regulatory officers, quality assurance inspectors, and statutory auditors.</p>
+          <div style="margin-top:14px;font-size:12px;line-height:1.7;color:#94a3b8">
+            <div><strong>National Consumer Helpline:</strong> <a href="tel:1800114000">1800-11-4000</a> (Toll-Free)</div>
+            <div><strong>Department Helpline:</strong> <a href="tel:+911123386123">+91-11-23386123</a></div>
+            <div><strong>Official Inquiries:</strong> <a href="mailto:dir-lm-ca@nic.in">dir-lm-ca@nic.in</a></div>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Portal Navigation</h4>
+          <ul>
+            <li><a href="#dashboard" data-page="dashboard">Compliance Dashboard</a></li>
+            <li><a href="#inspect" data-page="inspect">Pack Inspector</a></li>
+            <li><a href="#results" data-page="results">Inspection Results</a></li>
+            <li><a href="#catalog" data-page="catalog">Reference Catalog</a></li>
+            <li><a href="#rules" data-page="rules">Statutory Ruleset</a></li>
+            <li><a href="#assistant" data-page="assistant">Regulatory Assistant</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Governance &amp; Policy</h4>
+          <ul>
+            <li><a href="#terms" data-page="terms">Terms &amp; Conditions</a></li>
+            <li><a href="#privacy" data-page="privacy">Privacy Policy</a></li>
+            <li><a href="#about" data-page="about">System Documentation</a></li>
+            <li><a href="/docs" target="_blank" rel="noopener">OpenAPI Specification</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Legal Metrology Enforcement Directorate, Department of Consumer Affairs, Government of India. All rights reserved. &middot; SIH26034</div>
+        <div class="footer-bottom-links">
+          <a href="#terms" data-page="terms">Terms</a>
+          <a href="#privacy" data-page="privacy">Privacy</a>
+          <a href="#rules" data-page="rules">Rules</a>
+          <a href="#about" data-page="about">About</a>
+        </div>
+      </div>
+    </footer>
+
+  <!-- Camera Barcode & Multi-Photo Label Scanner Modal -->
+  <div class="modal-backdrop" id="cameraModal" style="display:none">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="7" y1="12" x2="17" y2="12"></line></svg>
+          <span style="font-weight:700">Camera Barcode Scanner</span>
+        </div>
+        <button type="button" class="modal-close" id="closeCameraBtn" aria-label="Close">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="camera-viewport">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <div class="camera-reticle"></div>
+          <div class="camera-status" id="cameraStatus">Align barcode within the reticle...</div>
+        </div>
+        <canvas id="cameraCanvas" style="display:none"></canvas>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="switchCameraBtn">
+          <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+          Switch Camera
+        </button>
+        <button type="button" class="btn btn-ghost" id="doneCameraBtn" style="display:none">
+          Done
+        </button>
+        <button type="button" class="btn btn-primary" id="captureFrameBtn">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+          Capture Frame
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="./frontend/app.js?v=7"></script>
 </body>
-
 </html>
-

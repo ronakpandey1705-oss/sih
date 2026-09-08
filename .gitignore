@@ -6,8 +6,33 @@ ENV/
 backend/.venv/
 backend/venv/
 
-# Secrets
+# Byte-compiled / optimized / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+**/*.pyc
+**/*.pyo
+
+# Pytest / Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets & Environment
 .env
 **/.env
 !.env.example
 !**/.env.example
+
+# Temporary Uploads & Test DBs
+uploads/
+backend/uploads/
+*.db-journal
+test_*.db
+/legal_metrology.db
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

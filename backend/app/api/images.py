@@ -117,6 +117,25 @@ async def upload_image(
     )
     db.add(uploaded_image)
 
+    # Automatic background barcode detection if image contains a 1D or 2D barcode
+    detected_barcode = None
+    barcode_detected = False
+    try:
+        from app.services.vision.barcode_service import BarcodeService
+        from app.models.product import Product
+
+        b_res = BarcodeService.detect_barcode(dest_path)
+        if b_res.get("found") and b_res.get("barcode"):
+            detected_barcode = b_res["barcode"]
+            barcode_detected = True
+            if not scan.barcode:
+                scan.barcode = detected_barcode
+                matched_product = db.query(Product).filter(Product.barcode == detected_barcode).first()
+                if matched_product and not scan.product_id:
+                    scan.product_id = matched_product.id
+    except Exception as e:
+        print(f"[BARCODE_DETECTION] Non-blocking notice: {e}")
+
     # Update scan status and optional location
     scan.status = "IMAGES_UPLOADED"
     if user_location and not scan.user_location:
@@ -132,7 +151,9 @@ async def upload_image(
         file_size=uploaded_image.file_size,
         mime_type=uploaded_image.mime_type,
         created_at=uploaded_image.created_at,
-        preprocessed=False
+        preprocessed=False,
+        barcode_detected=barcode_detected,
+        detected_barcode=detected_barcode
     )
 
 

@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 680" width="500" height="680" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- State Emblem of India: Lion Capital of Ashoka -->
+  
+  <!-- Central Lion Head & Mane -->
+  <path d="M250 50 C235 50 220 58 215 72 C210 65 198 62 190 70 C182 78 185 92 188 102 C178 106 172 118 175 128 C178 138 188 142 195 142 C192 152 195 165 205 172 C215 180 230 182 250 182 C270 182 285 180 295 172 C305 165 308 152 305 142 C312 142 322 138 325 128 C328 118 322 106 312 102 C315 92 318 78 310 70 C302 62 290 65 285 72 C280 58 265 50 250 50 Z" fill="#0f172a" fill-opacity="0.06"/>
+  <!-- Central Lion Facial Features -->
+  <path d="M232 95 C232 90 238 86 244 88 C250 90 250 95 244 97 C238 99 232 97 232 95 Z" fill="#0f172a" fill-opacity="0.2"/>
+  <path d="M268 95 C268 90 262 86 256 88 C250 90 250 95 256 97 C262 99 268 97 268 95 Z" fill="#0f172a" fill-opacity="0.2"/>
+  <path d="M242 106 L258 106 L254 118 L246 118 Z" fill="#0f172a" fill-opacity="0.3"/>
+  <path d="M235 126 C242 132 258 132 265 126" stroke-width="3"/>
+  <path d="M240 132 C245 138 255 138 260 132" stroke-width="2"/>
+  <!-- Central Lion Whiskers & Muzzle -->
+  <path d="M230 115 C215 118 205 124 200 130"/>
+  <path d="M230 120 C218 126 208 134 205 142"/>
+  <path d="M270 115 C285 118 295 124 300 130"/>
+  <path d="M270 120 C282 126 292 134 295 142"/>
+
+  <!-- Left Lion -->
+  <path d="M190 85 C175 75 155 78 145 92 C135 106 138 125 145 138 C135 142 128 155 132 168 C136 180 148 186 160 186 C158 198 165 212 178 218 C192 225 210 222 222 212" fill="#0f172a" fill-opacity="0.04"/>
+  <path d="M152 110 C150 105 155 100 160 102 C165 104 165 110 160 112 Z" fill="#0f172a" fill-opacity="0.2"/>
+  <path d="M148 125 L160 125 L156 135 Z"/>
+  <path d="M145 142 C152 148 162 146 168 140"/>
+
+  <!-- Right Lion -->
+  <path d="M310 85 C325 75 345 78 355 92 C365 106 362 125 355 138 C365 142 372 155 368 168 C364 180 352 186 340 186 C342 198 335 212 322 218 C308 225 290 222 278 212" fill="#0f172a" fill-opacity="0.04"/>
+  <path d="M348 110 C350 105 345 100 340 102 C335 104 335 110 340 112 Z" fill="#0f172a" fill-opacity="0.2"/>
+  <path d="M352 125 L340 125 L344 135 Z"/>
+  <path d="M355 142 C348 148 338 146 332 140"/>
+
+  <!-- Lion Forelegs and Bodies (Three Lions Stance) -->
+  <path d="M210 185 L200 320 L225 325 L232 230 L245 230 L245 325 L255 325 L255 230 L268 230 L275 325 L300 320 L290 185" fill="#0f172a" fill-opacity="0.05"/>
+  <path d="M165 195 L145 315 L170 322 L185 240 L195 240 L200 320" fill="#0f172a" fill-opacity="0.03"/>
+  <path d="M335 195 L355 315 L330 322 L315 240 L305 240 L300 320" fill="#0f172a" fill-opacity="0.03"/>
+
+  <!-- Abacus Upper Border -->
+  <rect x="110" y="325" width="280" height="18" rx="4" fill="#0f172a" fill-opacity="0.1" stroke-width="2"/>
+
+  <!-- Central Ashoka Chakra (Dharma Wheel) -->
+  <g transform="translate(250, 390)">
+    <circle cx="0" cy="0" r="42" stroke-width="3" fill="#0f172a" fill-opacity="0.03"/>
+    <circle cx="0" cy="0" r="36" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="9" fill="#0f172a" fill-opacity="0.2" stroke-width="2"/>
+    <!-- 24 Spokes -->
+    <line x1="0" y1="-36" x2="0" y2="36" stroke-width="1.2"/>
+    <line x1="-36" y1="0" x2="36" y2="0" stroke-width="1.2"/>
+    <line x1="-25.4" y1="-25.4" x2="25.4" y2="25.4" stroke-width="1.2"/>
+    <line x1="-25.4" y1="25.4" x2="25.4" y2="-25.4" stroke-width="1.2"/>
+    <line x1="-33.2" y1="-13.8" x2="33.2" y2="13.8" stroke-width="1.2"/>
+    <line x1="-33.2" y1="13.8" x2="33.2" y2="-13.8" stroke-width="1.2"/>
+    <line x1="-13.8" y1="-33.2" x2="13.8" y2="33.2" stroke-width="1.2"/>
+    <line x1="-13.8" y1="33.2" x2="13.8" y2="-33.2" stroke-width="1.2"/>
+    <line x1="-35.4" y1="-7" x2="35.4" y2="7" stroke-width="1"/>
+    <line x1="-35.4" y1="7" x2="35.4" y2="-7" stroke-width="1"/>
+    <line x1="-7" y1="-35.4" x2="7" y2="35.4" stroke-width="1"/>
+    <line x1="-7" y1="35.4" x2="7" y2="-35.4" stroke-width="1"/>
+  </g>
+
+  <!-- Left Animal: Galloping Horse -->
+  <g transform="translate(160, 390)">
+    <path d="M-30 -15 C-20 -25 -5 -25 10 -15 C20 -5 15 15 5 20 C-10 25 -25 20 -30 10 Z" fill="#0f172a" fill-opacity="0.05"/>
+    <path d="M-25 10 L-35 25 M-15 15 L-20 28 M0 15 L5 28 M15 10 L25 22" stroke-width="2"/>
+    <path d="M-28 -10 C-38 -15 -35 -28 -25 -25 C-18 -22 -15 -15 -18 -8" stroke-width="2"/>
+  </g>
+
+  <!-- Right Animal: Bull of Ashoka -->
+  <g transform="translate(340, 390)">
+    <path d="M-10 -15 C5 -22 25 -20 30 -10 C35 5 20 20 10 20 C-5 20 -15 10 -10 -5 Z" fill="#0f172a" fill-opacity="0.05"/>
+    <path d="M-10 10 L-18 26 M0 12 L-4 28 M15 12 L18 28 M25 8 L32 24" stroke-width="2"/>
+    <path d="M-12 -5 C-18 -12 -28 -10 -28 -2 C-28 6 -20 10 -12 8" stroke-width="2"/>
+    <!-- Horns & Hump -->
+    <path d="M-5 -18 C-8 -26 -12 -28 -10 -24" stroke-width="2"/>
+    <path d="M5 -20 C10 -26 15 -25 12 -20" stroke-width="2"/>
+  </g>
+
+  <!-- Abacus Lower Base -->
+  <rect x="95" y="445" width="310" height="24" rx="4" fill="#0f172a" fill-opacity="0.1" stroke-width="2.5"/>
+
+  <!-- Lotus Base (Inverted Bell Lotus) -->
+  <path d="M120 470 C140 520 210 545 250 545 C290 545 360 520 380 470 Z" fill="#0f172a" fill-opacity="0.04" stroke-width="2.5"/>
+  <!-- Lotus Petals -->
+  <path d="M160 470 C175 510 200 525 220 535" stroke-width="1.8"/>
+  <path d="M200 470 C215 515 235 538 250 545" stroke-width="1.8"/>
+  <path d="M300 470 C285 515 265 538 250 545" stroke-width="1.8"/>
+  <path d="M340 470 C325 510 300 525 280 535" stroke-width="1.8"/>
+
+  <!-- Plinth Pedestal -->
+  <path d="M140 545 L360 545 L375 570 L125 570 Z" fill="#0f172a" fill-opacity="0.08" stroke-width="2.5"/>
+
+  <!-- Devanagari Motto: सत्यमेव जयते (Satyameva Jayate) -->
+  <g transform="translate(250, 625)" text-anchor="middle" font-family="'IBM Plex Sans', sans-serif" font-weight="700" font-size="28" fill="#0f172a" stroke="none">
+    <text y="0" letter-spacing="4">सत्यमेव जयते</text>
+  </g>
+  <line x1="160" y1="595" x2="340" y2="595" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+</svg>

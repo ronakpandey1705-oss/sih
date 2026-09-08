@@ -1,20 +1,38 @@
 const API = "";
 const DEMO_BARCODES = [
-  ["8901234567890", "DemoBakes biscuits"],
-  ["8909876543210", "Sunflower oil"],
-  ["8901122334455", "Herbal soap"],
-  ["8905544332211", "Garam masala"],
-  ["8907788990011", "Wheat atta"],
-  ["8906677889900", "Instant coffee"],
-  ["8904433221100", "Almonds"],
-  ["8903322110099", "Fruit juice"],
+  ["8908877665501", "Heritage Double Bedsheet"],
+  ["8902233445501", "Aura X12 5G Smartphone"],
+  ["8906038530187", "Envie Rechargeable Charger"],
+  ["8903344556601", "Kohinoor Basmati Rice"],
+  ["8905566778801", "Herbal Essence Shampoo"],
+  ["8907788991101", "Surf Excel Top Load"],
+  ["8906677882201", "Huggies Diapers M"],
+  ["8904455667701", "Dettol Antiseptic Liquid"],
+  ["8901122330001", "Havells LED Bulb 9W"],
+  ["8904455667704", "ClassMate Ruled Notebook"],
+  ["8902233445506", "Prestige Electric Kettle"],
+  ["8908877665504", "HydroSoft Bath Towel"],
 ];
+
+const PAGE_TITLES = {
+  dashboard: "Compliance Dashboard",
+  inspect: "Packaging Inspector",
+  results: "Inspection Results & Discrepancies",
+  catalog: "Standard Reference Catalog",
+  rules: "Legal Metrology Ruleset (2011)",
+  assistant: "Regulatory Query Terminal",
+  terms: "Terms & Conditions",
+  privacy: "Privacy Policy",
+  about: "System Documentation",
+};
 
 const state = {
   scanId: null,
   product: null,
   analysis: null,
   fields: [],
+  products: [],
+  evidenceFiles: [],
   history: JSON.parse(localStorage.getItem("packsure_history") || "[]"),
 };
 
@@ -44,18 +62,34 @@ async function api(path, opts = {}) {
 
 function showPage(id) {
   document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  const target = document.getElementById(id);
+  if (target) {
+    target.classList.add("active");
+  }
   document.querySelectorAll("nav button").forEach((b) => {
     b.classList.toggle("active", b.dataset.page === id);
   });
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (PAGE_TITLES[id]) {
+    document.title = `PackSure | ${PAGE_TITLES[id]}`;
+  }
+  const mainNav = document.getElementById("mainNav");
+  if (mainNav) {
+    mainNav.classList.remove("nav-open");
+  }
+  const toggleBtn = document.getElementById("navToggle");
+  if (toggleBtn) {
+    toggleBtn.setAttribute("aria-expanded", "false");
+  }
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
 
-document.querySelectorAll("[data-page]").forEach((el) => {
-  el.addEventListener("click", (e) => {
+// Global delegated click handler for page navigation links and buttons
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-page]");
+  if (btn && btn.dataset.page) {
     e.preventDefault();
-    showPage(el.dataset.page);
-  });
+    showPage(btn.dataset.page);
+  }
 });
 
 function saveHistory() {
@@ -66,39 +100,39 @@ function saveHistory() {
 function pill(status) {
   const map = {
     PASS: ["pass", "PASS"],
-    POTENTIAL_NON_COMPLIANCE: ["fail", "FLAG"],
-    POTENTIAL_DISCREPANCY: ["fail", "FLAG"],
+    POTENTIAL_NON_COMPLIANCE: ["fail", "FLAGGED"],
+    POTENTIAL_DISCREPANCY: ["fail", "FLAGGED"],
     NEEDS_REVIEW: ["review", "REVIEW"],
     NOT_APPLICABLE: ["na", "N/A"],
     INFO: ["na", "INFO"],
   };
-  const [cls, label] = map[status] || ["na", status || "—"];
-  return `<span class="status-pill ${cls}">${label}</span>`;
+  const [cls, label] = map[status] || ["na", status || "N/A"];
+  return `<span class="status-tag ${cls}">${label}</span>`;
 }
 
 function renderDashboard() {
   document.getElementById("statScans").textContent = String(state.history.length);
   const last = state.history[0];
-  document.getElementById("statLast").textContent = last && last.score != null ? `${Math.round(last.score)}%` : "—";
+  document.getElementById("statLast").textContent = last && last.score != null ? `${Math.round(last.score)}%` : "N/A";
   const list = document.getElementById("recentList");
   if (!state.history.length) {
-    list.innerHTML = `<p class="muted">No inspections yet.</p>`;
+    list.innerHTML = `<p class="muted">No inspections recorded in this browser session.</p>`;
     return;
   }
   list.innerHTML = state.history.slice(0, 6).map((h) => `
     <div class="list-item">
       <div>
-        <div>${h.name || h.barcode || "Unlisted pack"}</div>
-        <div class="muted">${h.id.slice(0, 8)} · ${h.status || ""}</div>
+        <div style="font-weight:600">${h.name || h.barcode || "Unlisted Pack"}</div>
+        <div class="muted">ID: ${h.id.slice(0, 8)} | ${h.status || "COMPLETED"}</div>
       </div>
-      <div>${h.score != null ? Math.round(h.score) + "%" : "—"}</div>
+      <div><strong>${h.score != null ? Math.round(h.score) + "%" : "N/A"}</strong></div>
     </div>
   `).join("");
 }
 
 function renderDemoChips() {
   document.getElementById("demoChips").innerHTML = DEMO_BARCODES.map(
-    ([code, name]) => `<button class="chip" data-code="${code}">${name} · ${code}</button>`
+    ([code, name]) => `<button class="chip" data-code="${code}" type="button">${name}: ${code}</button>`
   ).join("");
   document.querySelectorAll("#demoChips .chip").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -113,46 +147,101 @@ async function ping() {
   try {
     const h = await api("/api/health");
     dot.className = "health-dot ok";
-    dot.querySelector("span").textContent = h.status === "ok" ? "API online" : "API";
+    dot.querySelector("span").textContent = h.status === "ok" ? "System Online" : "Service Active";
   } catch {
     dot.className = "health-dot bad";
-    dot.querySelector("span").textContent = "API offline";
+    dot.querySelector("span").textContent = "Service Offline";
   }
+}
+
+function renderCatalog() {
+  const grid = document.getElementById("catalogGrid");
+  if (!grid) return;
+  const categoryFilter = (document.getElementById("catalogCategoryFilter")?.value || "ALL").trim();
+  const searchQuery = (document.getElementById("catalogSearch")?.value || "").trim().toLowerCase();
+
+  const filtered = (state.products || []).filter((p) => {
+    if (categoryFilter !== "ALL" && p.category !== categoryFilter) {
+      return false;
+    }
+    if (searchQuery) {
+      const matchText = [
+        p.name,
+        p.brand,
+        p.barcode,
+        p.category,
+        p.expected_net_quantity,
+        p.expected_mrp,
+        p.manufacturer,
+        p.packer,
+      ].filter(Boolean).join(" ").toLowerCase();
+      if (!matchText.includes(searchQuery)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:48px 16px;background:var(--card-bg);border:1px dashed var(--border);border-radius:6px">
+        <div style="font-weight:600;font-size:15px">No commodities found</div>
+        <div class="muted" style="margin-top:6px">No products matched the selected category and search query. Try clearing filters or searching for another term.</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((p) => `
+    <div class="product-item">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
+        <h3 style="margin:0">${escapeHtml(p.name)}</h3>
+        <span class="status-tag na" style="font-size:10.5px;white-space:nowrap">${escapeHtml(p.category || "General")}</span>
+      </div>
+      <p class="muted" style="margin-bottom:8px">${escapeHtml(p.brand || "Standard Brand")}</p>
+      <div class="list-item"><span>Barcode</span><b>${escapeHtml(p.barcode)}</b></div>
+      <div class="list-item"><span>Net Quantity</span><b>${escapeHtml(p.expected_net_quantity || "N/A")}</b></div>
+      <div class="list-item"><span>Standard MRP</span><b>${escapeHtml(p.expected_mrp || "N/A")}</b></div>
+      ${p.manufacturer ? `<div class="list-item" style="font-size:11.5px;color:var(--text-muted)"><span>Mfr/Packer</span><span style="max-width:60%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(p.manufacturer)}">${escapeHtml(p.manufacturer)}</span></div>` : ""}
+      <button class="btn btn-ghost" style="margin-top:12px;width:100%" data-use="${escapeHtml(p.barcode)}">
+        Select for Inspection
+      </button>
+    </div>
+  `).join("");
+
+  grid.querySelectorAll("[data-use]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.getElementById("barcode").value = btn.dataset.use;
+      showPage("inspect");
+      lookup();
+    });
+  });
+}
+
+function renderRules(rulesList) {
+  const container = document.getElementById("rulesCards");
+  if (!container || !rulesList) return;
+  container.innerHTML = rulesList.map((r) => `
+    <div class="product-item">
+      <h3>Rule ${escapeHtml(r.rule_number)}: ${escapeHtml(r.name)}</h3>
+      <div class="row" style="margin:4px 0">
+        <span class="status-tag ${r.mandatory ? 'fail' : 'na'}">${r.mandatory ? "Mandatory" : "Advisory"}</span>
+        <span class="status-tag na">${escapeHtml(r.severity)} Severity</span>
+      </div>
+      <p class="muted" style="margin-top:6px">${escapeHtml(r.description)}</p>
+      <p class="muted" style="margin-top:6px;font-size:11px;color:var(--text-dim)">Reference: ${escapeHtml(r.legal_reference || "Legal Metrology (Packaged Commodities) Rules, 2011")}</p>
+    </div>
+  `).join("");
 }
 
 async function loadBootstrap() {
   try {
     const [products, rules] = await Promise.all([
-      api("/api/products/"),
+      api("/api/products/?limit=200"),
       api("/api/compliance/rules"),
     ]);
-    document.getElementById("statProducts").textContent = String(products.length);
-    document.getElementById("statRules").textContent = String(rules.total_rules);
-    document.getElementById("catalogGrid").innerHTML = products.map((p) => `
-      <div class="card">
-        <h2>${p.name}</h2>
-        <p class="muted">${p.brand} · ${p.category || ""}</p>
-        <div class="list-item"><span>Barcode</span><b>${p.barcode}</b></div>
-        <div class="list-item"><span>Net qty</span><b>${p.expected_net_quantity}</b></div>
-        <div class="list-item"><span>MRP</span><b>${p.expected_mrp}</b></div>
-        <button class="btn btn-cyan" style="margin-top:10px" data-use="${p.barcode}">Use barcode</button>
-      </div>
-    `).join("");
-    document.querySelectorAll("[data-use]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.getElementById("barcode").value = btn.dataset.use;
-        showPage("inspect");
-        lookup();
-      });
-    });
-    document.getElementById("rulesCards").innerHTML = rules.rules.map((r) => `
-      <div class="card">
-        <h2>${r.id} · ${r.name}</h2>
-        <p class="muted">${r.rule_number} · ${r.severity} · ${r.mandatory ? "Mandatory" : "Optional"}</p>
-        <p class="muted" style="margin-top:8px">${r.description}</p>
-        <p class="muted" style="margin-top:8px">${r.legal_reference || ""}</p>
-      </div>
-    `).join("");
+    state.products = products || [];
+    document.getElementById("statProducts").textContent = String(state.products.length);
+    document.getElementById("statRules").textContent = String(rules.total_rules || 0);
+    renderCatalog();
+    renderRules(rules.rules || []);
   } catch (err) {
     toast(err.message);
   }
@@ -162,7 +251,7 @@ async function lookup() {
   const barcode = document.getElementById("barcode").value.trim();
   const box = document.getElementById("lookupBox");
   if (!barcode) {
-    box.textContent = "Enter a barcode first.";
+    box.textContent = "Enter a barcode to query standard catalog.";
     return;
   }
   try {
@@ -174,9 +263,9 @@ async function lookup() {
     state.product = data.product;
     if (data.found && data.product) {
       const p = data.product;
-      box.innerHTML = `<strong>${p.name}</strong> · ${p.brand}<br>Expected ${p.expected_net_quantity} · ${p.expected_mrp}`;
+      box.innerHTML = `<strong>Registered SKU:</strong> ${p.name} (${p.brand})<br>Standard Net Qty: ${p.expected_net_quantity} | Standard MRP: ${p.expected_mrp}`;
     } else {
-      box.textContent = "Not in catalog. You can still inspect the pack label.";
+      box.textContent = "Barcode not found in standard reference catalog. Proceeding with standard unlisted package inspection.";
     }
   } catch (err) {
     box.textContent = err.message;
@@ -195,18 +284,7 @@ function sessionPayload() {
 
 function setSession(created) {
   state.scanId = created.scan_id || created.inspection_id;
-  document.getElementById("sessionMeta").textContent = `Session ${state.scanId} · ${created.status}`;
-}
-
-async function ensureSession() {
-  if (state.scanId) return state.scanId;
-  const created = await api("/api/scans/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(sessionPayload()),
-  });
-  setSession(created);
-  return state.scanId;
+  document.getElementById("sessionMeta").textContent = `Session ID: ${state.scanId} | Status: ${created.status}`;
 }
 
 async function createSession() {
@@ -217,33 +295,98 @@ async function createSession() {
       body: JSON.stringify(sessionPayload()),
     });
     setSession(created);
-    toast("Inspection created");
+    toast("Inspection session initialized");
   } catch (err) {
     toast(err.message);
   }
 }
 
+function addEvidenceFiles(files) {
+  if (!files || !files.length) return;
+  let added = 0;
+  for (const file of Array.from(files)) {
+    const okType = /^image\/(jpeg|jpg|png|webp)$/i.test(file.type) || /\.(jpe?g|png|webp)$/i.test(file.name);
+    if (!okType) {
+      toast(`Skipped ${file.name}: invalid format (use JPG, PNG, or WebP).`);
+      continue;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      toast(`Skipped ${file.name}: file exceeds 25 MB maximum limit.`);
+      continue;
+    }
+    const exists = state.evidenceFiles.some((f) => f.name === file.name && f.size === file.size);
+    if (!exists) {
+      state.evidenceFiles.push(file);
+      added++;
+    }
+  }
+  renderEvidenceGallery();
+  if (added > 0) {
+    toast(`${added} photo${added > 1 ? "s" : ""} added to packaging evidence (${state.evidenceFiles.length} total)`);
+  }
+}
+
+function removeEvidenceFile(index) {
+  if (index >= 0 && index < state.evidenceFiles.length) {
+    const removed = state.evidenceFiles.splice(index, 1)[0];
+    renderEvidenceGallery();
+    toast(`Removed ${removed.name}`);
+  }
+}
+
+function renderEvidenceGallery() {
+  const gallery = document.getElementById("evidenceGallery");
+  const preview = document.getElementById("preview");
+  if (!gallery) return;
+
+  if (!state.evidenceFiles.length) {
+    gallery.style.display = "none";
+    gallery.innerHTML = "";
+    if (preview) preview.style.display = "none";
+    return;
+  }
+
+  if (preview) preview.style.display = "none";
+  gallery.style.display = "grid";
+
+  const panelLabels = ["Front PDP", "Back Declarations", "Side / MRP Panel", "Barcode / Batch Panel", "Supplementary Panel"];
+
+  gallery.innerHTML = state.evidenceFiles.map((file, idx) => {
+    const url = URL.createObjectURL(file);
+    const label = panelLabels[idx] || `Panel ${idx + 1}`;
+    const kb = Math.round(file.size / 1024);
+    return `
+      <div class="evidence-item">
+        <div class="evidence-thumb-wrap">
+          <img class="evidence-thumb" src="${url}" alt="${escapeHtml(file.name)}" />
+          <span class="evidence-tag">${label}</span>
+          <button class="evidence-del" type="button" data-del-index="${idx}" title="Remove this panel photo">&times;</button>
+        </div>
+        <div class="evidence-info" title="${escapeHtml(file.name)}">${escapeHtml(file.name)} (${kb} KB)</div>
+      </div>
+    `;
+  }).join("");
+
+  gallery.querySelectorAll("[data-del-index]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.delIndex, 10);
+      removeEvidenceFile(idx);
+    });
+  });
+}
+
 function setChosenFile(file) {
-  if (!file) return false;
-  const okType = /^image\/(jpeg|jpg|png|webp)$/i.test(file.type) || /\.(jpe?g|png|webp)$/i.test(file.name);
-  if (!okType) {
-    toast("Use a JPG, PNG, or WebP of the pack label.");
-    return false;
-  }
-  const input = document.getElementById("fileInput");
-  if (input.files[0] !== file) {
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    input.files = dt.files;
-  }
-  const img = document.getElementById("preview");
-  img.src = URL.createObjectURL(file);
-  img.style.display = "block";
-  return true;
+  if (file) addEvidenceFiles([file]);
 }
 
 const fileInput = document.getElementById("fileInput");
-fileInput.addEventListener("change", (e) => setChosenFile(e.target.files[0]));
+fileInput.addEventListener("change", (e) => {
+  if (e.target.files && e.target.files.length) {
+    addEvidenceFiles(e.target.files);
+    e.target.value = "";
+  }
+});
 document.getElementById("chooseBtn").addEventListener("click", () => fileInput.click());
 
 const dropZone = document.getElementById("dropZone");
@@ -262,19 +405,14 @@ const dropZone = document.getElementById("dropZone");
   });
 });
 dropZone.addEventListener("drop", (e) => {
-  setChosenFile(e.dataTransfer.files[0]);
+  if (e.dataTransfer.files && e.dataTransfer.files.length) {
+    addEvidenceFiles(e.dataTransfer.files);
+  }
 });
 
-function statusClass(score, risk) {
-  if (risk === "HIGH" || (score != null && score < 60)) return "fail";
-  if (risk === "MEDIUM") return "review";
-  return "pass";
-}
-
 async function analyze() {
-  const file = document.getElementById("fileInput").files[0];
-  if (!file) {
-    toast("Choose a label photograph.");
+  if (!state.evidenceFiles.length) {
+    toast("Please attach or capture at least one packaging photograph before running screening.");
     return;
   }
   const busy = document.getElementById("busy");
@@ -289,11 +427,25 @@ async function analyze() {
     });
     setSession(created);
     const scanId = state.scanId;
-    const form = new FormData();
-    form.append("file", file);
-    const loc = document.getElementById("location").value.trim();
-    if (loc) form.append("user_location", loc);
-    await api(`/api/scans/${scanId}/images`, { method: "POST", body: form });
+
+    // Upload all attached packaging photos sequentially
+    for (let i = 0; i < state.evidenceFiles.length; i++) {
+      const file = state.evidenceFiles[i];
+      const form = new FormData();
+      form.append("file", file);
+      const loc = document.getElementById("location").value.trim();
+      if (loc) form.append("user_location", loc);
+      const uploadRes = await api(`/api/scans/${scanId}/images`, { method: "POST", body: form });
+      if (uploadRes && uploadRes.detected_barcode) {
+        const currentBarcode = document.getElementById("barcode").value.trim();
+        if (!currentBarcode) {
+          document.getElementById("barcode").value = uploadRes.detected_barcode;
+          lookup();
+          toast(`Barcode ${uploadRes.detected_barcode} automatically detected from panel ${i + 1}`);
+        }
+      }
+    }
+
     const analysis = await api(`/api/scans/${scanId}/analyze`, { method: "POST" });
     state.analysis = analysis;
     try {
@@ -302,7 +454,7 @@ async function analyze() {
     } catch {
       state.fields = [];
     }
-    const name = state.product?.name || document.getElementById("barcode").value.trim() || "Pack";
+    const name = state.product?.name || document.getElementById("barcode").value.trim() || "Unlisted Pack";
     state.history.unshift({
       id: state.scanId,
       barcode: document.getElementById("barcode").value.trim(),
@@ -313,9 +465,9 @@ async function analyze() {
     saveHistory();
     renderResults();
     showPage("results");
-    toast("Screening complete");
+    toast(`Screening pipeline completed across ${state.evidenceFiles.length} packaging panel${state.evidenceFiles.length > 1 ? "s" : ""}`);
   } catch (err) {
-    toast(err.message);
+    toast(err.message || "Failed to execute compliance screening.");
   } finally {
     busy.style.display = "none";
     btn.disabled = false;
@@ -325,53 +477,60 @@ async function analyze() {
 function renderResults() {
   const a = state.analysis;
   if (!a) return;
-  document.getElementById("resultLede").textContent = `Inspection ${a.inspection_id || a.scan_id}`;
+  document.getElementById("resultLede").textContent = `Inspection Session: ${a.inspection_id || a.scan_id}`;
   const score = Math.round(a.overall_score ?? 0);
   document.getElementById("scoreValue").textContent = `${score}%`;
-  document.getElementById("scoreRing").style.setProperty("--p", String(score));
-  document.getElementById("riskTitle").textContent = `${a.risk_level || "PENDING"} risk`;
-  document.getElementById("summaryText").textContent = a.summary || "";
+  document.getElementById("riskTitle").textContent = `${a.risk_level || "EVALUATED"} Risk Category`;
+  document.getElementById("summaryText").textContent = a.summary || "Statutory rule verification completed.";
   document.getElementById("reportBtn").disabled = false;
   document.getElementById("reviewBtn").disabled = false;
   document.getElementById("pdfLink").style.display = "none";
 
   const rules = a.rules_summary || [];
   document.getElementById("rulesTable").innerHTML = rules.length
-    ? `<table><thead><tr><th>Rule</th><th>Status</th><th>Reason</th></tr></thead><tbody>${
-        rules.map((r) => `<tr><td>${r.rule_id}<br><span class="muted">${r.name || ""}</span></td><td>${pill(r.status)}</td><td>${r.reason || ""}</td></tr>`).join("")
-      }</tbody></table>`
-    : "No rule rows returned.";
+    ? `<div class="table-responsive"><table><thead><tr><th>Statutory Rule</th><th>Finding</th><th>Observation</th></tr></thead><tbody>${
+        rules.map((r) => `<tr><td><strong>${escapeHtml(r.rule_id)}</strong><br><span class="muted">${escapeHtml(r.name || "")}</span></td><td>${pill(r.status)}</td><td>${escapeHtml(r.reason || "Verified")}</td></tr>`).join("")
+      }</tbody></table></div>`
+    : "<p class=\"muted\" style=\"padding:10px 0\">No statutory violations flagged for this session.</p>";
 
   const discs = a.discrepancies || [];
   document.getElementById("discList").innerHTML = discs.length
     ? discs.map((d) => `
         <div class="list-item">
           <div>
-            <div>${d.field}</div>
-            <div class="muted">${d.difference_summary || ""}</div>
-            <div class="muted">Catalog: ${d.catalog_value || "—"} · Pack: ${d.detected_value || "—"}</div>
+            <div style="font-weight:600">${escapeHtml(d.field)}</div>
+            <div class="muted">${escapeHtml(d.difference_summary || "")}</div>
+            <div class="muted">Catalog Value: ${escapeHtml(d.catalog_value || "None")} | Detected Value: ${escapeHtml(d.detected_value || "None")}</div>
           </div>
           ${pill(d.status)}
         </div>`).join("")
-    : "No catalog discrepancies flagged.";
+    : "<p class=\"muted\" style=\"padding:10px 0\">No catalog discrepancies flagged for this item.</p>";
 
   const labels = {
-    product_name: "Product name",
-    net_quantity: "Net quantity",
-    mrp: "MRP",
-    unit_sale_price: "Unit sale price",
-    manufacturer_name_and_address: "Manufacturer",
-    consumer_care: "Consumer care",
-    manufacture_or_import_date: "Date",
-    dimensions: "Dimensions",
+    product_name: "Product Designation",
+    net_quantity: "Net Quantity",
+    mrp: "Maximum Retail Price (MRP)",
+    unit_sale_price: "Unit Sale Price (USP)",
+    manufacturer_name_and_address: "Manufacturer / Packer Details",
+    consumer_care: "Consumer Care Coordinates",
+    manufacture_or_import_date: "Date of Manufacture / Import",
+    dimensions: "Package Dimensions",
   };
-  document.getElementById("fieldsGrid").innerHTML = (state.fields || []).map((f) => `
-    <div class="card">
-      <div class="muted">${labels[f.field_name] || f.field_name}</div>
-      <div style="margin-top:6px;font-weight:700">${f.value}</div>
-      <div class="muted">${Math.round((f.confidence || 0) * 100)}% confidence</div>
-    </div>
-  `).join("") || `<p class="muted">No fields extracted. OCR may have found little text on this image.</p>`;
+  document.getElementById("fieldsGrid").innerHTML = (state.fields || []).map((f) => {
+    let valHtml = escapeHtml(f.value);
+    if (f.field_name === "consumer_care") {
+      valHtml = valHtml
+        .replace(/(\b\d{3,4}[-\s]?\d{3,4}[-\s]?\d{3,4}\b|\b1800[-\s]?\d{3,4}[-\s]?\d{3,4}\b)/g, '<a href="tel:$1">$1</a>')
+        .replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1">$1</a>');
+    }
+    return `
+      <div class="product-item">
+        <div class="muted" style="font-size:11.5px;font-weight:600;text-transform:uppercase">${labels[f.field_name] || escapeHtml(f.field_name)}</div>
+        <div style="margin-top:6px;font-weight:700;font-size:14px">${valHtml}</div>
+        <div class="muted" style="font-size:12px;margin-top:4px">${Math.round((f.confidence || 0) * 100)}% Extraction Confidence</div>
+      </div>
+    `;
+  }).join("") || `<p class="muted">No declarations extracted. Ensure the label photograph is sharp and well lit.</p>`;
 }
 
 async function generateReport() {
@@ -382,14 +541,14 @@ async function generateReport() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         officer_notes: document.getElementById("notes").value.trim() || null,
-        authority_name: "PackSure · Legal Metrology screening",
-        authority_jurisdiction: document.getElementById("location").value.trim() || "Demo jurisdiction",
+        authority_name: "Legal Metrology Enforcement Directorate",
+        authority_jurisdiction: document.getElementById("location").value.trim() || "National Jurisdiction",
       }),
     });
     const link = document.getElementById("pdfLink");
     link.href = API + (report.pdf_download_url || `/api/scans/${state.scanId}/report/pdf`);
     link.style.display = "inline-flex";
-    toast(`Report ${report.report_number} ready`);
+    toast(`Inspection report ${report.report_number} generated`);
   } catch (err) {
     toast(err.message);
   }
@@ -407,7 +566,7 @@ async function submitReview() {
         officer_id: document.getElementById("officerId").value.trim() || null,
       }),
     });
-    toast("Officer review recorded");
+    toast("Officer determination recorded successfully");
   } catch (err) {
     toast(err.message);
   }
@@ -552,7 +711,7 @@ async function sendChat() {
   input.value = "";
   const bot = document.createElement("div");
   bot.className = "msg bot";
-  bot.textContent = "Thinking…";
+  bot.textContent = "Processing inquiry...";
   box.appendChild(bot);
   box.scrollTop = box.scrollHeight;
   sendBtn.disabled = true;
@@ -570,7 +729,7 @@ async function sendChat() {
     chatHistory.push({ role: "user", content: text });
     chatHistory.push({ role: "assistant", content: data.reply });
   } catch (err) {
-    bot.textContent = err.message || "Chat request failed.";
+    bot.textContent = err.message || "Query communication failure.";
   } finally {
     sendBtn.disabled = false;
     box.scrollTop = box.scrollHeight;
@@ -585,6 +744,280 @@ document.getElementById("reviewBtn").addEventListener("click", submitReview);
 document.getElementById("chatSend").addEventListener("click", sendChat);
 document.getElementById("chatInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendChat();
+});
+
+const catSearch = document.getElementById("catalogSearch");
+if (catSearch) {
+  catSearch.addEventListener("input", renderCatalog);
+}
+const catFilter = document.getElementById("catalogCategoryFilter");
+if (catFilter) {
+  catFilter.addEventListener("change", renderCatalog);
+}
+
+/* =====================================================
+   CAMERA & PHOTO BARCODE & LABEL CAPTURE
+===================================================== */
+let cameraStream = null;
+let cameraFacingMode = "environment";
+let barcodeScanningActive = false;
+let cameraMode = "barcode"; // "barcode" or "label"
+
+async function startCamera(mode = "barcode") {
+  cameraMode = mode;
+  const modal = document.getElementById("cameraModal");
+  const video = document.getElementById("cameraVideo");
+  const status = document.getElementById("cameraStatus");
+  const title = modal.querySelector(".modal-header span");
+  const reticle = modal.querySelector(".camera-reticle");
+  const captureBtn = document.getElementById("captureFrameBtn");
+  const doneBtn = document.getElementById("doneCameraBtn");
+  if (!modal || !video) return;
+
+  modal.style.display = "flex";
+  status.textContent = "Requesting camera access...";
+
+  if (cameraMode === "label") {
+    title.textContent = "Capture Package Label Photo (Multiple Panels)";
+    reticle.style.width = "88%";
+    reticle.style.height = "80%";
+    reticle.style.borderColor = "#0f766e";
+    captureBtn.textContent = "Capture Photo";
+    if (doneBtn) doneBtn.style.display = "inline-flex";
+  } else {
+    title.textContent = "Camera Barcode Scanner";
+    reticle.style.width = "75%";
+    reticle.style.height = "48%";
+    reticle.style.borderColor = "#38bdf8";
+    captureBtn.textContent = "Capture Frame";
+    if (doneBtn) doneBtn.style.display = "none";
+  }
+
+  try {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((t) => t.stop());
+    }
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: cameraFacingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false,
+    });
+    video.srcObject = cameraStream;
+    await video.play();
+
+    if (cameraMode === "label") {
+      status.textContent = `Position packaging panel (front, back, or side declarations) and tap Capture Photo.`;
+      barcodeScanningActive = false;
+    } else {
+      status.textContent = "Align barcode within the reticle...";
+      barcodeScanningActive = true;
+      startBarcodeScanLoop();
+    }
+  } catch (err) {
+    status.textContent = "Camera access unavailable: " + err.message;
+  }
+}
+
+function stopCamera() {
+  barcodeScanningActive = false;
+  if (cameraStream) {
+    cameraStream.getTracks().forEach((t) => t.stop());
+    cameraStream = null;
+  }
+  const modal = document.getElementById("cameraModal");
+  if (modal) modal.style.display = "none";
+}
+
+async function captureAction() {
+  if (cameraMode === "label") {
+    captureLabelPhoto();
+  } else {
+    captureAndDecodeFrame(true);
+  }
+}
+
+function captureLabelPhoto() {
+  const video = document.getElementById("cameraVideo");
+  const canvas = document.getElementById("cameraCanvas");
+  const status = document.getElementById("cameraStatus");
+  if (!video || video.readyState < 2) return;
+
+  canvas.width = video.videoWidth || 1280;
+  canvas.height = video.videoHeight || 720;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const count = state.evidenceFiles.length + 1;
+    const file = new File([blob], `packaging_panel_${count}.jpg`, { type: "image/jpeg" });
+    addEvidenceFiles([file]);
+    status.textContent = `Panel #${count} captured! Position another panel (back, side, or barcode) and tap Capture Photo, or tap Done.`;
+    toast(`Packaging panel #${count} added to evidence queue`);
+  }, "image/jpeg", 0.92);
+}
+
+async function startBarcodeScanLoop() {
+  if (!barcodeScanningActive || cameraMode !== "barcode") return;
+
+  // 1. Modern browser BarcodeDetector API
+  if ("BarcodeDetector" in window) {
+    try {
+      const barcodeDetector = new window.BarcodeDetector({
+        formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"],
+      });
+      const video = document.getElementById("cameraVideo");
+      const detectFrame = async () => {
+        if (!barcodeScanningActive || cameraMode !== "barcode") return;
+        if (video.readyState >= 2) {
+          try {
+            const barcodes = await barcodeDetector.detect(video);
+            if (barcodes.length > 0) {
+              const code = barcodes[0].rawValue;
+              if (code && code.trim()) {
+                onBarcodeDetected(code.trim(), "Camera Real-Time Scanner");
+                return;
+              }
+            }
+          } catch (_) {}
+        }
+        requestAnimationFrame(detectFrame);
+      };
+      requestAnimationFrame(detectFrame);
+      return;
+    } catch (_) {}
+  }
+
+  // 2. Periodic frame fallback to OpenCV backend /api/products/scan-barcode
+  const intervalId = setInterval(async () => {
+    if (!barcodeScanningActive || cameraMode !== "barcode") {
+      clearInterval(intervalId);
+      return;
+    }
+    await captureAndDecodeFrame(false);
+  }, 1400);
+}
+
+async function captureAndDecodeFrame(manual = true) {
+  const video = document.getElementById("cameraVideo");
+  const canvas = document.getElementById("cameraCanvas");
+  const status = document.getElementById("cameraStatus");
+  if (!video || video.readyState < 2) return;
+
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  if (manual) {
+    status.textContent = "Analyzing captured frame...";
+  }
+
+  canvas.toBlob(async (blob) => {
+    if (!blob || !barcodeScanningActive) return;
+    try {
+      const formData = new FormData();
+      formData.append("file", blob, "camera_frame.jpg");
+      const res = await api("/api/products/scan-barcode", { method: "POST", body: formData });
+      if (res && res.found && res.barcode) {
+        onBarcodeDetected(res.barcode, "OpenCV Vision Pipeline");
+      } else if (manual) {
+        status.textContent = "No barcode detected in frame. Adjust distance or lighting and retry.";
+      }
+    } catch (err) {
+      if (manual) status.textContent = "Frame analysis error: " + err.message;
+    }
+  }, "image/jpeg", 0.85);
+}
+
+function onBarcodeDetected(code, source = "Scanner") {
+  stopCamera();
+  const input = document.getElementById("barcode");
+  input.value = code;
+  lookup();
+  toast(`Barcode ${code} detected via ${source}`);
+}
+
+async function scanBarcodeFromFile(file) {
+  if (!file) return;
+  toast("Scanning photo for barcode...");
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await api("/api/products/scan-barcode", { method: "POST", body: formData });
+    if (res && res.found && res.barcode) {
+      onBarcodeDetected(res.barcode, "Image Decoder");
+    } else {
+      toast("No barcode or QR code recognized in selected photo.");
+    }
+  } catch (err) {
+    toast("Barcode extraction error: " + err.message);
+  }
+}
+
+// Mobile Nav Toggle Listener
+const navToggleBtn = document.getElementById("navToggle");
+if (navToggleBtn) {
+  navToggleBtn.addEventListener("click", () => {
+    const nav = document.getElementById("mainNav");
+    if (nav) {
+      const isOpen = nav.classList.toggle("nav-open");
+      navToggleBtn.setAttribute("aria-expanded", String(isOpen));
+    }
+  });
+}
+
+document.getElementById("scanCameraBtn").addEventListener("click", () => startCamera("barcode"));
+document.getElementById("snapLabelCameraBtn").addEventListener("click", () => startCamera("label"));
+document.getElementById("closeCameraBtn").addEventListener("click", stopCamera);
+const doneCam = document.getElementById("doneCameraBtn");
+if (doneCam) doneCam.addEventListener("click", stopCamera);
+document.getElementById("captureFrameBtn").addEventListener("click", captureAction);
+document.getElementById("switchCameraBtn").addEventListener("click", () => {
+  cameraFacingMode = cameraFacingMode === "environment" ? "user" : "environment";
+  startCamera(cameraMode);
+});
+document.getElementById("barcodeImageInput").addEventListener("change", (e) => {
+  if (e.target.files && e.target.files[0]) {
+    scanBarcodeFromFile(e.target.files[0]);
+  }
+});
+document.getElementById("mobileCameraInput").addEventListener("change", (e) => {
+  if (e.target.files && e.target.files.length) {
+    addEvidenceFiles(e.target.files);
+    e.target.value = "";
+  }
+});
+
+// Accessibility font scaling (A-, A, A+)
+let currentFontScale = 100;
+function setFontScale(scale) {
+  currentFontScale = Math.max(80, Math.min(135, scale));
+  document.documentElement.style.fontSize = `${currentFontScale}%`;
+  try {
+    localStorage.setItem("packsure_font_scale", String(currentFontScale));
+  } catch (_) {}
+}
+try {
+  const savedScale = localStorage.getItem("packsure_font_scale");
+  if (savedScale) setFontScale(parseInt(savedScale, 10));
+} catch (_) {}
+
+const fontDecBtn = document.getElementById("fontDec");
+if (fontDecBtn) fontDecBtn.addEventListener("click", () => setFontScale(currentFontScale - 10));
+const fontNormalBtn = document.getElementById("fontNormal");
+if (fontNormalBtn) fontNormalBtn.addEventListener("click", () => setFontScale(100));
+const fontIncBtn = document.getElementById("fontInc");
+if (fontIncBtn) fontIncBtn.addEventListener("click", () => setFontScale(currentFontScale + 10));
+
+// Keyboard interaction for card buttons
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    const card = e.target.closest('.service-card[data-page]');
+    if (card && card.dataset.page) {
+      e.preventDefault();
+      showPage(card.dataset.page);
+    }
+  }
 });
 
 renderDemoChips();

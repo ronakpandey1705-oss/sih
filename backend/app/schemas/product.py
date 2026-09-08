@@ -37,3 +37,12 @@ class ProductLookupResponse(BaseModel):
     found: bool
     message: Optional[str] = None
     product: Optional[ProductResponse] = None
+
+
+class BarcodeScanResponse(BaseModel):
+    found: bool
+    barcode: Optional[str] = None
+    barcode_type: Optional[str] = None
+    message: Optional[str] = None
+    product: Optional[ProductResponse] = None
+

@@ -11,6 +11,8 @@ class ImageUploadResponse(BaseModel):
     mime_type: Optional[str] = Field(None, description="Image MIME type")
     created_at: datetime
     preprocessed: bool = Field(False, description="Whether preprocessing has been executed")
+    barcode_detected: bool = Field(False, description="Whether a barcode was automatically detected from the image")
+    detected_barcode: Optional[str] = Field(None, description="Automatically decoded barcode string if present")
 
     model_config = ConfigDict(from_attributes=True)
 

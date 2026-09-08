@@ -1,9 +1,10 @@
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.config import settings
 from app.database import engine, Base, SessionLocal
 from app.models import (
@@ -142,3 +143,21 @@ def serve_packsure():
         "docs": "/docs",
         "health": "/api/health",
     }
+
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        if request.url.path.startswith("/api"):
+            return JSONResponse(
+                status_code=404,
+                content={"detail": exc.detail or "API endpoint not found"}
+            )
+        four_o_four_path = os.path.join(FRONTEND_DIR, "404.html")
+        if os.path.isfile(four_o_four_path):
+            return FileResponse(four_o_four_path, status_code=404)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
