@@ -23,6 +23,8 @@ from app.services.reports.report_service import ReportService
 from app.services.extraction.field_extractor import FieldExtractor
 from app.services.compliance.rules_engine import RulesEngine
 from app.services.ocr.paddle_ocr import PaddleOCRService
+from app.services.storage.storage_service import StorageService
+from app.services.products.product_service import ProductService
 
 router = APIRouter(prefix="/scans/{scan_id}", tags=["Reports & Evidence"])
 inspections_reports_router = APIRouter(prefix="/inspections/{scan_id}", tags=["Official Inspection Reports"])
@@ -223,7 +225,7 @@ def _handle_analyze(scan_id: str, db: Session) -> UnifiedAnalysisResponse:
                     )
                     if existing_for_image:
                         continue
-                    target_path = img.original_path
+                    target_path = StorageService.resolve_local_image_path(img.original_path, scan_id=img.scan_id)
                     if target_path and os.path.exists(target_path):
                         ocr_items = ocr_service.process_image(target_path, img.id)
                         PaddleOCRService.save_ocr_results_to_db(db, scan_id, img.id, ocr_items)
@@ -235,10 +237,21 @@ def _handle_analyze(scan_id: str, db: Session) -> UnifiedAnalysisResponse:
     # 2. Extract declarations
     extracted_fields = FieldExtractor.extract_from_scan(scan_id, db)
 
-    # 3. Evaluate compliance
+    # 3. Auto-save product to reference database catalog
+    try:
+        ProductService.upsert_inspected_product(
+            db=db,
+            scan_id=scan.id,
+            barcode=scan.barcode,
+            extracted_fields=extracted_fields
+        )
+    except Exception as exc:
+        print(f"[ANALYZE] Error auto-saving inspected product to database: {exc}")
+
+    # 4. Evaluate compliance
     eval_resp = RulesEngine.evaluate_scan(scan_id, db)
 
-    # 4. Check discrepancies
+    # 5. Check discrepancies
     disc_data = DiscrepancyService.check_discrepancies(scan_id, db)
 
     rules_summary_list = [

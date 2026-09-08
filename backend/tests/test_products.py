@@ -48,3 +48,49 @@ def test_get_product_by_id(client):
 def test_get_nonexistent_product_by_id(client):
     response = client.get("/api/products/99999")
     assert response.status_code == 404
+
+
+def test_upsert_inspected_product(client):
+    from tests.conftest import TestingSessionLocal
+    from app.services.products.product_service import ProductService
+    from app.models.scan import Scan
+    from app.models.product import Product
+
+    resp = client.post("/api/inspections/", json={"establishment_name": "New Mart", "inspection_location": "Delhi"})
+    insp_id = resp.json()["inspection_id"]
+
+    db = TestingSessionLocal()
+    try:
+        extracted = [
+            {"field_name": "product_name", "value": "Aashirvaad Superior Atta"},
+            {"field_name": "net_quantity", "value": "5 kg"},
+            {"field_name": "mrp", "value": "₹ 310.00 (incl. of all taxes)"},
+            {"field_name": "manufacturer_name_and_address", "value": "ITC Limited, 37 J.L. Nehru Road, Kolkata 700071"},
+            {"field_name": "consumer_care", "value": "Toll Free: 1800-425-4444, Email: itccares@itc.in"}
+        ]
+        test_barcode = "8901030869999"
+        prod = ProductService.upsert_inspected_product(
+            db=db,
+            scan_id=insp_id,
+            barcode=test_barcode,
+            extracted_fields=extracted
+        )
+        assert prod is not None
+        assert prod.barcode == test_barcode
+        assert prod.name == "Aashirvaad Superior Atta"
+        assert prod.category == "Food & Beverages"
+        assert prod.is_demo is False
+
+        # Verify scan is linked
+        scan = db.query(Scan).filter(Scan.id == insp_id).first()
+        assert scan.product_id == prod.id
+
+        # Verify it can be looked up via API
+        lookup_resp = client.post("/api/products/lookup", json={"barcode": test_barcode})
+        assert lookup_resp.status_code == 200
+        assert lookup_resp.json()["found"] is True
+        assert lookup_resp.json()["product"]["name"] == "Aashirvaad Superior Atta"
+        assert lookup_resp.json()["product"]["is_demo"] is False
+    finally:
+        db.close()
+

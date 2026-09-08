@@ -22,6 +22,7 @@ from app.schemas.ocr import (
 )
 from app.services.vision.preprocessing import ImagePreprocessor
 from app.services.ocr.paddle_ocr import PaddleOCRService
+from app.services.storage.storage_service import StorageService
 
 router = APIRouter(prefix="/scans/{scan_id}", tags=["Images & OCR"])
 inspections_images_router = APIRouter(prefix="/inspections/{scan_id}", tags=["Inspection Images & OCR"])
@@ -137,12 +138,12 @@ async def upload_image(
     except Exception as e:
         print(f"[BARCODE_DETECTION] Non-blocking notice: {e}")
 
-    # Optional upload to cloud storage if configured
+    # Optional upload to cloud storage for permanent backup
     try:
-        from app.services.storage.storage_service import StorageService
         if StorageService.is_cloud_enabled():
             cloud_url = StorageService.upload_image(dest_path, public_id=f"{scan_id}_{image_id}")
-            if cloud_url and cloud_url.startswith("http"):
+            # If upload succeeded, retain local dest_path so OCR/OpenCV have instant zero-latency file access
+            if not os.path.exists(dest_path) and cloud_url and cloud_url.startswith("http"):
                 uploaded_image.original_path = cloud_url
     except Exception as e:
         print(f"[STORAGE WARNING] Cloud upload notice: {e}")
@@ -229,9 +230,16 @@ def preprocess_image(
     scan_dir = os.path.join(settings.UPLOAD_DIR, scan_id)
     out_path = os.path.join(scan_dir, f"{image_id}_preprocessed.png")
 
+    source_path = StorageService.resolve_local_image_path(image.original_path, scan_id=scan_id)
+    if not source_path or not os.path.exists(source_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image file not accessible on server or storage cache"
+        )
+
     try:
         metrics = ImagePreprocessor.process_pipeline(
-            image_path=image.original_path,
+            image_path=source_path,
             output_path=out_path,
             deskew=deskew
         )
@@ -282,23 +290,24 @@ def run_ocr_on_image(
         )
 
     # Determine image path (preprocessed if available and requested, else original)
-    target_path = image.original_path
+    resolved_original = StorageService.resolve_local_image_path(image.original_path, scan_id=scan_id)
+    target_path = resolved_original
+
     if use_preprocessed and image.preprocessed_path and os.path.exists(image.preprocessed_path):
         target_path = image.preprocessed_path
-    elif use_preprocessed and not image.preprocessed_path:
-        # Automatically run preprocessing if not yet performed
+    elif use_preprocessed and not image.preprocessed_path and target_path:
         scan_dir = os.path.join(settings.UPLOAD_DIR, scan_id)
         out_path = os.path.join(scan_dir, f"{image_id}_preprocessed.png")
         try:
-            metrics = ImagePreprocessor.process_pipeline(image.original_path, out_path)
+            metrics = ImagePreprocessor.process_pipeline(target_path, out_path)
             image.preprocessed_path = metrics["preprocessed_path"]
             db.commit()
             target_path = image.preprocessed_path
         except Exception:
-            target_path = image.original_path
+            target_path = resolved_original
 
     ocr_service = PaddleOCRService.get_instance()
-    extracted_items = ocr_service.process_image(target_path, image_id)
+    extracted_items = ocr_service.process_image(target_path, image_id) if target_path else []
 
     # Clear previous OCR results for this image if re-running
     db.query(OCRResult).filter(OCRResult.image_id == image_id).delete()
