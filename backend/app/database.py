@@ -23,11 +23,19 @@ else:
         "pool_recycle": 300,
     })
 
-engine = create_engine(
-    db_url,
-    connect_args=connect_args,
-    **engine_kwargs
-)
+try:
+    engine = create_engine(
+        db_url,
+        connect_args=connect_args,
+        **engine_kwargs
+    )
+except Exception as exc:
+    print(f"[DATABASE WARNING] Failed to connect to {db_url}: {exc}. Falling back to SQLite.")
+    engine = create_engine(
+        "sqlite:///./legal_metrology.db",
+        connect_args={"check_same_thread": False},
+        echo=False
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

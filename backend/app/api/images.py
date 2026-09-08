@@ -4,6 +4,7 @@ import uuid
 import shutil
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
+from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.config import settings
@@ -136,6 +137,16 @@ async def upload_image(
     except Exception as e:
         print(f"[BARCODE_DETECTION] Non-blocking notice: {e}")
 
+    # Optional upload to cloud storage if configured
+    try:
+        from app.services.storage.storage_service import StorageService
+        if StorageService.is_cloud_enabled():
+            cloud_url = StorageService.upload_image(dest_path, public_id=f"{scan_id}_{image_id}")
+            if cloud_url and cloud_url.startswith("http"):
+                uploaded_image.original_path = cloud_url
+    except Exception as e:
+        print(f"[STORAGE WARNING] Cloud upload notice: {e}")
+
     # Update scan status and optional location
     scan.status = "IMAGES_UPLOADED"
     if user_location and not scan.user_location:
@@ -167,6 +178,24 @@ def list_scan_images(
     _verify_scan_exists(scan_id, db)
     images = db.query(UploadedImage).filter(UploadedImage.scan_id == scan_id).all()
     return [ImageDetailResponse.model_validate(img) for img in images]
+
+
+@router.get("/images/{image_id}/file", summary="Retrieve uploaded image file or redirect to cloud storage")
+@inspections_images_router.get("/images/{image_id}/file", summary="Retrieve uploaded image file or redirect to cloud storage")
+def get_image_file(scan_id: str, image_id: str, db: Session = Depends(get_db)):
+    """Serve uploaded packaging image from disk or redirect to permanent cloud storage."""
+    _verify_scan_exists(scan_id, db)
+    image = db.query(UploadedImage).filter(
+        UploadedImage.id == image_id,
+        UploadedImage.scan_id == scan_id
+    ).first()
+    if not image:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Image '{image_id}' not found")
+    if image.original_path.startswith("http://") or image.original_path.startswith("https://"):
+        return RedirectResponse(image.original_path)
+    if os.path.exists(image.original_path):
+        return FileResponse(image.original_path, media_type=image.mime_type or "image/jpeg")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file not found on disk")
 
 
 @router.post("/images/{image_id}/preprocess", response_model=PreprocessResultResponse, summary="Run OpenCV image preprocessing")

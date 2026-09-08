@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./uploads"
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    CLOUDINARY_URL: str = ""
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
 
     model_config = SettingsConfigDict(
         env_file=str(_BACKEND_DIR / ".env"),

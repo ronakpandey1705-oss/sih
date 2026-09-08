@@ -1,7 +1,7 @@
 services:
   - type: web
     name: packsure
-    env: python
+    runtime: python
     region: singapore
     plan: free
     branch: main
