@@ -71,11 +71,15 @@ function showPage(id) {
   if (target) {
     target.classList.add("active");
   }
-  document.querySelectorAll("nav button").forEach((b) => {
+  document.querySelectorAll(".gov-nav-item, nav button").forEach((b) => {
     b.classList.toggle("active", b.dataset.page === id);
   });
   if (PAGE_TITLES[id]) {
     document.title = `PackSure | ${PAGE_TITLES[id]}`;
+    const crumb = document.getElementById("pageCrumb");
+    if (crumb) {
+      crumb.innerHTML = `<span>National Portal</span> <strong>${escapeHtml(PAGE_TITLES[id])}</strong>`;
+    }
   }
   const mainNav = document.getElementById("mainNav");
   if (mainNav) {
@@ -1372,4 +1376,39 @@ renderOfficerStatus();
 ping();
 loadBootstrap();
 setInterval(ping, 20000);
+
+// Accessibility Text Resizing Listeners (Government Portal Standard)
+const fontDecBtn = document.getElementById("fontDec");
+if (fontDecBtn) {
+  fontDecBtn.addEventListener("click", () => {
+    document.documentElement.classList.remove("font-lg");
+    document.documentElement.classList.add("font-sm");
+    toast("Text Size: Small (A-)");
+  });
+}
+const fontNormBtn = document.getElementById("fontNormal");
+if (fontNormBtn) {
+  fontNormBtn.addEventListener("click", () => {
+    document.documentElement.classList.remove("font-sm", "font-lg");
+    toast("Text Size: Standard (A)");
+  });
+}
+const fontIncBtn = document.getElementById("fontInc");
+if (fontIncBtn) {
+  fontIncBtn.addEventListener("click", () => {
+    document.documentElement.classList.remove("font-sm");
+    document.documentElement.classList.add("font-lg");
+    toast("Text Size: Large (A+)");
+  });
+}
+
+// Mobile Government Navigation Drawer Toggle
+const mobileNavToggle = document.getElementById("navToggle");
+const mobileMainNav = document.getElementById("mainNav");
+if (mobileNavToggle && mobileMainNav) {
+  mobileNavToggle.addEventListener("click", () => {
+    const isOpen = mobileMainNav.classList.toggle("nav-open");
+    mobileNavToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+}
 

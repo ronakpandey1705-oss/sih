@@ -18,179 +18,236 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/styles.css?v=11" />
+  <link rel="stylesheet" href="/static/styles.css?v=12" />
 </head>
 <body>
   <!-- Sovereign State Emblem Watermark -->
   <div class="emblem-watermark" aria-hidden="true"></div>
 
-  <!-- Masthead Banner -->
-  <div class="gov-topbar">
-    <div class="gov-topbar-inner">
-      <div class="gov-topbar-flag">
-        <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="16" height="4" fill="#FF9933"/>
-          <rect y="4" width="16" height="4" fill="#FFFFFF"/>
-          <rect y="8" width="16" height="4" fill="#138808"/>
-          <circle cx="8" cy="6" r="1.5" stroke="#000080" stroke-width="0.6"/>
-        </svg>
-        <span>Department of Consumer Affairs, Legal Metrology Division</span>
-      </div>
-      <div class="gov-topbar-actions">
-        <div class="gov-access-group">
-          <button type="button" class="gov-access-btn" id="fontDec" title="Decrease font size" aria-label="Decrease font size">A-</button>
-          <button type="button" class="gov-access-btn" id="fontNormal" title="Standard font size" aria-label="Standard font size">A</button>
-          <button type="button" class="gov-access-btn" id="fontInc" title="Increase font size" aria-label="Increase font size">A+</button>
+  <!-- Grand Sovereign Header (National Portal Architecture) -->
+  <header class="gov-portal-header" role="banner">
+    <!-- 1. National Utility & Accessibility Bar -->
+    <div class="gov-topbar">
+      <div class="gov-topbar-inner">
+        <div class="gov-topbar-flag">
+          <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Indian National Tricolor">
+            <rect width="18" height="4.33" fill="#FF9933"/>
+            <rect y="4.33" width="18" height="4.33" fill="#FFFFFF"/>
+            <rect y="8.66" width="18" height="4.34" fill="#138808"/>
+            <circle cx="9" cy="6.5" r="1.6" stroke="#000080" stroke-width="0.65"/>
+          </svg>
+          <span class="gov-title-hindi">भारत सरकार | GOVERNMENT OF INDIA</span>
+          <span class="gov-topbar-divider">|</span>
+          <span class="gov-title-eng">उपभोक्ता मामले विभाग | Department of Consumer Affairs</span>
         </div>
-        <span class="gov-lang-select" aria-label="Language selection">English | हिन्दी</span>
-        <div id="topbarOfficerContainer" style="display:inline-flex;align-items:center;gap:6px;">
-          <button type="button" class="officer-topbar-btn" id="openOfficerAuthBtn" title="Official Government Access">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            Officer Sign In
-          </button>
+        <div class="gov-topbar-actions">
+          <a href="#mainContent" class="skip-link">Skip to Main Content</a>
+          <div class="gov-access-group" aria-label="Text size accessibility">
+            <button type="button" class="gov-access-btn" id="fontDec" title="Decrease font size" aria-label="Decrease font size">A-</button>
+            <button type="button" class="gov-access-btn" id="fontNormal" title="Standard font size" aria-label="Standard font size">A</button>
+            <button type="button" class="gov-access-btn" id="fontInc" title="Increase font size" aria-label="Increase font size">A+</button>
+          </div>
+          <span class="gov-lang-select" aria-label="Language selection">English | हिन्दी</span>
+          <div class="gov-helpline-chip" title="National Consumer Helpline">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            <span>NCH: 1915</span>
+          </div>
         </div>
-        <div class="gov-topbar-domain">packsure.gov.in</div>
       </div>
     </div>
-  </div>
 
-  <div class="app shell">
-    <aside class="sidebar" id="sidebar">
-      <a class="brand" href="#dashboard" data-page="dashboard" aria-label="PackSure Home">
-        <div class="brand-mark">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v18"></path>
-            <path d="m3 7 9-4 9 4"></path>
-            <path d="M3 7v10l9 4 9-4V7"></path>
-            <path d="M6 10.5 12 14l6-3.5"></path>
-          </svg>
+    <!-- 2. Grand Sovereign Masthead Banner -->
+    <div class="gov-masthead">
+      <div class="gov-masthead-inner">
+        <div class="gov-masthead-brand">
+          <img src="/static/emblem.svg" alt="State Emblem of India" class="gov-emblem-seal" width="56" height="72" />
+          <div class="gov-masthead-titles">
+            <div class="gov-dept-hindi">उपभोक्ता मामले, खाद्य एवं सार्वजनिक वितरण मंत्रालय</div>
+            <div class="gov-dept-eng">MINISTRY OF CONSUMER AFFAIRS, FOOD &amp; PUBLIC DISTRIBUTION</div>
+            <div class="gov-div-title">विधि मापविज्ञान प्रभाग &middot; Legal Metrology Division</div>
+          </div>
         </div>
-        <div>
-          <div class="brand-title">PackSure</div>
-          <span class="brand-subtitle">Legal Metrology</span>
-        </div>
-      </a>
 
-      <nav id="mainNav">
-        <p class="side-label">Workspace</p>
-        <button class="active" data-page="dashboard">
-          <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
-          Dashboard
-        </button>
-        <button data-page="inspect">
-          <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
-          Inspect
-        </button>
-        <button data-page="results">
-          <svg viewBox="0 0 24 24"><path d="m9 11 3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-          Results
-        </button>
-        <p class="side-label">Reference</p>
-        <button data-page="catalog">
-          <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
-          Catalog
-        </button>
-        <button data-page="rules">
-          <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
-          Rules
-        </button>
-        <button data-page="assistant">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          Assistant
-        </button>
-        <p class="side-label">Portal</p>
-        <button data-page="about">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-          About
-        </button>
-        <button data-page="terms">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-          Terms
-        </button>
-        <button data-page="privacy">
-          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          Privacy
-        </button>
-        <button data-page="login" id="navLoginBtn">
-          <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-          Officer portal
-        </button>
-      </nav>
-    </aside>
-
-    <div class="workspace">
-    <header>
-      <div class="nav">
-        <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle Navigation Menu" aria-expanded="false">
-          <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        </button>
-        <div class="crumb" id="pageCrumb">
-          <span>National portal</span>
-          <strong>Dashboard</strong>
+        <div class="gov-portal-identity">
+          <a class="brand" href="#dashboard" data-page="dashboard" aria-label="PackSure Home">
+            <div class="brand-mark">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v18"></path>
+                <path d="m3 7 9-4 9 4"></path>
+                <path d="M3 7v10l9 4 9-4V7"></path>
+                <path d="M6 10.5 12 14l6-3.5"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="brand-title">PackSure</div>
+              <span class="brand-subtitle">SIH 2026 National Screening Desk</span>
+            </div>
+          </a>
         </div>
-        <div id="headerOfficerArea" style="display:inline-flex;align-items:center;gap:8px;"></div>
-        <button class="btn-header-cta" data-page="inspect" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
-          New inspection
-        </button>
-        <div class="health-dot" id="healthDot">
-          <i></i>
-          <span>Connecting</span>
+
+        <div class="gov-masthead-actions">
+          <div class="sih-initiative-badge" title="Smart India Hackathon 2026 National Initiative">
+            <span class="sih-tag">SIH 2026</span>
+            <span class="sih-desc">PS: SIH26034</span>
+          </div>
+          <div id="topbarOfficerContainer" style="display:inline-flex;align-items:center;gap:6px;">
+            <button type="button" class="officer-topbar-btn" id="openOfficerAuthBtn" title="Official Government Access">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Officer Sign In</span>
+            </button>
+          </div>
+          <div id="headerOfficerArea" style="display:inline-flex;align-items:center;gap:8px;"></div>
+          <div class="health-dot" id="healthDot" title="System Operational Status">
+            <i></i>
+            <span>Connecting</span>
+          </div>
         </div>
       </div>
-    </header>
+    </div>
 
-    <main>
+    <!-- 3. Primary Full-Width Government Navigation Bar (MahaDBT Style) -->
+    <nav class="gov-navbar" aria-label="Primary Portal Navigation">
+      <div class="gov-navbar-inner">
+        <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle Navigation Menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <span>Menu</span>
+        </button>
+
+        <div class="gov-nav-links" id="mainNav">
+          <button class="gov-nav-item active" data-page="dashboard">
+            <svg viewBox="0 0 24 24" width="16" height="16"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+            <span>Dashboard</span>
+          </button>
+          <button class="gov-nav-item" data-page="inspect">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
+            <span>Package Inspection</span>
+          </button>
+          <button class="gov-nav-item" data-page="results">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="m9 11 3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <span>Audit Findings</span>
+          </button>
+          <button class="gov-nav-item" data-page="catalog">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+            <span>Standard Catalog</span>
+          </button>
+          <button class="gov-nav-item" data-page="rules">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
+            <span>Statutory Rules</span>
+          </button>
+          <button class="gov-nav-item" data-page="assistant">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span>AI Legal Desk</span>
+          </button>
+          <button class="gov-nav-item" data-page="about">
+            <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>About</span>
+          </button>
+          <button class="gov-nav-item" data-page="login" id="navLoginBtn">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            <span>Officer Portal</span>
+          </button>
+        </div>
+
+        <div class="gov-navbar-cta">
+          <button class="btn-gov-cta" data-page="inspect" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            <span>New Inspection</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 4. Real-Time Statutory Advisory Marquee Ticker -->
+    <div class="gov-marquee-bar" role="region" aria-label="Official Statutory Advisory">
+      <div class="gov-marquee-inner">
+        <div class="gov-marquee-badge">
+          <span class="live-pulse"></span>
+          <span>STATUTORY ADVISORY</span>
+        </div>
+        <div class="gov-marquee-content">
+          <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();">
+            Mandatory packaging declaration audit under Rule 6 of the Legal Metrology (Packaged Commodities) Rules, 2011 is active across all consumer categories. &bull; Report dual MRP, font deficit, or missing customer care via Helpline 1915 or PackSure Citizen Redressal. &bull; Automated OCR & AI Vision inspection active for field officers.
+          </marquee>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Portal Workspace Container (Full Width / Max 1320px) -->
+  <div class="app-workspace" id="mainContent">
+    <!-- Sub-utility Breadcrumb Bar -->
+    <div class="workspace-subbar">
+      <div class="crumb" id="pageCrumb">
+        <span>National Portal</span>
+        <strong>Dashboard</strong>
+      </div>
+      <div class="subbar-right">
+        <span class="subbar-env-tag">Enforcement Zone: All India</span>
+        <span class="subbar-date" id="livePortalDate">PCR 2011 Active Audit</span>
+      </div>
+    </div>
+
+    <main id="mainContainer">
       <!-- DASHBOARD PAGE -->
       <section id="dashboard" class="page active">
-        <!-- Modern Executive Hero Banner (Dribbble Government Portal Style) -->
+        <!-- MahaDBT-Style Executive Hero Banner -->
         <div class="hero-banner">
           <div class="hero-copy">
             <div class="hero-badge">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Department of Consumer Affairs
+              Department of Consumer Affairs &middot; Legal Metrology Division
             </div>
-            <h1 class="hero-title">PackSure national verification desk</h1>
-            <p class="hero-desc">A calm workspace for officers: identify a pack, photograph the label, then read findings on a separate results sheet.</p>
+            <h1 class="hero-title">National Legal Metrology Compliance &amp; Verification Desk</h1>
+            <p class="hero-desc">Automated packaging compliance screening, Rule 6 statutory audits, and instant legal notice drafting under the Legal Metrology (Packaged Commodities) Rules, 2011.</p>
             <div class="hero-actions">
-              <button class="btn btn-primary" data-page="inspect" type="button">Start inspection</button>
-              <button class="btn btn-ghost hero-ghost" data-page="catalog" type="button">Open catalog</button>
+              <button class="btn btn-primary" data-page="inspect" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
+                Start Inspection
+              </button>
+              <button class="btn btn-ghost hero-ghost" data-page="catalog" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+                Standard Catalog
+              </button>
+              <button class="btn btn-ghost hero-ghost" data-page="rules" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
+                PCR Rules Schedule
+              </button>
             </div>
           </div>
           <div class="hero-art" aria-hidden="true">
             <div class="hero-building"></div>
             <div class="hero-card-float">
-              <strong>Rule 6 desk</strong>
-              <span>Identify · Record · Photograph</span>
+              <strong>Rule 6 Enforcement</strong>
+              <span>Detect &middot; Audit &middot; Enforce</span>
             </div>
           </div>
         </div>
 
-        <!-- 4 Elevated Service Cards (Dribbble/Modern Gov Layout) -->
+        <!-- MahaDBT-Style 4-Pillar Service Gateway Grid -->
         <div class="service-grid">
           <div class="service-card" data-page="inspect" role="button" tabindex="0">
             <div>
               <div class="service-card-top">
-                <div class="service-icon">
+                <div class="service-icon service-icon-blue">
                   <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
                 </div>
                 <div class="service-arrow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
               </div>
-              <h3>Package Inspection</h3>
+              <h3>Package Inspection Desk</h3>
               <p>Scan packaging barcode or upload multi-panel photos to automatically audit MRP, net quantity, manufacturer, and consumer care compliance.</p>
             </div>
             <div class="service-card-footer">
-              <span>Rule 6 Screening</span>
-              <span>Launch &rarr;</span>
+              <span class="service-badge">Rule 6 Screening</span>
+              <span class="service-cta">Launch &rarr;</span>
             </div>
           </div>
 
           <div class="service-card" data-page="catalog" role="button" tabindex="0">
             <div>
               <div class="service-card-top">
-                <div class="service-icon">
+                <div class="service-icon service-icon-gold">
                   <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
                 </div>
                 <div class="service-arrow">
@@ -201,46 +258,46 @@
               <p>Cross-reference commodity records across food, electronics, home textiles, and personal care registered under Legal Metrology schedules.</p>
             </div>
             <div class="service-card-footer">
-              <span>50+ Seeded SKUs</span>
-              <span>Browse &rarr;</span>
+              <span class="service-badge">50+ Seeded SKUs</span>
+              <span class="service-cta">Browse &rarr;</span>
             </div>
           </div>
 
           <div class="service-card" data-page="rules" role="button" tabindex="0">
             <div>
               <div class="service-card-top">
-                <div class="service-icon">
+                <div class="service-icon service-icon-green">
                   <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
                 </div>
                 <div class="service-arrow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
               </div>
-              <h3>Statutory Rules</h3>
+              <h3>Statutory Rules Schedule</h3>
               <p>Inspect active Legal Metrology (Packaged Commodities) Rules, 2011 clauses, minimum font heights, and unit standardization mandates.</p>
             </div>
             <div class="service-card-footer">
-              <span>Rule 6, 7 &amp; 8</span>
-              <span>Review &rarr;</span>
+              <span class="service-badge">Rule 6, 7 &amp; 8</span>
+              <span class="service-cta">Review &rarr;</span>
             </div>
           </div>
 
           <div class="service-card" data-page="assistant" role="button" tabindex="0">
             <div>
               <div class="service-card-top">
-                <div class="service-icon">
+                <div class="service-icon service-icon-navy">
                   <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 </div>
                 <div class="service-arrow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
               </div>
-              <h3>Officer Assistant</h3>
-              <p>Query statutory advisory guidance, violation classification standards, compounding provisions, and notice generation criteria.</p>
+              <h3>Officer AI Assistant</h3>
+              <p>Query statutory advisory guidance, violation classification standards, compounding provisions, and legal notice generation criteria.</p>
             </div>
             <div class="service-card-footer">
-              <span>Legal Metrology AI</span>
-              <span>Consult &rarr;</span>
+              <span class="service-badge">Legal Metrology AI</span>
+              <span class="service-cta">Consult &rarr;</span>
             </div>
           </div>
         </div>
@@ -1179,6 +1236,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="/static/app.js?v=11"></script>
+  <script src="/static/app.js?v=12"></script>
 </body>
 </html>
