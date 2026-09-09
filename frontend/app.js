@@ -508,14 +508,15 @@ function renderResults() {
       if (missing.length) {
         missingSec.style.display = "block";
         missingList.innerHTML = missing.map((m) => `
-          <div class="product-item" style="border-left: 3px solid var(--status-fail-border);background: rgba(220, 38, 38, 0.04)">
-            <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
-              <span style="font-weight:700;color:var(--status-fail-text)">${escapeHtml(m.label)}</span>
+          <div class="audit-missing-card">
+            <div class="audit-missing-card-head">
+              <span class="audit-missing-card-title">${escapeHtml(m.label)}</span>
               <span class="status-tag fail" style="font-size:10px">${escapeHtml(m.rule_number)}</span>
             </div>
-            <p style="margin:4px 0;font-size:13px">${escapeHtml(m.description)}</p>
-            <div class="muted" style="margin-top:6px;font-size:12px;color:var(--text-dim)">
-              <strong>Guidance:</strong> ${escapeHtml(m.recommendation)}
+            <p class="audit-missing-card-desc">${escapeHtml(m.description)}</p>
+            <div class="audit-missing-card-tip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              <span><strong>Guidance:</strong> ${escapeHtml(m.recommendation)}</span>
             </div>
           </div>
         `).join("");
@@ -525,18 +526,27 @@ function renderResults() {
 
       if (detected.length) {
         detectedSec.style.display = "block";
-        detectedList.innerHTML = detected.map((d) => `
-          <div class="product-item" style="border-left: 3px solid var(--status-pass-border);background: rgba(16, 185, 129, 0.04)">
-            <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
-              <span style="font-weight:700;color:var(--status-pass-text)">${escapeHtml(d.label)}</span>
-              <span class="status-tag pass" style="font-size:10px">${escapeHtml(d.rule_number)}</span>
+        detectedList.innerHTML = detected.map((d) => {
+          let valHtml = escapeHtml(d.value);
+          if (d.field === "consumer_care") {
+            valHtml = valHtml
+              .replace(/(\b\d{3,4}[-\s]?\d{3,4}[-\s]?\d{3,4}\b|\b1800[-\s]?\d{3,4}[-\s]?\d{3,4}\b)/g, '<a href="tel:$1">$1</a>')
+              .replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1">$1</a>');
+          }
+          return `
+            <div class="audit-detected-card">
+              <div class="audit-detected-card-head">
+                <span class="audit-detected-card-label">${escapeHtml(d.label)}</span>
+                <span class="status-tag pass" style="font-size:10px">${escapeHtml(d.rule_number)}</span>
+              </div>
+              <div class="audit-detected-card-val">${valHtml}</div>
+              <div class="audit-detected-card-meta">
+                <span>${d.method === 'AI_LLM_ASSISTED' ? 'AI Vision Extraction' : 'Direct OCR Verification'}</span>
+                <span>${Math.round((d.confidence || 0.95) * 100)}% Conf.</span>
+              </div>
             </div>
-            <div style="margin:4px 0;font-weight:600;font-size:14px">${escapeHtml(d.value)}</div>
-            <div class="muted" style="margin-top:4px;font-size:11.5px">
-              ${d.method === 'AI_LLM_ASSISTED' ? 'AI-Assisted Vision Extraction' : 'Direct Label OCR Verification'}
-            </div>
-          </div>
-        `).join("");
+          `;
+        }).join("");
       } else {
         detectedSec.style.display = "none";
       }
