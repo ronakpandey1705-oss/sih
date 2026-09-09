@@ -17,8 +17,8 @@
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/styles.css?v=8" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=9" />
 </head>
 <body>
   <!-- Sovereign State Emblem Watermark -->
@@ -54,79 +54,85 @@
     </div>
   </div>
 
-  <div class="app">
+  <div class="app shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#dashboard" data-page="dashboard" aria-label="PackSure Home">
+        <div class="brand-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v18"></path>
+            <path d="m3 7 9-4 9 4"></path>
+            <path d="M3 7v10l9 4 9-4V7"></path>
+            <path d="M6 10.5 12 14l6-3.5"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">PackSure</div>
+          <span class="brand-subtitle">Legal Metrology</span>
+        </div>
+      </a>
+
+      <nav id="mainNav">
+        <p class="side-label">Workspace</p>
+        <button class="active" data-page="dashboard">
+          <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+          Dashboard
+        </button>
+        <button data-page="inspect">
+          <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
+          Inspect
+        </button>
+        <button data-page="results">
+          <svg viewBox="0 0 24 24"><path d="m9 11 3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          Results
+        </button>
+        <p class="side-label">Reference</p>
+        <button data-page="catalog">
+          <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+          Catalog
+        </button>
+        <button data-page="rules">
+          <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
+          Rules
+        </button>
+        <button data-page="assistant">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          Assistant
+        </button>
+        <p class="side-label">Portal</p>
+        <button data-page="about">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          About
+        </button>
+        <button data-page="terms">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          Terms
+        </button>
+        <button data-page="privacy">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          Privacy
+        </button>
+        <button data-page="login" id="navLoginBtn">
+          <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+          Officer portal
+        </button>
+      </nav>
+    </aside>
+
+    <div class="workspace">
     <header>
       <div class="nav">
-        <a class="brand" href="#dashboard" data-page="dashboard" aria-label="PackSure Home">
-          <div class="brand-mark">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3v18"></path>
-              <path d="m3 7 9-4 9 4"></path>
-              <path d="M3 7v10l9 4 9-4V7"></path>
-              <path d="M6 10.5 12 14l6-3.5"></path>
-            </svg>
-          </div>
-          <div>
-            <div class="brand-title">PackSure</div>
-            <span class="brand-subtitle">Legal Metrology Verification: SIH26034</span>
-          </div>
-        </a>
-
         <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle Navigation Menu" aria-expanded="false">
           <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-
-        <nav id="mainNav">
-          <button class="active" data-page="dashboard">
-            <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
-            Dashboard
-          </button>
-          <button data-page="inspect">
-            <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
-            Inspect
-          </button>
-          <button data-page="results">
-            <svg viewBox="0 0 24 24"><path d="m9 11 3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-            Results
-          </button>
-          <button data-page="catalog">
-            <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
-            Catalog
-          </button>
-          <button data-page="rules">
-            <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
-            Rules
-          </button>
-          <button data-page="assistant">
-            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            Assistant
-          </button>
-          <button data-page="terms">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-            Terms
-          </button>
-          <button data-page="privacy">
-            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            Privacy
-          </button>
-          <button data-page="about">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            About
-          </button>
-          <button data-page="login" id="navLoginBtn">
-            <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-            Officer Portal
-          </button>
-        </nav>
-
-        <!-- Dedicated Officer Status & Prominent Logout in Header -->
+        <div class="crumb" id="pageCrumb">
+          <span>National portal</span>
+          <strong>Dashboard</strong>
+        </div>
         <div id="headerOfficerArea" style="display:inline-flex;align-items:center;gap:8px;"></div>
-
         <button class="btn-header-cta" data-page="inspect" type="button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
-          New Inspection
+          New inspection
         </button>
-
         <div class="health-dot" id="healthDot">
           <i></i>
           <span>Connecting</span>
@@ -139,25 +145,24 @@
       <section id="dashboard" class="page active">
         <!-- Modern Executive Hero Banner (Dribbble Government Portal Style) -->
         <div class="hero-banner">
-          <div class="hero-badge">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Official Compliance &amp; Verification Portal
+          <div class="hero-copy">
+            <div class="hero-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Department of Consumer Affairs
+            </div>
+            <h1 class="hero-title">PackSure national verification desk</h1>
+            <p class="hero-desc">A calm workspace for officers: identify a pack, photograph the label, then read findings on a separate results sheet.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" data-page="inspect" type="button">Start inspection</button>
+              <button class="btn btn-ghost hero-ghost" data-page="catalog" type="button">Open catalog</button>
+            </div>
           </div>
-          <h1 class="hero-title">National Legal Metrology Verification System</h1>
-          <p class="hero-desc">Screen packaged commodities against Rule 6 statutory declarations, identify non-conforming packaging evidence, cross-reference reference catalog SKUs, and record enforcement determinations with tamper-evident audit logs.</p>
-          <div class="hero-actions">
-            <button class="btn btn-primary" data-page="inspect" type="button">
-              <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
-              Start Packaging Inspection
-            </button>
-            <button class="btn btn-ghost" style="color:#ffffff;border-color:#334155;background:rgba(255,255,255,0.06);" data-page="catalog" type="button">
-              <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path></svg>
-              Standard Reference Catalog
-            </button>
-            <button class="btn btn-ghost" style="color:#94a3b8;border-color:#334155;" data-page="rules" type="button">
-              <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path></svg>
-              Statutory Rules Engine
-            </button>
+          <div class="hero-art" aria-hidden="true">
+            <div class="hero-building"></div>
+            <div class="hero-card-float">
+              <strong>Rule 6 desk</strong>
+              <span>Identify · Record · Photograph</span>
+            </div>
           </div>
         </div>
 
@@ -291,121 +296,109 @@
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="card">
-            <h2>
-              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              Inspection Workflow Instructions
-            </h2>
-            <p class="muted">PackSure provides an assistive inspection workflow to support authorized enforcement officers:</p>
-            <table style="margin-top:14px">
-              <tbody>
-                <tr>
-                  <td style="width:140px"><strong>1. Barcode Lookup</strong></td>
-                  <td class="muted">Check pack EAN against standard registered products, or screen unlisted packs directly.</td>
-                </tr>
-                <tr>
-                  <td><strong>2. Label Evidence</strong></td>
-                  <td class="muted">Upload clear photographic evidence of all principal display panel declarations (Front, Back, MRP &amp; Barcode panels).</td>
-                </tr>
-                <tr>
-                  <td><strong>3. Screening Pipeline</strong></td>
-                  <td class="muted">Automated OCR, field extraction, Rule 6 validation, and discrepancy analysis.</td>
-                </tr>
-                <tr>
-                  <td><strong>4. Officer Record</strong></td>
-                  <td class="muted">Record statutory determination and generate a tamper-evident inspection report.</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="row" style="margin-top:20px">
-              <button class="btn btn-primary" data-page="inspect" type="button">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
-                Open Inspector
-              </button>
-              <button class="btn btn-ghost" data-page="catalog" type="button">
-                Browse Reference Catalog
-              </button>
-            </div>
-          </div>
-
-          <div class="card">
-            <h2>
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-              Recent Browser Sessions
-            </h2>
-            <div id="recentList" class="muted" style="margin-top:10px">No inspections recorded in this session.</div>
-          </div>
+        <div class="card">
+          <h2>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            Recent sessions
+          </h2>
+          <p class="muted">This list is only this browser. Open Results after a screening to see the full finding set.</p>
+          <div id="recentList" class="muted" style="margin-top:10px">No inspections recorded in this session.</div>
         </div>
       </section>
 
       <!-- INSPECT PAGE -->
       <section id="inspect" class="page">
         <div class="page-header">
-          <div class="badge-tag">Verification Station</div>
-          <h1>Inspect Package Declarations</h1>
-          <p class="lede">Enter the product barcode or choose a reference item from the demo catalog. PackSure performs label compliance screening on both registered and unlisted packaged commodities.</p>
+          <div class="badge-tag">Verification station</div>
+          <h1>Inspect a pack</h1>
+          <p class="lede">Follow the three stations in order. Identify the commodity, record the visit, then add label photos. Results stay on their own page.</p>
         </div>
+
+        <ol class="inspect-tracker" aria-label="Inspection progress">
+          <li class="on">
+            <span>01</span>
+            Identify
+          </li>
+          <li>
+            <span>02</span>
+            Record visit
+          </li>
+          <li>
+            <span>03</span>
+            Label photos
+          </li>
+        </ol>
 
         <div id="officerInspectBannerContainer"></div>
 
-        <div class="grid-2">
-          <div class="card">
-            <h2>
-              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-              1. Inspection Metadata
-            </h2>
-            <p class="muted">Record inspector credentials and establishment premises information.</p>
+        <div class="inspect-flow">
+          <article class="card inspect-station" id="stationIdentify">
+            <div class="station-head">
+              <div>
+                <p class="station-kicker">Station 01</p>
+                <h2>Identify the commodity</h2>
+                <p class="muted">Scan the pack or pick a catalog item. Digits stay in the field only — the picker shows product names.</p>
+              </div>
+              <div class="barcode-art" aria-hidden="true"></div>
+            </div>
 
-            <label class="field">Product Barcode (EAN / GTIN)</label>
+            <label class="field" for="barcode">Barcode field</label>
             <div class="row" style="gap:8px">
-              <input id="barcode" placeholder="Enter 13-digit EAN/GTIN barcode (e.g. 8908877665501)" style="flex:1" />
+              <input id="barcode" placeholder="Scan with camera or type the code" style="flex:1" />
               <button type="button" class="btn btn-navy" id="scanCameraBtn" title="Scan barcode with camera">
                 <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect width="10" height="8" x="7" y="8" rx="1"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
-                Scan Barcode
+                Scan
               </button>
             </div>
+            <p class="field-hint">Quick picks from the demo catalog</p>
             <div class="chips" id="demoChips"></div>
-
             <div class="row" style="margin-top:12px">
               <button type="button" class="btn btn-ghost" id="lookupBtn">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                Query Catalog
+                Look up catalog
               </button>
               <label for="barcodeImageInput" class="btn btn-ghost" style="cursor:pointer">
                 <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                Decode from Photo
+                Decode from photo
               </label>
               <input type="file" id="barcodeImageInput" accept="image/*" style="display:none" />
             </div>
-            <div id="lookupBox" class="muted" style="margin-top:10px"></div>
+            <div id="lookupBox" class="lookup-card muted"></div>
+          </article>
 
-            <label class="field">Officer Identification</label>
-            <input id="officerId" placeholder="Official Inspector ID (e.g. LM-INSP-2026-441)" />
-
-            <label class="field">Establishment Name</label>
-            <input id="establishment" placeholder="Retail premise or distributor commercial name" />
-
-            <label class="field">Inspection Location</label>
-            <input id="location" placeholder="Premises address, city, or district" />
-
-            <label class="field">Field Notes</label>
-            <textarea id="notes" placeholder="Official observations regarding batch code, container seal integrity, or inspection context"></textarea>
-
-            <button class="btn btn-navy" id="createBtn" style="margin-top:16px;width:100%">
+          <article class="card inspect-station">
+            <p class="station-kicker">Station 02</p>
+            <h2>Record the visit</h2>
+            <p class="muted">Premise details stay here so they are not mixed with scanning or photos.</p>
+            <div class="visit-grid">
+              <div>
+                <label class="field" for="officerId">Officer identification</label>
+                <input id="officerId" placeholder="Inspector badge" />
+              </div>
+              <div>
+                <label class="field" for="establishment">Establishment</label>
+                <input id="establishment" placeholder="Retail or distributor name" />
+              </div>
+              <div>
+                <label class="field" for="location">Location</label>
+                <input id="location" placeholder="Premises, city, or district" />
+              </div>
+              <div>
+                <label class="field" for="notes">Field notes</label>
+                <textarea id="notes" placeholder="Batch, seal, or context"></textarea>
+              </div>
+            </div>
+            <button class="btn btn-navy" id="createBtn" style="margin-top:16px">
               <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              Initialize Inspection Session
+              Save session
             </button>
             <p class="muted" id="sessionMeta" style="margin-top:10px"></p>
-          </div>
+          </article>
 
-          <div class="card">
-            <h2>
-              <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-              2. Package Label Evidence
-            </h2>
-            <p class="muted">Attach photographs of all packaging panels (front display, back declarations, side/MRP panel, barcode). Multiple photos supported.</p>
-
+          <article class="card inspect-station">
+            <p class="station-kicker">Station 03</p>
+            <h2>Label photographs</h2>
+            <p class="muted">Front, back, MRP panel, and barcode panel. Screening runs only from this station.</p>
             <div class="drop" id="dropZone" style="margin-top:14px">
               <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple />
               <svg class="drop-icon" viewBox="0 0 24 24">
@@ -414,31 +407,26 @@
                 <line x1="12" y1="3" x2="12" y2="15"></line>
               </svg>
               <div class="drop-copy">
-                <strong>Click to choose packaging photos</strong> or drag &amp; drop files here<br>
-                Supports multiple panels: Front PDP, Back Declarations, Side/MRP panel (JPEG, PNG, WebP)
+                <strong>Drop label photos here</strong><br>
+                JPEG, PNG, or WebP
               </div>
               <img id="preview" alt="Pack label evidence preview" />
             </div>
-
-            <!-- Evidence Gallery for Multiple Packaging Photos -->
             <div id="evidenceGallery" class="evidence-gallery" style="display:none"></div>
-
             <div class="row" style="margin-top:16px">
               <button type="button" class="btn btn-navy" id="snapLabelCameraBtn">
                 <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                Take Photo with Camera
+                Camera
               </button>
-              <button type="button" class="btn btn-ghost" id="chooseBtn">
-                Choose Files
-              </button>
+              <button type="button" class="btn btn-ghost" id="chooseBtn">Choose files</button>
               <button type="button" class="btn btn-primary" id="analyzeBtn">
                 <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                Execute Screening Pipeline
+                Run screening
               </button>
             </div>
             <input type="file" id="mobileCameraInput" accept="image/*" capture="environment" multiple style="display:none" />
-            <p class="busy" id="busy">Executing OCR extraction and Legal Metrology rule checks across packaging panels. Please wait.</p>
-          </div>
+            <p class="busy" id="busy">Running OCR and rule checks. This can take a minute.</p>
+          </article>
         </div>
       </section>
 
@@ -971,6 +959,7 @@
         </div>
       </div>
     </footer>
+    </div>
 
   <!-- Legal Metrology Enforcement Officer Authentication Gate Modal -->
   <div class="modal-backdrop" id="officerAuthModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="officerAuthTitle">
@@ -1165,6 +1154,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="/static/app.js?v=7"></script>
+  <script src="/static/app.js?v=8"></script>
 </body>
 </html>

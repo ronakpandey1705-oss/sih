@@ -137,7 +137,7 @@ function renderDashboard() {
 
 function renderDemoChips() {
   document.getElementById("demoChips").innerHTML = DEMO_BARCODES.map(
-    ([code, name]) => `<button class="chip" data-code="${code}" type="button">${name}: ${code}</button>`
+    ([code, name]) => `<button class="chip" data-code="${code}" type="button">${name}</button>`
   ).join("");
   document.querySelectorAll("#demoChips .chip").forEach((btn) => {
     btn.addEventListener("click", () => {
