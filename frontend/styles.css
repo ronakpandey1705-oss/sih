@@ -130,8 +130,10 @@ body {
 }
 
 .gov-topbar-inner {
-  max-width: 1320px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
+  padding: 0 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -237,13 +239,15 @@ body {
 /* 2. Grand Sovereign Masthead Banner */
 .gov-masthead {
   background: #ffffff;
-  padding: 12px 24px;
+  padding: 12px 0;
   border-bottom: 1px solid var(--line);
 }
 
 .gov-masthead-inner {
-  max-width: 1320px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
+  padding: 0 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -435,9 +439,10 @@ body {
 }
 
 .gov-navbar-inner {
-  max-width: 1320px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -528,12 +533,13 @@ body {
 .gov-marquee-bar {
   background: #ffffff;
   border-bottom: 1px solid var(--line);
-  padding: 5px 24px;
+  padding: 5px 32px;
   width: 100%;
 }
 
 .gov-marquee-inner {
-  max-width: 1320px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -583,10 +589,11 @@ body {
    MAIN WORKSPACE LAYOUT & SUB-UTILITY BAR
    ========================================================================== */
 .app-workspace {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 20px 24px 70px;
   width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px 32px 70px;
+  box-sizing: border-box;
   position: relative;
   z-index: 1;
 }
@@ -693,15 +700,24 @@ h1 {
    MAHADBT-STYLE EXECUTIVE HERO & 4-PILLAR SERVICE GATEWAY
    ========================================================================== */
 .hero-banner {
-  background: var(--gov-navy);
-  border: 1px solid #1e3a8a;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-left: 5px solid #c2410c;
   border-radius: var(--radius-md);
-  padding: 34px 36px;
-  color: #ffffff;
+  padding: 32px 36px;
+  color: #0b2545;
   margin-bottom: 28px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(11, 37, 69, 0.08);
+  box-shadow: 0 2px 8px rgba(194, 65, 12, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.hero-copy {
+  flex: 1;
 }
 
 .hero-badge {
@@ -721,21 +737,21 @@ h1 {
 }
 
 .hero-title {
-  font-size: 27px;
+  font-size: 28px;
   font-weight: 800;
-  color: #ffffff;
+  color: #0b2545;
   letter-spacing: -0.01em;
   line-height: 1.25;
-  max-width: 32ch;
+  max-width: 100%;
   margin-bottom: 12px;
   font-family: "Source Serif 4", Georgia, serif;
 }
 
 .hero-desc {
   font-size: 14.5px;
-  color: #e2e8f0;
+  color: #475569;
   line-height: 1.6;
-  max-width: 74ch;
+  max-width: 85ch;
   margin-bottom: 22px;
 }
 
@@ -746,17 +762,53 @@ h1 {
 }
 
 .hero-ghost {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: #ffffff;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  color: #0b2545;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-weight: 600;
+  transition: all 0.15s ease;
 }
 
 .hero-ghost:hover {
-  background: rgba(255, 255, 255, 0.22);
-  color: #ffffff;
+  background: #ffedd5;
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
+.hero-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-card-float {
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  border-left: 4px solid #c2410c;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(194, 65, 12, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+}
+
+.hero-card-float strong {
+  font-size: 13.5px;
+  color: #0b2545;
+  font-weight: 700;
+}
+
+.hero-card-float span {
+  font-size: 11.5px;
+  color: #c2410c;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 /* 4-Pillar Service Gateway Grid */
@@ -1767,13 +1819,15 @@ footer {
   background: #090d16;
   color: #94a3b8;
   border-top: 1px solid #1e293b;
-  padding: 40px 24px 24px;
+  padding: 40px 32px 24px;
   font-size: 13px;
+  width: 100%;
 }
 
 .footer-inner {
-  max-width: 1240px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   gap: 32px;
@@ -1828,8 +1882,9 @@ footer {
 }
 
 .footer-bottom {
-  max-width: 1240px;
-  margin: 20px auto 0;
+  width: 100%;
+  max-width: 100%;
+  margin: 20px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1905,7 +1960,89 @@ footer {
   color: var(--text);
 }
 
-/* Officer Topbar Indicators */
+/* Sleek Sovereign Officer Profile Button (Corner Icon) */
+.officer-profile-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: var(--gov-navy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(11, 37, 69, 0.08);
+  flex-shrink: 0;
+}
+
+.officer-profile-btn:hover {
+  background: #fff7ed;
+  border-color: #c2410c;
+  color: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(194, 65, 12, 0.15);
+}
+
+.officer-profile-btn:focus-visible {
+  outline: 2px solid #c2410c;
+  outline-offset: 2px;
+}
+
+.officer-profile-btn.logged-in {
+  border-color: var(--gov-green);
+  background: #f0fdf4;
+  color: var(--gov-green);
+}
+
+.officer-profile-btn.logged-in:hover {
+  border-color: #166534;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.officer-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.officer-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gov-green);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.active-officer-modal-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid var(--gov-green);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.officer-avatar-lg {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--gov-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .officer-topbar-btn {
   background: #1e3a8a;
   border: 1px solid #3b82f6;

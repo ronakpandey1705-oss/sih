@@ -1098,7 +1098,6 @@ document.addEventListener("keydown", (e) => {
 // ==========================================
 function renderOfficerStatus() {
   const topContainer = document.getElementById("topbarOfficerContainer");
-  const headerArea = document.getElementById("headerOfficerArea");
   const bannerContainer = document.getElementById("officerInspectBannerContainer");
   const officerInput = document.getElementById("officerId");
 
@@ -1109,32 +1108,47 @@ function renderOfficerStatus() {
   const loginActiveJurisdiction = document.getElementById("loginActiveJurisdiction");
   const loginActiveProvider = document.getElementById("loginActiveProvider");
 
+  // Modal active card elements
+  const modalActiveCard = document.getElementById("modalActiveOfficerCard");
+  const modalOfficerName = document.getElementById("modalOfficerName");
+  const modalOfficerBadge = document.getElementById("modalOfficerBadge");
+  const modalOfficerJurisdiction = document.getElementById("modalOfficerJurisdiction");
+  const modalOfficerEmail = document.getElementById("modalOfficerEmail");
+  const modalOfficerProvider = document.getElementById("modalOfficerProvider");
+  const modalLogoutBtn = document.getElementById("modalOfficerLogoutBtn");
+
   if (state.officer) {
-    // Masthead Topbar
+    // Only profile pic in corner with green status dot - NO NAMES OR SIGN IN/OUT ON TOPBAR
     if (topContainer) {
       topContainer.innerHTML = `
-        <span class="officer-topbar-active">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          Officer: ${escapeHtml(state.officer.name)} (${escapeHtml(state.officer.officer_badge)})
-        </span>
-        <button type="button" class="officer-logout-btn" id="topbarLogoutBtn" title="Sign out of official terminal">Sign Out</button>
+        <button type="button" class="officer-profile-btn logged-in" id="openOfficerAuthBtn" title="Officer Profile: ${escapeHtml(state.officer.name)} (${escapeHtml(state.officer.officer_badge)})" aria-label="Officer Profile">
+          <span class="officer-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </span>
+          <span class="officer-status-dot" title="Active Official Session"></span>
+        </button>
       `;
-      const outBtn = document.getElementById("topbarLogoutBtn");
-      if (outBtn) outBtn.addEventListener("click", logoutOfficer);
+      const btn = document.getElementById("openOfficerAuthBtn");
+      if (btn) btn.addEventListener("click", openOfficerModal);
     }
 
-    // Main Header Officer Area
-    if (headerArea) {
-      headerArea.innerHTML = `
-        <div class="header-officer-pill">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          <span class="officer-name">${escapeHtml(state.officer.name)}</span>
-          <span class="officer-badge-tag">${escapeHtml(state.officer.officer_badge)}</span>
-          <button type="button" class="btn-officer-logout" id="headerLogoutBtn" title="Logout of Officer Account">Logout</button>
-        </div>
-      `;
-      const hLogout = document.getElementById("headerLogoutBtn");
-      if (hLogout) hLogout.addEventListener("click", logoutOfficer);
+    // Modal Active Card
+    if (modalActiveCard) {
+      modalActiveCard.style.display = "block";
+      if (modalOfficerName) modalOfficerName.textContent = state.officer.name;
+      if (modalOfficerBadge) modalOfficerBadge.textContent = state.officer.officer_badge;
+      if (modalOfficerJurisdiction) modalOfficerJurisdiction.textContent = state.officer.jurisdiction || "National Directorate, New Delhi";
+      if (modalOfficerEmail) modalOfficerEmail.textContent = state.officer.email || "";
+      if (modalOfficerProvider) modalOfficerProvider.textContent = (state.officer.authorized_provider || "Gov ID").toUpperCase();
+      if (modalLogoutBtn) {
+        modalLogoutBtn.onclick = () => {
+          logoutOfficer();
+          closeOfficerModal();
+        };
+      }
     }
 
     // Inspection Banner
@@ -1170,30 +1184,24 @@ function renderOfficerStatus() {
       officerInput.dataset.autoFilled = "true";
     }
   } else {
-    // Masthead Topbar
+    // Only profile pic in corner - NO NAME OR SIGN IN TEXT ON TOPBAR
     if (topContainer) {
       topContainer.innerHTML = `
-        <button type="button" class="officer-topbar-btn" id="openOfficerAuthBtn" title="Official Government Access">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          Officer Sign In
+        <button type="button" class="officer-profile-btn" id="openOfficerAuthBtn" title="Official Government Access" aria-label="Official Sign In">
+          <span class="officer-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </span>
         </button>
       `;
-      const inBtn = document.getElementById("openOfficerAuthBtn");
-      if (inBtn) inBtn.addEventListener("click", openOfficerModal);
+      const btn = document.getElementById("openOfficerAuthBtn");
+      if (btn) btn.addEventListener("click", openOfficerModal);
     }
 
-    // Main Header Officer Area
-    if (headerArea) {
-      headerArea.innerHTML = `
-        <button type="button" class="btn-header-login" id="headerLoginBtn" data-page="login">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          Officer Login
-        </button>
-      `;
-      const hLogin = document.getElementById("headerLoginBtn");
-      if (hLogin) {
-        hLogin.addEventListener("click", () => showPage("login"));
-      }
+    if (modalActiveCard) {
+      modalActiveCard.style.display = "none";
     }
 
     // Inspection Banner
@@ -1231,6 +1239,7 @@ function openOfficerModal() {
   if (modal) modal.style.display = "flex";
   const notice = document.getElementById("officerHelpdeskNotice");
   if (notice) notice.style.display = "none";
+  renderOfficerStatus();
 }
 
 function closeOfficerModal() {

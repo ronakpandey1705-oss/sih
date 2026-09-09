@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/styles.css?v=13" />
+  <link rel="stylesheet" href="/static/styles.css?v=14" />
 </head>
 <body>
   <!-- Sovereign State Emblem Watermark -->
@@ -90,16 +90,19 @@
             <span class="sih-tag">SIH 2026</span>
             <span class="sih-desc">PS: SIH26034</span>
           </div>
-          <div id="topbarOfficerContainer" style="display:inline-flex;align-items:center;gap:6px;">
-            <button type="button" class="officer-topbar-btn" id="openOfficerAuthBtn" title="Official Government Access">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              <span>Officer Sign In</span>
-            </button>
-          </div>
-          <div id="headerOfficerArea" style="display:inline-flex;align-items:center;gap:8px;"></div>
           <div class="health-dot" id="healthDot" title="System Operational Status">
             <i></i>
             <span>Connecting</span>
+          </div>
+          <div id="topbarOfficerContainer" style="display:inline-flex;align-items:center;">
+            <button type="button" class="officer-profile-btn" id="openOfficerAuthBtn" title="Official Government Access" aria-label="Official Government Access">
+              <span class="officer-avatar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -1060,6 +1063,31 @@
       </div>
 
       <div class="officer-modal-body">
+        <!-- Active Authenticated Officer Session Card (Shown when logged in) -->
+        <div class="active-officer-modal-card" id="modalActiveOfficerCard" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="officer-avatar-lg">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div>
+                <div id="modalOfficerName" style="font-weight:700;font-size:15px;color:#0b2545;">Officer Name</div>
+                <div style="font-size:12px;color:#475569;margin-top:2px;">
+                  Badge: <strong id="modalOfficerBadge" style="color:#0b2545;">LM-2026-001</strong> &middot; <span id="modalOfficerJurisdiction">National Directorate</span>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-officer-logout" id="modalOfficerLogoutBtn" style="padding:6px 14px;font-size:12px;font-weight:700;">Sign Out</button>
+          </div>
+          <div style="font-size:11.5px;color:#15803d;font-weight:600;border-top:1px solid #bbf7d0;padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
+            <span>Active Session: <span id="modalOfficerEmail" style="font-family:monospace;font-weight:700;">email</span></span>
+            <span id="modalOfficerProvider" style="text-transform:uppercase;font-size:10px;background:#dcfce7;padding:2px 6px;border-radius:3px;">Gov ID</span>
+          </div>
+        </div>
+
         <div class="officer-statutory-notice">
           <strong>Restricted Government Portal &middot; Official Access Only</strong>
           Under Section 18 of the Legal Metrology Act, 2009, packaged commodity screening, OCR extraction, and statutory violation notices are reserved strictly for authorized Legal Metrology Enforcement Officers. Public access is prohibited.
@@ -1236,6 +1264,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="/static/app.js?v=13"></script>
+  <script src="/static/app.js?v=14"></script>
 </body>
 </html>
