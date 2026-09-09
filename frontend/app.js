@@ -1377,31 +1377,6 @@ ping();
 loadBootstrap();
 setInterval(ping, 20000);
 
-// Accessibility Text Resizing Listeners (Government Portal Standard)
-const fontDecBtn = document.getElementById("fontDec");
-if (fontDecBtn) {
-  fontDecBtn.addEventListener("click", () => {
-    document.documentElement.classList.remove("font-lg");
-    document.documentElement.classList.add("font-sm");
-    toast("Text Size: Small (A-)");
-  });
-}
-const fontNormBtn = document.getElementById("fontNormal");
-if (fontNormBtn) {
-  fontNormBtn.addEventListener("click", () => {
-    document.documentElement.classList.remove("font-sm", "font-lg");
-    toast("Text Size: Standard (A)");
-  });
-}
-const fontIncBtn = document.getElementById("fontInc");
-if (fontIncBtn) {
-  fontIncBtn.addEventListener("click", () => {
-    document.documentElement.classList.remove("font-sm");
-    document.documentElement.classList.add("font-lg");
-    toast("Text Size: Large (A+)");
-  });
-}
-
 // Mobile Government Navigation Drawer Toggle
 const mobileNavToggle = document.getElementById("navToggle");
 const mobileMainNav = document.getElementById("mainNav");
