@@ -90,3 +90,5 @@ class UnifiedAnalysisResponse(BaseModel):
     summary: str
     discrepancies: List[DiscrepancyItem]
     rules_summary: List[Dict[str, Any]]
+    detected_declarations: List[Dict[str, Any]] = []
+    missing_declarations: List[Dict[str, Any]] = []

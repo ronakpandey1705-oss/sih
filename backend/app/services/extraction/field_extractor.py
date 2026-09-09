@@ -1,7 +1,9 @@
 import re
 import json
 from typing import List, Dict, Any, Optional
+import httpx
 from sqlalchemy.orm import Session
+from app.config import settings
 from app.models.scan import Scan
 from app.models.ocr_result import OCRResult
 from app.models.detected_field import DetectedField
@@ -30,36 +32,40 @@ class FieldExtractor:
     )
 
     MRP_PATTERN = re.compile(
-        r"(?:(?:m\.?r\.?p\.?|max(?:imum)?\s*retail\s*price|अधिकतम\s*खुदरा\s*मूल्य)\s*[:.\-]?\s*)?"
-        r"(?:(?:rs|inr|₹)\.?\s*)?([0-9]+(?:\.[0-9]{1,2})?)",
+        r"(?:(?:m\.?r\.?p\.?|max(?:imum)?\s*retail\s*price|अधिकतम\s*खुदरा\s*मूल्य)[\s:.-]*)?"
+        r"(?:(?:rs\.?|inr|₹)[\s:.-]*)?([0-9]+(?:\.[0-9]{1,2})?)(?:\s*\/\-)?",
         re.IGNORECASE
     )
 
     TAX_INCLUSIVE_PATTERN = re.compile(
-        r"(?:incl(?:usive|\.)?\s*(?:of)?\s*all\s*taxes|all\s*taxes\s*incl(?:uded|\.)?|taxes\s*incl(?:uded|\.)?|कर\s*सहित|सभी\s*कर\s*सहित|सभी\s*करों\s*सहित|tax\s*incl(?:uded|\.)?)",
+        r"(?:incl(?:usive|\.)?\s*(?:of)?\s*all\s*taxes|all\s*taxes\s*incl(?:uded|\.)?|taxes\s*incl(?:uded|\.)?|कर\s*सहित|सभी\s*कर\s*सहित|सभी\s*करों\s*सहित|tax\s*incl(?:uded|\.)?|inclusive\s*of\s*taxes)",
         re.IGNORECASE
     )
 
     UNIT_SALE_PRICE_PATTERN = re.compile(
-        r"(?:(?:unit\s*sale\s*price|usp|इकाई\s*बिक्री\s*मूल्य)\s*[:.\-]?\s*)?(?:(?:rs|inr|₹)\.?\s*)?([0-9]+(?:\.[0-9]{1,2})?)\s*(?:\/|per)\s*(?:100\s*)?(g|gm|kg|ml|l|ltr|n|piece|pc|item)\b",
+        r"(?:(?:unit\s*sale\s*price|usp|इकाई\s*बिक्री\s*मूल्य)\s*[:.\-]?\s*)?(?:(?:rs|inr|₹)\.?\s*)?([0-9]+(?:\.[0-9]{1,2})?)\s*(?:\/|per)\s*(?:100\s*)?(g|gm|kg|ml|l|ltr|n|piece|pc|item|u)\b",
         re.IGNORECASE
     )
 
     MANUFACTURER_KEYWORDS = [
         "manufactured by", "mfg by", "mfd by", "mfg. by", "mfd. by", "mfg by:", "mfd by:",
-        "manufactured & packed by", "mfg & pkd by", "manufactured and packed by",
+        "manufactured & packed by", "mfg & pkd by", "mfd & pkd by", "manufactured and packed by",
         "packed by", "pkd by", "pkd. by", "pkd by:", "packaged by",
         "imported by", "imp by", "imp. by",
-        "marketed by", "mkt by", "mkt. by", "packed & marketed by",
+        "marketed by", "mkt by", "mkt. by", "packed & marketed by", "manufactured & marketed by",
+        "distributed by", "dist by", "dist. by",
         "brand owner", "brand owner:", "processor:", "regd office", "registered office",
         "corporate office", "factory:", "works:", "unit:", "mfg at", "mfd at",
+        "plot no", "industrial area", "midc", "gidc", "phase-", "sector-",
+        "pvt ltd", "private limited", "ltd.", "limited", "llp",
         "निर्माता", "पैककर्ता", "आयातकर्ता"
     ]
 
     CONSUMER_CARE_KEYWORDS = [
         "consumer care", "consumer helpline", "customer care", "customer support", "customer service",
         "grievance cell", "consumer complaints", "contact us", "toll free", "toll-free", "toll free no",
-        "feedback", "queries", "care manager", "write to us", "reach us", "consumer cell",
+        "feedback", "queries", "care manager", "care executive", "write to us", "reach us", "consumer cell",
+        "helpline", "toll free:", "toll-free:", "contact:", "support:",
         "उपभोक्ता सेवा", "हेल्पलाइन", "ग्राहक सेवा"
     ]
 
@@ -75,7 +81,8 @@ class FieldExtractor:
         r"(?:(?:mfg|pkd|packed|manufactured|imported|mfd|date|dt|dom|dop|use\s*by|best\s*before|exp(?:iry)?)\s*[:.\-]?\s*)?"
         r"((?:0[1-9]|1[0-2])[\/\.\-](?:20[2-3][0-9]|[2-3][0-9])|"
         r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\.\-\/]*(?:20[2-3][0-9]|[2-3][0-9])|"
-        r"(?:0[1-9]|[12][0-9]|3[01])[\/\.\-](?:0[1-9]|1[0-2])[\/\.\-](?:20[2-3][0-9]|[2-3][0-9]))\b",
+        r"(?:0[1-9]|[12][0-9]|3[01])[\/\.\-](?:0[1-9]|1[0-2])[\/\.\-](?:20[2-3][0-9]|[2-3][0-9])|"
+        r"(?:best\s*before|use\s*by|exp(?:iry)?)\s*(?:within\s*)?[0-9]+\s*(?:months?|days?|weeks?|years?)(?:\s*(?:from|of)\s*(?:mfg|pkd|packaging|manufacture|date))?)\b",
         re.IGNORECASE
     )
 
@@ -84,7 +91,7 @@ class FieldExtractor:
         re.IGNORECASE
     )
 
-    PINCODE_PATTERN = re.compile(r"\b[1-9][0-9]{5}\b")
+    PINCODE_PATTERN = re.compile(r"\b[1-9][0-9]{2}\s?[0-9]{3}\b")
 
     @classmethod
     def extract_from_scan(cls, scan_id: str, db: Session) -> List[DetectedField]:
@@ -430,6 +437,14 @@ class FieldExtractor:
                 }
                 break
 
+        # --- AI-Assisted LLM extraction fallback for uncataloged products or noisy packaging labels ---
+        if full_text_lines and (not scan.product or len(extracted_fields_dict) < 6):
+            cls._ai_llm_extract_missing_fields(
+                full_text=full_text,
+                extracted_fields_dict=extracted_fields_dict,
+                ocr_results=ocr_results
+            )
+
         # --- Persist in Database (detected_fields table) ---
         db.query(DetectedField).filter(DetectedField.scan_id == scan_id).delete()
 
@@ -453,3 +468,100 @@ class FieldExtractor:
             db.refresh(df)
 
         return saved_fields
+
+    @classmethod
+    def _ai_llm_extract_missing_fields(
+        cls,
+        full_text: str,
+        extracted_fields_dict: Dict[str, Dict[str, Any]],
+        ocr_results: List[OCRResult],
+    ) -> None:
+        """
+        AI-Assisted field extraction via Groq for uncataloged products or noisy packaging labels.
+        Fills in mandatory Legal Metrology fields that heuristic regexes may have missed.
+        """
+        api_key = (settings.GROQ_API_KEY or "").strip()
+        if not api_key or not full_text.strip():
+            return
+
+        needed_fields = [
+            f for f in [
+                "product_name",
+                "net_quantity",
+                "mrp",
+                "manufacturer_name_and_address",
+                "consumer_care",
+                "manufacture_or_import_date",
+                "unit_sale_price",
+            ]
+            if f not in extracted_fields_dict
+        ]
+        if not needed_fields:
+            return
+
+        prompt = (
+            "You are an expert Indian Legal Metrology (Packaged Commodities Rules, 2011) compliance officer.\n"
+            "Analyze the following OCR text from a physical packaged commodity and extract statutory declarations.\n"
+            "If a declaration is present in the text, extract its exact value. If not found, set its value to null.\n\n"
+            "Statutory fields to extract:\n"
+            "- product_name: The generic or brand name of the commodity.\n"
+            "- net_quantity: Declared net quantity with metric unit (e.g. 100g, 500 ml, 1 N).\n"
+            "- mrp: Maximum retail price with currency and tax declaration (e.g. ₹ 20.00 incl. of all taxes).\n"
+            "- unit_sale_price: Unit sale price if declared (e.g. ₹ 0.20 / g).\n"
+            "- manufacturer_name_and_address: Full name and address of manufacturer, packer, or marketer with city/state/pin.\n"
+            "- consumer_care: Consumer care contact details (toll-free number, phone, email, or address).\n"
+            "- manufacture_or_import_date: Date of manufacture/packing or 'Best Before' statement.\n"
+            "- country_of_origin: Country of origin if stated (default null if not stated).\n\n"
+            f"OCR Text:\n{full_text[:4000]}\n\n"
+            "Respond ONLY with a valid JSON object containing these 8 keys. Do not include markdown code fences, comments, or explanations."
+        )
+
+        try:
+            candidate_models = [settings.GROQ_MODEL]
+            for m in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b", "llama-3.3-70b-versatile"]:
+                if m not in candidate_models:
+                    candidate_models.append(m)
+
+            with httpx.Client(timeout=8.0) as client:
+                for mod in candidate_models:
+                    try:
+                        resp = client.post(
+                            "https://api.groq.com/openai/v1/chat/completions",
+                            headers={
+                                "Authorization": f"Bearer {api_key}",
+                                "Content-Type": "application/json",
+                            },
+                            json={
+                                "model": mod,
+                                "messages": [{"role": "user", "content": prompt}],
+                                "temperature": 0.1,
+                                "max_tokens": 1000,
+                            },
+                        )
+                        if resp.status_code == 200:
+                            content = resp.json()["choices"][0]["message"]["content"].strip()
+                            if content.startswith("```"):
+                                content = content.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+                            data = json.loads(content)
+                            first_img_id = ocr_results[0].image_id if ocr_results else None
+                            first_bbox = ocr_results[0].bbox_json if ocr_results else None
+
+                            for field_key, val in data.items():
+                                if field_key in needed_fields and val and str(val).strip() and str(val).lower() != "null":
+                                    extracted_fields_dict[field_key] = {
+                                        "value": str(val).strip(),
+                                        "raw_text": str(val).strip(),
+                                        "confidence": 0.92,
+                                        "method": "AI_LLM_ASSISTED",
+                                        "image_id": first_img_id,
+                                        "bbox_json": first_bbox,
+                                    }
+                            break
+                        elif resp.status_code in (400, 404):
+                            continue
+                        else:
+                            break
+                    except Exception:
+                        continue
+        except Exception as exc:
+            print(f"[AI_EXTRACTION] Non-blocking notice: {exc}")

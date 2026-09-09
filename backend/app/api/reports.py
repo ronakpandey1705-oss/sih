@@ -266,6 +266,75 @@ def _handle_analyze(scan_id: str, db: Session) -> UnifiedAnalysisResponse:
         for r in eval_resp.results
     ]
 
+    FIELD_METADATA = {
+        "product_name": {
+            "label": "Product Identity / Designation",
+            "rule_number": "Rule 6(1)(b)",
+            "panel_tip": "Typically displayed prominently on the Principal Display Panel (Front).",
+        },
+        "net_quantity": {
+            "label": "Net Quantity (Weight / Volume / Count)",
+            "rule_number": "Rule 6(1)(c)",
+            "panel_tip": "Must appear on the Principal Display Panel (PDP) with standard metric units.",
+        },
+        "mrp": {
+            "label": "Maximum Retail Price (MRP)",
+            "rule_number": "Rule 6(1)(e)",
+            "panel_tip": "Check near barcode or bottom/side panel. Must include 'inclusive of all taxes'.",
+        },
+        "manufacturer_name_and_address": {
+            "label": "Manufacturer / Packer Identity & Address",
+            "rule_number": "Rule 6(1)(a)",
+            "panel_tip": "Usually printed on the back or side panel with postal code/state.",
+        },
+        "consumer_care": {
+            "label": "Consumer Care / Grievance Contact",
+            "rule_number": "Rule 6(2)",
+            "panel_tip": "Toll-free helpline, telephone, email, or postal grievance contact (usually on back/side).",
+        },
+        "manufacture_or_import_date": {
+            "label": "Date of Manufacture / Packing / Expiry",
+            "rule_number": "Rule 6(1)(d)",
+            "panel_tip": "Month/year of packing or 'Best Before' statement (often on top crimp, back, or side).",
+        },
+        "unit_sale_price": {
+            "label": "Unit Sale Price (USP)",
+            "rule_number": "Rule 6(1)(e)",
+            "panel_tip": "Price per g/kg/ml/unit for packages containing more than 1 unit.",
+        },
+        "country_of_origin": {
+            "label": "Country of Origin",
+            "rule_number": "Rule 6(1)(da)",
+            "panel_tip": "Mandatory for imported or e-commerce packaged commodities.",
+        },
+    }
+
+    detected_map = {f.field_name: f for f in extracted_fields}
+    detected_declarations = []
+    missing_declarations = []
+
+    for field_key, meta in FIELD_METADATA.items():
+        if field_key in detected_map and detected_map[field_key].value:
+            df = detected_map[field_key]
+            detected_declarations.append({
+                "field": field_key,
+                "label": meta["label"],
+                "value": df.value,
+                "rule_number": meta["rule_number"],
+                "confidence": df.confidence,
+                "method": df.extraction_method,
+                "status": "PASS"
+            })
+        elif field_key in ["product_name", "net_quantity", "mrp", "manufacturer_name_and_address", "consumer_care", "manufacture_or_import_date"]:
+            missing_declarations.append({
+                "field": field_key,
+                "label": meta["label"],
+                "rule_number": meta["rule_number"],
+                "description": f"{meta['label']} was not detected on current packaging photograph(s).",
+                "recommendation": meta["panel_tip"],
+                "severity": "CRITICAL" if field_key in ["net_quantity", "mrp"] else "HIGH"
+            })
+
     return UnifiedAnalysisResponse(
         inspection_id=scan.id,
         scan_id=scan.id,
@@ -281,7 +350,9 @@ def _handle_analyze(scan_id: str, db: Session) -> UnifiedAnalysisResponse:
         officer_determination=scan.officer_determination,
         summary=f"{eval_resp.summary} {disc_data.get('summary', '')}".strip(),
         discrepancies=disc_data.get("discrepancies", []),
-        rules_summary=rules_summary_list
+        rules_summary=rules_summary_list,
+        detected_declarations=detected_declarations,
+        missing_declarations=missing_declarations
     )
 
 

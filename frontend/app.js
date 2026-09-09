@@ -493,6 +493,58 @@ function renderResults() {
   document.getElementById("reviewBtn").disabled = false;
   document.getElementById("pdfLink").style.display = "none";
 
+  const decCard = document.getElementById("declarationsStatusCard");
+  const missingSec = document.getElementById("missingDeclarationsSection");
+  const missingList = document.getElementById("missingDeclarationsList");
+  const detectedSec = document.getElementById("detectedDeclarationsSection");
+  const detectedList = document.getElementById("detectedDeclarationsList");
+
+  const detected = a.detected_declarations || [];
+  const missing = a.missing_declarations || [];
+
+  if (decCard) {
+    if (detected.length || missing.length) {
+      decCard.style.display = "block";
+      if (missing.length) {
+        missingSec.style.display = "block";
+        missingList.innerHTML = missing.map((m) => `
+          <div class="product-item" style="border-left: 3px solid var(--status-fail-border);background: rgba(220, 38, 38, 0.04)">
+            <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-weight:700;color:var(--status-fail-text)">${escapeHtml(m.label)}</span>
+              <span class="status-tag fail" style="font-size:10px">${escapeHtml(m.rule_number)}</span>
+            </div>
+            <p style="margin:4px 0;font-size:13px">${escapeHtml(m.description)}</p>
+            <div class="muted" style="margin-top:6px;font-size:12px;color:var(--text-dim)">
+              <strong>Guidance:</strong> ${escapeHtml(m.recommendation)}
+            </div>
+          </div>
+        `).join("");
+      } else {
+        missingSec.style.display = "none";
+      }
+
+      if (detected.length) {
+        detectedSec.style.display = "block";
+        detectedList.innerHTML = detected.map((d) => `
+          <div class="product-item" style="border-left: 3px solid var(--status-pass-border);background: rgba(16, 185, 129, 0.04)">
+            <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-weight:700;color:var(--status-pass-text)">${escapeHtml(d.label)}</span>
+              <span class="status-tag pass" style="font-size:10px">${escapeHtml(d.rule_number)}</span>
+            </div>
+            <div style="margin:4px 0;font-weight:600;font-size:14px">${escapeHtml(d.value)}</div>
+            <div class="muted" style="margin-top:4px;font-size:11.5px">
+              ${d.method === 'AI_LLM_ASSISTED' ? 'AI-Assisted Vision Extraction' : 'Direct Label OCR Verification'}
+            </div>
+          </div>
+        `).join("");
+      } else {
+        detectedSec.style.display = "none";
+      }
+    } else {
+      decCard.style.display = "none";
+    }
+  }
+
   const rules = a.rules_summary || [];
   document.getElementById("rulesTable").innerHTML = rules.length
     ? `<div class="table-responsive"><table><thead><tr><th>Statutory Rule</th><th>Finding</th><th>Observation</th></tr></thead><tbody>${

@@ -457,6 +457,29 @@
               </a>
             </div>
           </div>
+        <!-- DETECTED VS MISSING STATUTORY DECLARATIONS -->
+        <div id="declarationsStatusCard" class="card" style="display:none;margin-top:20px;margin-bottom:20px">
+          <h2>
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Statutory Packaging Verification Overview
+          </h2>
+          <p class="muted" style="margin-bottom:16px">Automated audit of mandatory pre-packaged declarations under Rule 6 of the Legal Metrology (Packaged Commodities) Rules, 2011.</p>
+          
+          <div id="missingDeclarationsSection" style="display:none;margin-bottom:20px">
+            <h3 style="color:var(--status-fail-text);font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Missing Declarations (Action Required)
+            </h3>
+            <div id="missingDeclarationsList" class="product-grid"></div>
+          </div>
+
+          <div id="detectedDeclarationsSection" style="display:none">
+            <h3 style="color:var(--status-pass-text);font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              Verified Declarations (Detected on Label)
+            </h3>
+            <div id="detectedDeclarationsList" class="product-grid"></div>
+          </div>
         </div>
 
         <div class="grid-2">
@@ -1154,6 +1177,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="/static/app.js?v=8"></script>
+  <script src="/static/app.js?v=10"></script>
 </body>
 </html>

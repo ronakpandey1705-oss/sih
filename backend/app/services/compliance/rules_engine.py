@@ -548,10 +548,10 @@ class RulesEngine:
             rule_number=r_def["rule_number"],
             name=r_def["name"],
             field=r_def["field"],
-            status="POTENTIAL_NON_COMPLIANCE",
-            confidence=0.8,
+            status="NEEDS_REVIEW",
+            confidence=0.75,
             severity=r_def["severity"],
-            reason="Net quantity declaration is missing from display panel; numeral height cannot be established under Rule 7.",
+            reason="Net quantity declaration is pending detection on Principal Display Panel; numeral height cannot be established from current photo.",
             legal_reference=r_def["legal_reference"]
         )
 
@@ -577,10 +577,10 @@ class RulesEngine:
             rule_number=r_def["rule_number"],
             name=r_def["name"],
             field=r_def["field"],
-            status="POTENTIAL_NON_COMPLIANCE",
-            confidence=0.85,
+            status="NEEDS_REVIEW",
+            confidence=0.75,
             severity=r_def["severity"],
-            reason="Mandatory declarations missing or improperly positioned on Principal Display Panel under Rule 8.",
+            reason="Net quantity declaration is pending detection on Principal Display Panel; placement clearance under Rule 8 requires PDP panel verification.",
             legal_reference=r_def["legal_reference"]
         )
 
