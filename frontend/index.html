@@ -18,11 +18,269 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/styles.css?v=16" />
+  <link rel="stylesheet" href="/static/styles.css?v=17" />
+  <script>
+    // Show the sign-in gate before first paint when there is no officer session
+    try { if (!localStorage.getItem("packsure_token")) document.documentElement.classList.add("gate-open"); }
+    catch (_) { document.documentElement.classList.add("gate-open"); }
+  </script>
 </head>
 <body>
   <!-- Sovereign State Emblem Watermark -->
   <div class="emblem-watermark" aria-hidden="true"></div>
+
+  <!-- Entry Gate: Officer Sign In / Register + Citizen Public Complaint -->
+  <div class="auth-gate" id="authGate" role="main" aria-label="PackSure sign in">
+    <div class="gate-strip">
+      <svg width="18" height="13" viewBox="0 0 18 13" fill="none" aria-hidden="true">
+        <rect width="18" height="4.33" fill="#FF9933"/>
+        <rect y="4.33" width="18" height="4.33" fill="#FFFFFF"/>
+        <rect y="8.66" width="18" height="4.34" fill="#138808"/>
+        <circle cx="9" cy="6.5" r="1.6" stroke="#000080" stroke-width="0.65"/>
+      </svg>
+      <span>भारत सरकार | GOVERNMENT OF INDIA</span>
+      <span class="gate-strip-sub">Department of Consumer Affairs</span>
+    </div>
+
+    <div class="gate-head">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m3 7 9-4 9 4"></path><path d="M3 7v10l9 4 9-4V7"></path><path d="M6 10.5 12 14l6-3.5"></path></svg>
+        </div>
+        <div>
+          <div class="brand-title">PackSure</div>
+          <span class="brand-subtitle">National Compliance Agency</span>
+        </div>
+      </div>
+      <img src="/static/emblem.svg" alt="State Emblem of India" class="gate-emblem" width="40" height="50" />
+    </div>
+
+    <!-- View 1: Sign in / Register + citizen entry point -->
+    <div class="gate-body" id="gateAuthView">
+      <button type="button" class="gate-citizen-jump" data-gate-view="complaint">
+        <span><strong>Citizen?</strong> Report a wrong or missing product label. No login needed.</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+      <section class="gate-card gate-auth-card" aria-labelledby="gateAuthTitle">
+        <h1 id="gateAuthTitle">Officer Portal</h1>
+        <p class="muted">Legal Metrology enforcement officers sign in to access inspections, audit findings and citizen complaints.</p>
+
+        <div class="gate-tabs" role="tablist">
+          <button type="button" class="gate-tab active" role="tab" aria-selected="true" data-gate-tab="signin">Sign In</button>
+          <button type="button" class="gate-tab" role="tab" aria-selected="false" data-gate-tab="signup">Register</button>
+        </div>
+
+        <form id="gateSigninForm" class="gate-form" novalidate>
+          <label class="field" for="signinEmail">Email address</label>
+          <input type="email" id="signinEmail" autocomplete="email" placeholder="you@department.gov.in" required />
+          <label class="field" for="signinPassword">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="signinPassword" autocomplete="current-password" placeholder="Your password" required />
+            <button type="button" class="pw-toggle" data-pw-toggle="signinPassword" aria-label="Show password">Show</button>
+          </div>
+          <p class="gate-error" id="signinError" role="alert"></p>
+          <button type="submit" class="btn btn-primary gate-submit">Sign In</button>
+          <p class="gate-switch">New officer? <a href="#" data-gate-tab="signup">Create an account</a></p>
+        </form>
+
+        <form id="gateSignupForm" class="gate-form" novalidate hidden>
+          <label class="field" for="signupName">Full name</label>
+          <input type="text" id="signupName" autocomplete="name" placeholder="As per appointment order" required />
+          <label class="field" for="signupEmail">Official email</label>
+          <input type="email" id="signupEmail" autocomplete="email" placeholder="you@department.gov.in" required />
+          <div class="gate-grid-2">
+            <div>
+              <label class="field" for="signupDesignation">Designation</label>
+              <select id="signupDesignation">
+                <option>Inspector, Legal Metrology</option>
+                <option>Assistant Controller, Legal Metrology</option>
+                <option>Deputy Controller, Legal Metrology</option>
+                <option>Controller, Legal Metrology</option>
+                <option>Field Verification Officer</option>
+              </select>
+            </div>
+            <div>
+              <label class="field" for="signupJurisdiction">Jurisdiction</label>
+              <input type="text" id="signupJurisdiction" placeholder="District / Zone" />
+            </div>
+          </div>
+          <label class="field" for="signupPhone">Mobile (optional)</label>
+          <input type="tel" id="signupPhone" autocomplete="tel" inputmode="tel" placeholder="10-digit mobile number" />
+          <div class="gate-grid-2">
+            <div>
+              <label class="field" for="signupPassword">Password</label>
+              <div class="pw-wrap">
+                <input type="password" id="signupPassword" autocomplete="new-password" placeholder="Min. 8 characters" required minlength="8" />
+                <button type="button" class="pw-toggle" data-pw-toggle="signupPassword" aria-label="Show password">Show</button>
+              </div>
+            </div>
+            <div>
+              <label class="field" for="signupConfirm">Confirm password</label>
+              <input type="password" id="signupConfirm" autocomplete="new-password" placeholder="Re-enter password" required />
+            </div>
+          </div>
+          <p class="gate-error" id="signupError" role="alert"></p>
+          <button type="submit" class="btn btn-primary gate-submit">Create Account</button>
+          <p class="gate-switch">Already registered? <a href="#" data-gate-tab="signin">Sign in</a></p>
+        </form>
+
+        <details class="gate-demo">
+          <summary>Demo officer access (1-click)</summary>
+          <div class="officer-cards-grid">
+            <button type="button" class="officer-card-btn gate-demo-btn" data-officer-email="ronak.pandey@gmail.com">
+              <div class="officer-card-badge">LM-2026-001</div>
+              <div class="officer-card-name">Ronak Pandey</div>
+              <div class="officer-card-designation">National Directorate, New Delhi</div>
+            </button>
+            <button type="button" class="officer-card-btn gate-demo-btn" data-officer-email="himanshu.verma@gmail.com">
+              <div class="officer-card-badge">LM-2026-002</div>
+              <div class="officer-card-name">Himanshu Verma</div>
+              <div class="officer-card-designation">Western Zone, Mumbai</div>
+            </button>
+            <button type="button" class="officer-card-btn gate-demo-btn" data-officer-email="vibha.pawar@yahoo.com">
+              <div class="officer-card-badge">LM-2026-003</div>
+              <div class="officer-card-name">Vibha Pawar</div>
+              <div class="officer-card-designation">Northern Zone, Chandigarh</div>
+            </button>
+            <button type="button" class="officer-card-btn gate-demo-btn" data-officer-email="harsh.nagvekar@icloud.com">
+              <div class="officer-card-badge">LM-2026-004</div>
+              <div class="officer-card-name">Harsh Nagvekar</div>
+              <div class="officer-card-designation">Southern Zone, Bengaluru</div>
+            </button>
+          </div>
+        </details>
+      </section>
+
+      <section class="gate-card gate-citizen-card" aria-labelledby="gateCitizenTitle">
+        <div class="gate-citizen-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
+        </div>
+        <h2 id="gateCitizenTitle">Public Complaint</h2>
+        <p>Found a packaged product with a wrong or missing label? Missing MRP, net quantity, expiry date or manufacturer details? Report it to Legal Metrology officers.</p>
+        <ul class="gate-points">
+          <li>No login or registration needed</li>
+          <li>Stay anonymous if you want</li>
+          <li>Attach photos straight from your phone camera</li>
+        </ul>
+        <button type="button" class="btn btn-gold gate-submit" id="openComplaintBtn">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          File a Public Complaint
+        </button>
+
+        <form class="gate-track" id="trackForm" novalidate>
+          <label class="field" for="trackRef">Already filed? Track status</label>
+          <div class="gate-track-row">
+            <input type="text" id="trackRef" placeholder="e.g. PC-2609-A1B2C3" autocapitalize="characters" />
+            <button type="submit" class="btn btn-ghost">Track</button>
+          </div>
+          <div class="gate-track-result" id="trackResult" aria-live="polite"></div>
+        </form>
+      </section>
+    </div>
+
+    <!-- View 2: Anonymous public complaint form -->
+    <div class="gate-body gate-body-single" id="gateComplaintView" hidden>
+      <section class="gate-card">
+        <button type="button" class="gate-back" data-gate-view="auth">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Back
+        </button>
+        <h1>File a Public Complaint</h1>
+        <p class="muted">Tell us about a product whose label is wrong or incomplete. Fields marked * are required. Your complaint goes directly to Legal Metrology officers.</p>
+
+        <form id="complaintForm" novalidate>
+          <fieldset class="gate-fieldset">
+            <legend>1. Product</legend>
+            <label class="field" for="cProduct">Product name *</label>
+            <input type="text" id="cProduct" placeholder="e.g. Masala Namkeen 200 g" required maxlength="255" />
+            <div class="gate-grid-2">
+              <div>
+                <label class="field" for="cBrand">Brand</label>
+                <input type="text" id="cBrand" placeholder="Brand / company" maxlength="255" />
+              </div>
+              <div>
+                <label class="field" for="cBarcode">Barcode number</label>
+                <input type="text" id="cBarcode" inputmode="numeric" placeholder="Digits under the barcode" maxlength="64" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="gate-fieldset">
+            <legend>2. What is wrong with the label? *</legend>
+            <div class="issue-grid" id="issueGrid"></div>
+            <label class="field" for="cDescription">Describe the problem *</label>
+            <textarea id="cDescription" placeholder="e.g. No MRP printed on the pack; shopkeeper charged Rs 60." required maxlength="4000"></textarea>
+          </fieldset>
+
+          <fieldset class="gate-fieldset">
+            <legend>3. Photos of the label</legend>
+            <p class="muted" style="font-size:12.5px">Clear photos of the front, back and price panel help officers act faster. Up to 6 photos.</p>
+            <div class="photo-actions">
+              <button type="button" class="btn btn-navy" id="cTakePhotoBtn">
+                <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                Take Photo
+              </button>
+              <button type="button" class="btn btn-ghost" id="cChoosePhotoBtn">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                Choose from Gallery
+              </button>
+            </div>
+            <input type="file" id="cCameraInput" accept="image/*" capture="environment" hidden />
+            <input type="file" id="cGalleryInput" accept="image/jpeg,image/png,image/webp,image/*" multiple hidden />
+            <div class="evidence-gallery" id="cPhotoGallery" hidden></div>
+          </fieldset>
+
+          <fieldset class="gate-fieldset">
+            <legend>4. Where did you find it?</legend>
+            <label class="field" for="cLocation">City / district, state *</label>
+            <input type="text" id="cLocation" placeholder="e.g. Nagpur, Maharashtra" required maxlength="255" />
+            <div class="gate-grid-2">
+              <div>
+                <label class="field" for="cStore">Shop / website</label>
+                <input type="text" id="cStore" placeholder="Where you bought it" maxlength="255" />
+              </div>
+              <div>
+                <label class="field" for="cPurchaseDate">Date of purchase</label>
+                <input type="date" id="cPurchaseDate" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="gate-fieldset">
+            <legend>5. Contact (optional)</legend>
+            <label class="field" for="cContact">Phone or email for follow-up</label>
+            <input type="text" id="cContact" placeholder="Leave blank to stay anonymous" maxlength="255" />
+            <p class="gate-anon-note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              Your identity is not required. Contact details, if given, are visible only to officers.
+            </p>
+          </fieldset>
+
+          <p class="gate-error" id="complaintError" role="alert"></p>
+          <button type="submit" class="btn btn-primary gate-submit" id="complaintSubmitBtn">Submit Complaint</button>
+        </form>
+      </section>
+    </div>
+
+    <!-- View 3: Complaint submitted -->
+    <div class="gate-body gate-body-single" id="gateSuccessView" hidden>
+      <section class="gate-card gate-success">
+        <div class="gate-success-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h1>Complaint Registered</h1>
+        <p class="muted">Legal Metrology officers have been notified. Save this reference number to track your complaint.</p>
+        <div class="gate-ref" id="successRef">PC-0000-000000</div>
+        <button type="button" class="btn btn-ghost" id="copyRefBtn">Copy reference number</button>
+        <div class="gate-success-actions">
+          <button type="button" class="btn btn-primary" id="fileAnotherBtn">File Another Complaint</button>
+          <button type="button" class="btn btn-ghost" data-gate-view="auth">Back to Home</button>
+        </div>
+      </section>
+    </div>
+
+    <p class="gate-foot">National Consumer Helpline: <a href="tel:1915">1915</a> &middot; Legal Metrology (Packaged Commodities) Rules, 2011</p>
+  </div>
 
   <!-- Grand Sovereign Header (National Portal Architecture) -->
   <header class="gov-portal-header" role="banner">
@@ -97,6 +355,10 @@
             <i></i>
             <span>Connecting</span>
           </div>
+          <button type="button" class="notify-bell" id="notifyBell" data-page="complaints" title="Citizen complaints" aria-label="Citizen complaints, no new">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="notify-count" id="notifyCount" hidden>0</span>
+          </button>
           <div id="topbarOfficerContainer" style="display:inline-flex;align-items:center;">
             <button type="button" class="officer-profile-btn" id="openOfficerAuthBtn" title="Official Government Access" aria-label="Official Government Access">
               <span class="officer-avatar">
@@ -145,6 +407,11 @@
           <button class="gov-nav-item" data-page="assistant">
             <svg viewBox="0 0 24 24" width="16" height="16"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             <span>AI Legal Desk</span>
+          </button>
+          <button class="gov-nav-item" data-page="complaints">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
+            <span>Complaints</span>
+            <span class="nav-count" id="navComplaintCount" hidden>0</span>
           </button>
           <button class="gov-nav-item" data-page="about">
             <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -657,6 +924,35 @@
               Transmit
             </button>
           </div>
+        </div>
+      </section>
+
+      <!-- CITIZEN COMPLAINTS PAGE -->
+      <section id="complaints" class="page">
+        <div class="page-header">
+          <div class="badge-tag">Public Redressal</div>
+          <h1>Citizen Complaints</h1>
+          <p class="lede">Anonymous label complaints filed by the public from the portal entry page. New complaints raise a notification on the bell icon.</p>
+        </div>
+
+        <div class="card complaints-toolbar">
+          <div class="row" style="gap:10px">
+            <select id="complaintStatusFilter" aria-label="Filter complaints by status">
+              <option value="ALL">All complaints</option>
+              <option value="NEW" selected>New</option>
+              <option value="UNDER_REVIEW">Under review</option>
+              <option value="ACTION_TAKEN">Action taken</option>
+              <option value="DISMISSED">Dismissed</option>
+            </select>
+            <button type="button" class="btn btn-ghost" id="refreshComplaintsBtn">
+              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div id="complaintsList" class="complaints-list">
+          <p class="muted">Loading complaints...</p>
         </div>
       </section>
 
@@ -1269,6 +1565,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="/static/app.js?v=16"></script>
+  <script src="/static/app.js?v=17"></script>
 </body>
 </html>

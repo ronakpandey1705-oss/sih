@@ -19,6 +19,8 @@ class Officer(Base):
     designation = Column(String(128), default="Legal Metrology Officer")
     jurisdiction = Column(String(128), default="Central Enforcement Directorate")
     status = Column(String(32), default="ACTIVE")  # ACTIVE, PENDING_VERIFICATION, SUSPENDED
+    password_hash = Column(String(255), nullable=True)  # Null for SSO / demo officers
+    phone = Column(String(32), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 

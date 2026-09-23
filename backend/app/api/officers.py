@@ -11,6 +11,7 @@ from app.schemas.officer import (
     OfficerProfile,
     HelpdeskTicketResponse,
 )
+from app.services.auth import create_token
 
 router = APIRouter(prefix="/officers", tags=["Officer Verification"])
 
@@ -31,10 +32,19 @@ def verify_officer(req: OfficerVerifyRequest, db: Session = Depends(get_db)):
         .first()
     )
 
+    if officer and officer.password_hash:
+        # Password accounts must sign in with their password, not email alone
+        return OfficerVerifyResponse(
+            verified=False,
+            officer=None,
+            message="This account is protected by a password. Please sign in with your email and password."
+        )
+
     if officer:
         return OfficerVerifyResponse(
             verified=True,
             officer=OfficerProfile.model_validate(officer),
+            token=create_token(officer),
             message=f"Official credentials verified. Welcome {officer.name} ({officer.officer_badge})."
         )
 
@@ -67,7 +77,7 @@ def verify_officer(req: OfficerVerifyRequest, db: Session = Depends(get_db)):
 @router.get("/demo", response_model=List[OfficerProfile], summary="List registered reference officers")
 def get_demo_officers(db: Session = Depends(get_db)):
     """Returns registered authorized officers for quick testing."""
-    officers = db.query(Officer).filter(Officer.status == "ACTIVE").all()
+    officers = db.query(Officer).filter(Officer.status == "ACTIVE", Officer.password_hash.is_(None)).all()
     return [OfficerProfile.model_validate(o) for o in officers]
 
 

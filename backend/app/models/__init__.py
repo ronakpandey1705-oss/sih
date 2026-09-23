@@ -7,6 +7,7 @@ from app.models.detected_field import DetectedField
 from app.models.compliance import ComplianceResult, Violation
 from app.models.complaint import ComplaintReport, InspectionReport
 from app.models.officer import Officer, OfficerHelpdeskRequest
+from app.models.public_complaint import PublicComplaint, PublicComplaintPhoto
 
 __all__ = [
     "Base",
@@ -22,5 +23,7 @@ __all__ = [
     "InspectionReport",
     "Officer",
     "OfficerHelpdeskRequest",
+    "PublicComplaint",
+    "PublicComplaintPhoto",
 ]
 

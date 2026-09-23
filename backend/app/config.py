@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
     CLOUDINARY_API_SECRET: str = ""
+    # Signs officer session tokens. Set a long random value in production.
+    SECRET_KEY: str = "packsure-dev-secret-change-me"
+    SESSION_TTL_HOURS: int = 12
 
     model_config = SettingsConfigDict(
         env_file=str(_BACKEND_DIR / ".env"),

@@ -25,6 +25,7 @@ const PAGE_TITLES = {
   privacy: "Privacy Policy",
   about: "System Documentation",
   login: "Officer Authentication Portal",
+  complaints: "Citizen Complaints",
 };
 
 const state = {
@@ -36,6 +37,7 @@ const state = {
   evidenceFiles: [],
   history: JSON.parse(localStorage.getItem("packsure_history") || "[]"),
   officer: JSON.parse(localStorage.getItem("packsure_officer") || "null"),
+  token: localStorage.getItem("packsure_token") || null,
 };
 
 function toast(msg) {
@@ -46,7 +48,13 @@ function toast(msg) {
 }
 
 async function api(path, opts = {}) {
-  const res = await fetch(API + path, opts);
+  const headers = { ...(opts.headers || {}) };
+  if (state.token) headers.Authorization = `Bearer ${state.token}`;
+  const res = await fetch(API + path, { ...opts, headers });
+  if (res.status === 401 && state.token) {
+    // Session expired or revoked: send the user back to the sign-in gate
+    endSession("Your session has expired. Please sign in again.");
+  }
   if (!res.ok) {
     let detail = res.statusText;
     try {
@@ -65,6 +73,9 @@ async function api(path, opts = {}) {
 function showPage(id) {
   if (id === "inspect" && !state.officer) {
     openOfficerModal();
+  }
+  if (id === "complaints") {
+    loadComplaints();
   }
   document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
   const target = document.getElementById(id);
@@ -850,8 +861,8 @@ async function startCamera(mode = "barcode") {
   modal.style.display = "flex";
   status.textContent = "Requesting camera access...";
 
-  if (cameraMode === "label") {
-    title.textContent = "Capture Package Label Photo (Multiple Panels)";
+  if (cameraMode === "label" || cameraMode === "complaint") {
+    title.textContent = cameraMode === "complaint" ? "Photograph the Product Label" : "Capture Package Label Photo (Multiple Panels)";
     reticle.style.width = "88%";
     reticle.style.height = "80%";
     reticle.style.borderColor = "#0f766e";
@@ -877,7 +888,7 @@ async function startCamera(mode = "barcode") {
     video.srcObject = cameraStream;
     await video.play();
 
-    if (cameraMode === "label") {
+    if (cameraMode === "label" || cameraMode === "complaint") {
       status.textContent = `Position packaging panel (front, back, or side declarations) and tap Capture Photo.`;
       barcodeScanningActive = false;
     } else {
@@ -901,7 +912,7 @@ function stopCamera() {
 }
 
 async function captureAction() {
-  if (cameraMode === "label") {
+  if (cameraMode === "label" || cameraMode === "complaint") {
     captureLabelPhoto();
   } else {
     captureAndDecodeFrame(true);
@@ -921,6 +932,11 @@ function captureLabelPhoto() {
 
   canvas.toBlob((blob) => {
     if (!blob) return;
+    if (cameraMode === "complaint") {
+      const added = addComplaintPhotos([new File([blob], `label_photo_${Date.now()}.jpg`, { type: "image/jpeg" })]);
+      if (added) status.textContent = `Photo ${complaintPhotos.length} captured. Take another or tap Done.`;
+      return;
+    }
     const count = state.evidenceFiles.length + 1;
     const file = new File([blob], `packaging_panel_${count}.jpg`, { type: "image/jpeg" });
     addEvidenceFiles([file]);
@@ -1248,10 +1264,7 @@ function closeOfficerModal() {
 }
 
 function logoutOfficer() {
-  state.officer = null;
-  localStorage.removeItem("packsure_officer");
-  renderOfficerStatus();
-  toast("Officer session ended. Logged out successfully.");
+  endSession("Officer session ended. Logged out successfully.");
 }
 
 async function verifyOfficerEmail(email, provider = "gmail", claimedName = null) {
@@ -1273,9 +1286,7 @@ async function verifyOfficerEmail(email, provider = "gmail", claimedName = null)
     });
 
     if (res.verified && res.officer) {
-      state.officer = res.officer;
-      localStorage.setItem("packsure_officer", JSON.stringify(res.officer));
-      renderOfficerStatus();
+      startSession(res.token, res.officer);
       closeOfficerModal();
       toast(res.message);
       showPage("inspect");
@@ -1379,20 +1390,553 @@ if (loginPageLogout) {
   loginPageLogout.addEventListener("click", logoutOfficer);
 }
 
+// ==========================================
+// Session & Entry Gate (Sign In / Register)
+// ==========================================
+function startSession(token, officer) {
+  state.token = token || null;
+  state.officer = officer;
+  try {
+    if (token) localStorage.setItem("packsure_token", token);
+    localStorage.setItem("packsure_officer", JSON.stringify(officer));
+  } catch (_) {}
+  renderOfficerStatus();
+  hideGate();
+  startComplaintPolling();
+}
+
+function endSession(message) {
+  const wasSignedIn = !!state.token;
+  state.token = null;
+  state.officer = null;
+  try {
+    localStorage.removeItem("packsure_token");
+    localStorage.removeItem("packsure_officer");
+  } catch (_) {}
+  stopComplaintPolling();
+  photoBlobCache.forEach((url) => URL.revokeObjectURL(url));
+  photoBlobCache.clear();
+  renderOfficerStatus();
+  closeOfficerModal();
+  showGate("auth");
+  if (message && wasSignedIn) toast(message);
+}
+
+function showGate(view = "auth") {
+  document.documentElement.classList.add("gate-open");
+  setGateView(view);
+}
+
+function hideGate() {
+  document.documentElement.classList.remove("gate-open");
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function setGateView(view) {
+  const views = { auth: "gateAuthView", complaint: "gateComplaintView", success: "gateSuccessView" };
+  Object.entries(views).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.hidden = key !== view;
+  });
+  if (view === "complaint") loadIssueTypes();
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function setGateTab(tab) {
+  document.querySelectorAll(".gate-tab").forEach((b) => {
+    const on = b.dataset.gateTab === tab;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", String(on));
+  });
+  document.getElementById("gateSigninForm").hidden = tab !== "signin";
+  document.getElementById("gateSignupForm").hidden = tab !== "signup";
+  document.getElementById("signinError").textContent = "";
+  document.getElementById("signupError").textContent = "";
+}
+
+async function withBusy(button, label, fn) {
+  const original = button.innerHTML;
+  button.disabled = true;
+  button.textContent = label;
+  try {
+    return await fn();
+  } finally {
+    button.disabled = false;
+    button.innerHTML = original;
+  }
+}
+
+async function submitSignin(e) {
+  e.preventDefault();
+  const email = document.getElementById("signinEmail").value.trim();
+  const password = document.getElementById("signinPassword").value;
+  const errEl = document.getElementById("signinError");
+  errEl.textContent = "";
+  if (!email || !password) {
+    errEl.textContent = "Enter your email and password.";
+    return;
+  }
+  await withBusy(e.target.querySelector("button[type=submit]"), "Signing in...", async () => {
+    try {
+      const res = await api("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      document.getElementById("signinPassword").value = "";
+      startSession(res.token, res.officer);
+      showPage("dashboard");
+      toast(res.message);
+    } catch (err) {
+      errEl.textContent = err.message;
+    }
+  });
+}
+
+async function submitSignup(e) {
+  e.preventDefault();
+  const val = (id) => document.getElementById(id).value.trim();
+  const errEl = document.getElementById("signupError");
+  errEl.textContent = "";
+  const payload = {
+    name: val("signupName"),
+    email: val("signupEmail"),
+    designation: val("signupDesignation"),
+    jurisdiction: val("signupJurisdiction") || null,
+    phone: val("signupPhone") || null,
+    password: document.getElementById("signupPassword").value,
+  };
+  let problem = "";
+  if (payload.name.length < 2) problem = "Enter your full name.";
+  else if (!/^\S+@\S+\.\S+$/.test(payload.email)) problem = "Enter a valid email address.";
+  else if (payload.password.length < 8) problem = "Password must be at least 8 characters.";
+  else if (payload.password !== document.getElementById("signupConfirm").value) problem = "Passwords do not match.";
+  if (problem) {
+    errEl.textContent = problem;
+    return;
+  }
+  await withBusy(e.target.querySelector("button[type=submit]"), "Creating account...", async () => {
+    try {
+      const res = await api("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      e.target.reset();
+      startSession(res.token, res.officer);
+      showPage("dashboard");
+      toast(res.message);
+    } catch (err) {
+      errEl.textContent = err.message;
+    }
+  });
+}
+
+async function initSession() {
+  if (!state.token) {
+    // Sessions saved before password sign-in existed carry no token
+    state.officer = null;
+    try { localStorage.removeItem("packsure_officer"); } catch (_) {}
+    renderOfficerStatus();
+    showGate("auth");
+    return;
+  }
+  hideGate();
+  try {
+    const officer = await api("/api/auth/me");
+    state.officer = officer;
+    try { localStorage.setItem("packsure_officer", JSON.stringify(officer)); } catch (_) {}
+    renderOfficerStatus();
+    startComplaintPolling();
+  } catch (_) {
+    // A 401 has already gone through endSession; on network errors keep the cached session
+  }
+}
+
+document.querySelectorAll("[data-gate-tab]").forEach((el) => {
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
+    setGateTab(el.dataset.gateTab);
+  });
+});
+document.querySelectorAll("[data-gate-view]").forEach((el) => {
+  el.addEventListener("click", () => setGateView(el.dataset.gateView));
+});
+document.querySelectorAll("[data-pw-toggle]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const input = document.getElementById(btn.dataset.pwToggle);
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    btn.textContent = show ? "Hide" : "Show";
+    btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+  });
+});
+document.getElementById("gateSigninForm").addEventListener("submit", submitSignin);
+document.getElementById("gateSignupForm").addEventListener("submit", submitSignup);
+document.querySelectorAll(".gate-demo-btn").forEach((btn) => {
+  btn.addEventListener("click", () => verifyOfficerEmail(btn.dataset.officerEmail, "demo"));
+});
+
+// ==========================================
+// Public Complaint (anonymous, no sign-in)
+// ==========================================
+const MAX_COMPLAINT_PHOTOS = 6;
+let complaintPhotos = [];
+let issueTypesLoaded = false;
+
+async function loadIssueTypes() {
+  if (issueTypesLoaded) return;
+  const grid = document.getElementById("issueGrid");
+  try {
+    const types = await api("/api/public-complaints/issue-types");
+    grid.innerHTML = types.map((t) => `
+      <label class="issue-option">
+        <input type="checkbox" name="issue" value="${escapeHtml(t.code)}" />
+        <span>${escapeHtml(t.label)}</span>
+      </label>
+    `).join("");
+    issueTypesLoaded = true;
+  } catch (err) {
+    grid.innerHTML = `<p class="gate-error">Could not load issue list: ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+// Downscale large phone photos before upload to save mobile data
+async function compressImage(file) {
+  if (!/^image\/(jpeg|png|webp)$/i.test(file.type) || file.size < 600 * 1024) return file;
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const scale = Math.min(1, 1800 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    if (bitmap.close) bitmap.close();
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch (_) {
+    return file;
+  }
+}
+
+function addComplaintPhotos(files) {
+  let added = 0;
+  for (const file of Array.from(files || [])) {
+    if (complaintPhotos.length >= MAX_COMPLAINT_PHOTOS) {
+      toast(`You can attach up to ${MAX_COMPLAINT_PHOTOS} photos.`);
+      break;
+    }
+    const okType = /^image\/(jpeg|jpg|png|webp)$/i.test(file.type) || /\.(jpe?g|png|webp)$/i.test(file.name);
+    if (!okType) {
+      toast(`Skipped ${file.name}: please attach a JPG, PNG or WebP photo.`);
+      continue;
+    }
+    const entry = { file, url: URL.createObjectURL(file), ready: null };
+    entry.ready = compressImage(file).then((smaller) => { entry.file = smaller; });
+    complaintPhotos.push(entry);
+    added++;
+  }
+  renderComplaintPhotos();
+  return added;
+}
+
+function renderComplaintPhotos() {
+  const gallery = document.getElementById("cPhotoGallery");
+  gallery.hidden = complaintPhotos.length === 0;
+  gallery.innerHTML = complaintPhotos.map((p, idx) => `
+    <div class="evidence-item">
+      <div class="evidence-thumb-wrap">
+        <img class="evidence-thumb" src="${p.url}" alt="Label photo ${idx + 1}" />
+        <span class="evidence-tag">Photo ${idx + 1}</span>
+        <button class="evidence-del" type="button" data-cphoto-del="${idx}" aria-label="Remove photo ${idx + 1}">&times;</button>
+      </div>
+    </div>
+  `).join("");
+  gallery.querySelectorAll("[data-cphoto-del]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const [removed] = complaintPhotos.splice(parseInt(btn.dataset.cphotoDel, 10), 1);
+      if (removed) URL.revokeObjectURL(removed.url);
+      renderComplaintPhotos();
+    });
+  });
+}
+
+function resetComplaintForm() {
+  document.getElementById("complaintForm").reset();
+  complaintPhotos.forEach((p) => URL.revokeObjectURL(p.url));
+  complaintPhotos = [];
+  renderComplaintPhotos();
+  document.getElementById("complaintError").textContent = "";
+}
+
+async function submitComplaint(e) {
+  e.preventDefault();
+  const errEl = document.getElementById("complaintError");
+  errEl.textContent = "";
+  const val = (id) => document.getElementById(id).value.trim();
+  const issues = [...document.querySelectorAll('#issueGrid input[name="issue"]:checked')].map((i) => i.value);
+
+  const missing = [];
+  if (!val("cProduct")) missing.push("product name");
+  if (!issues.length) missing.push("at least one issue");
+  if (!val("cDescription")) missing.push("description");
+  if (!val("cLocation")) missing.push("location");
+  if (missing.length) {
+    errEl.textContent = `Please add: ${missing.join(", ")}.`;
+    return;
+  }
+
+  await withBusy(document.getElementById("complaintSubmitBtn"), "Submitting...", async () => {
+    await Promise.all(complaintPhotos.map((p) => p.ready));
+    const form = new FormData();
+    form.append("product_name", val("cProduct"));
+    issues.forEach((code) => form.append("issue_types", code));
+    form.append("description", val("cDescription"));
+    form.append("location", val("cLocation"));
+    [["brand", "cBrand"], ["barcode", "cBarcode"], ["store_name", "cStore"], ["purchase_date", "cPurchaseDate"], ["contact", "cContact"]]
+      .forEach(([key, id]) => { if (val(id)) form.append(key, val(id)); });
+    complaintPhotos.forEach((p) => form.append("photos", p.file, p.file.name));
+    try {
+      const res = await api("/api/public-complaints", { method: "POST", body: form });
+      document.getElementById("successRef").textContent = res.reference_no;
+      resetComplaintForm();
+      setGateView("success");
+    } catch (err) {
+      errEl.textContent = err.message || "Could not submit complaint. Please try again.";
+    }
+  });
+}
+
+const COMPLAINT_STATUS_LABELS = {
+  NEW: "Received, awaiting review",
+  UNDER_REVIEW: "Under review by an officer",
+  ACTION_TAKEN: "Action taken",
+  DISMISSED: "Closed without action",
+};
+
+async function trackComplaint(e) {
+  e.preventDefault();
+  const ref = document.getElementById("trackRef").value.trim();
+  const box = document.getElementById("trackResult");
+  if (!ref) {
+    box.innerHTML = `<span class="gate-error">Enter your reference number.</span>`;
+    return;
+  }
+  box.textContent = "Checking...";
+  try {
+    const res = await api(`/api/public-complaints/track/${encodeURIComponent(ref)}`);
+    box.innerHTML = `<strong>${escapeHtml(res.reference_no)}</strong> &middot; ${escapeHtml(res.product_name)}<br>
+      Status: <span class="complaint-status s-${escapeHtml(res.status.toLowerCase())}">${escapeHtml(COMPLAINT_STATUS_LABELS[res.status] || res.status)}</span>`;
+  } catch (err) {
+    box.innerHTML = `<span class="gate-error">${escapeHtml(err.message)}</span>`;
+  }
+}
+
+function openComplaintCamera() {
+  const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  // Phones open the native camera app; desktops/laptops use the in-page webcam modal
+  if (!coarse && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    startCamera("complaint");
+  } else {
+    document.getElementById("cCameraInput").click();
+  }
+}
+
+document.getElementById("openComplaintBtn").addEventListener("click", () => setGateView("complaint"));
+document.getElementById("fileAnotherBtn").addEventListener("click", () => setGateView("complaint"));
+document.getElementById("complaintForm").addEventListener("submit", submitComplaint);
+document.getElementById("trackForm").addEventListener("submit", trackComplaint);
+document.getElementById("cTakePhotoBtn").addEventListener("click", openComplaintCamera);
+document.getElementById("cChoosePhotoBtn").addEventListener("click", () => document.getElementById("cGalleryInput").click());
+["cCameraInput", "cGalleryInput"].forEach((id) => {
+  document.getElementById(id).addEventListener("change", (e) => {
+    addComplaintPhotos(e.target.files);
+    e.target.value = "";
+  });
+});
+document.getElementById("copyRefBtn").addEventListener("click", async () => {
+  const ref = document.getElementById("successRef").textContent;
+  try {
+    await navigator.clipboard.writeText(ref);
+    toast("Reference number copied");
+  } catch (_) {
+    toast(`Reference number: ${ref}`);
+  }
+});
+
+// ==========================================
+// Officer: Citizen Complaint Inbox & Notifications
+// ==========================================
+let complaintPollTimer = null;
+let lastComplaintSummary = null;
+const photoBlobCache = new Map();
+
+function startComplaintPolling() {
+  stopComplaintPolling();
+  lastComplaintSummary = null;
+  pollComplaintSummary();
+  complaintPollTimer = setInterval(pollComplaintSummary, 30000);
+}
+
+function stopComplaintPolling() {
+  if (complaintPollTimer) clearInterval(complaintPollTimer);
+  complaintPollTimer = null;
+  setComplaintBadge(0);
+}
+
+function setComplaintBadge(count) {
+  const label = count > 99 ? "99+" : String(count);
+  [document.getElementById("notifyCount"), document.getElementById("navComplaintCount")].forEach((el) => {
+    if (!el) return;
+    el.textContent = label;
+    el.hidden = count === 0;
+  });
+  const bell = document.getElementById("notifyBell");
+  if (bell) {
+    bell.classList.toggle("has-new", count > 0);
+    bell.setAttribute("aria-label", count ? `Citizen complaints, ${count} new` : "Citizen complaints, no new");
+  }
+}
+
+async function pollComplaintSummary() {
+  if (!state.token) return;
+  try {
+    const summary = await api("/api/public-complaints/summary");
+    const prev = lastComplaintSummary;
+    lastComplaintSummary = summary;
+    setComplaintBadge(summary.new_count);
+    if (prev && summary.latest_reference_no && summary.latest_reference_no !== prev.latest_reference_no) {
+      toast(`New public complaint received: ${summary.latest_reference_no}`);
+      if (document.getElementById("complaints").classList.contains("active")) loadComplaints();
+    }
+  } catch (_) {
+    // Offline or signed out; the next poll retries
+  }
+}
+
+function formatWhen(iso) {
+  if (!iso) return "";
+  // Backend datetimes are UTC; SQLite drops the offset
+  const d = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(iso) ? iso : iso + "Z");
+  return d.toLocaleString(undefined, { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+async function loadComplaintPhoto(img) {
+  const url = img.dataset.src;
+  const link = img.closest("a");
+  if (/^https?:\/\//.test(url)) {
+    img.src = url;
+    link.href = url;
+    return;
+  }
+  try {
+    if (!photoBlobCache.has(url)) {
+      const res = await fetch(API + url, { headers: { Authorization: `Bearer ${state.token}` } });
+      if (!res.ok) throw new Error(res.statusText);
+      photoBlobCache.set(url, URL.createObjectURL(await res.blob()));
+    }
+    img.src = photoBlobCache.get(url);
+    link.href = img.src;
+  } catch (_) {
+    img.alt = "Photo unavailable";
+  }
+}
+
+function renderComplaintCard(c) {
+  const statusOptions = Object.keys(COMPLAINT_STATUS_LABELS)
+    .map((s) => `<option value="${s}" ${s === c.status ? "selected" : ""}>${s.replace("_", " ")}</option>`).join("");
+  const meta = [
+    c.brand && `<div><span>Brand</span><b>${escapeHtml(c.brand)}</b></div>`,
+    c.barcode && `<div><span>Barcode</span><b>${escapeHtml(c.barcode)}</b></div>`,
+    `<div><span>Location</span><b>${escapeHtml(c.location)}</b></div>`,
+    c.store_name && `<div><span>Shop</span><b>${escapeHtml(c.store_name)}</b></div>`,
+    c.purchase_date && `<div><span>Purchased</span><b>${escapeHtml(c.purchase_date)}</b></div>`,
+    `<div><span>Contact</span><b>${c.contact ? escapeHtml(c.contact) : "Anonymous"}</b></div>`,
+  ].filter(Boolean).join("");
+  const photos = c.photos.length
+    ? `<div class="complaint-photos">${c.photos.map((p, i) => `
+        <a href="#" target="_blank" rel="noopener" class="complaint-photo"><img data-src="${escapeHtml(p.url)}" alt="Label photo ${i + 1}" loading="lazy" /></a>`).join("")}</div>`
+    : `<p class="muted" style="font-size:12.5px">No photos attached.</p>`;
+  return `
+    <article class="card complaint-card" data-complaint-id="${escapeHtml(c.id)}">
+      <div class="complaint-head">
+        <div>
+          <div class="complaint-ref">${escapeHtml(c.reference_no)} &middot; ${escapeHtml(formatWhen(c.created_at))}</div>
+          <h3>${escapeHtml(c.product_name)}</h3>
+        </div>
+        <span class="complaint-status s-${escapeHtml(c.status.toLowerCase())}">${escapeHtml(c.status.replace("_", " "))}</span>
+      </div>
+      <div class="complaint-issues">${c.issue_labels.map((l) => `<span class="status-tag fail">${escapeHtml(l)}</span>`).join("")}</div>
+      <p class="complaint-desc">${escapeHtml(c.description)}</p>
+      <div class="complaint-meta">${meta}</div>
+      ${photos}
+      <div class="complaint-actions">
+        <div>
+          <label class="field">Status</label>
+          <select data-field="status">${statusOptions}</select>
+        </div>
+        <div class="complaint-notes">
+          <label class="field">Officer notes</label>
+          <textarea data-field="notes" placeholder="Action taken, inspection reference, etc.">${escapeHtml(c.officer_notes || "")}</textarea>
+        </div>
+        <button type="button" class="btn btn-primary" data-save-complaint>Save Update</button>
+      </div>
+      ${c.handled_by_badge ? `<p class="muted complaint-handled">Last updated by ${escapeHtml(c.handled_by_badge)} &middot; ${escapeHtml(formatWhen(c.updated_at))}</p>` : ""}
+    </article>`;
+}
+
+async function loadComplaints() {
+  const list = document.getElementById("complaintsList");
+  if (!list || !state.token) return;
+  const filter = document.getElementById("complaintStatusFilter").value;
+  try {
+    const items = await api(`/api/public-complaints?status=${encodeURIComponent(filter)}`);
+    if (!items.length) {
+      const label = filter === "ALL" ? "" : `${filter.replace("_", " ").toLowerCase()} `;
+      list.innerHTML = `<div class="card"><p class="muted">No ${label}complaints right now.</p></div>`;
+      return;
+    }
+    list.innerHTML = items.map(renderComplaintCard).join("");
+    list.querySelectorAll(".complaint-photos img").forEach(loadComplaintPhoto);
+  } catch (err) {
+    list.innerHTML = `<div class="card"><p class="muted">${escapeHtml(err.message)}</p></div>`;
+  }
+}
+
+document.getElementById("complaintStatusFilter").addEventListener("change", loadComplaints);
+document.getElementById("refreshComplaintsBtn").addEventListener("click", () => {
+  loadComplaints();
+  pollComplaintSummary();
+});
+document.getElementById("complaintsList").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-save-complaint]");
+  if (!btn) return;
+  const card = btn.closest("[data-complaint-id]");
+  await withBusy(btn, "Saving...", async () => {
+    try {
+      await api(`/api/public-complaints/${card.dataset.complaintId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: card.querySelector('[data-field="status"]').value,
+          officer_notes: card.querySelector('[data-field="notes"]').value,
+        }),
+      });
+      toast("Complaint updated");
+      pollComplaintSummary();
+      loadComplaints();
+    } catch (err) {
+      toast(err.message);
+    }
+  });
+});
+
 renderDemoChips();
 renderDashboard();
 renderOfficerStatus();
+initSession();
 ping();
 loadBootstrap();
 setInterval(ping, 20000);
-
-// Mobile Government Navigation Drawer Toggle
-const mobileNavToggle = document.getElementById("navToggle");
-const mobileMainNav = document.getElementById("mainNav");
-if (mobileNavToggle && mobileMainNav) {
-  mobileNavToggle.addEventListener("click", () => {
-    const isOpen = mobileMainNav.classList.toggle("nav-open");
-    mobileNavToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-  });
-}
 

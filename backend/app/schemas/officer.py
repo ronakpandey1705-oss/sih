@@ -27,6 +27,7 @@ class OfficerVerifyResponse(BaseModel):
     officer: Optional[OfficerProfile] = None
     message: str
     ticket_no: Optional[str] = None
+    token: Optional[str] = None
 
 
 class HelpdeskTicketResponse(BaseModel):

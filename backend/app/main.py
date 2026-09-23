@@ -15,7 +15,9 @@ from app.models import (
     DetectedField,
     ComplianceResult,
     Violation,
-    ComplaintReport
+    ComplaintReport,
+    PublicComplaint,
+    PublicComplaintPhoto,
 )
 from app.services.products.product_service import ProductService
 from app.api.products import router as products_router
@@ -32,6 +34,8 @@ from app.api.reports import (
 )
 from app.api.chat import router as chat_router
 from app.api.officers import router as officers_router
+from app.api.auth import router as auth_router
+from app.api.public_complaints import router as public_complaints_router
 
 
 def _ensure_database_compatibility():
@@ -50,7 +54,15 @@ def _ensure_database_compatibility():
                 conn.execute(text("ALTER TABLE products ALTER COLUMN consumer_care_details TYPE VARCHAR(1024);"))
                 conn.commit()
             except Exception as e:
+                conn.rollback()
                 print(f"[STARTUP] PostgreSQL column check notice: {e}")
+            try:
+                conn.execute(text("ALTER TABLE officers ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);"))
+                conn.execute(text("ALTER TABLE officers ADD COLUMN IF NOT EXISTS phone VARCHAR(32);"))
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                print(f"[STARTUP] PostgreSQL officer column notice: {e}")
         elif "sqlite" in url_str:
             try:
                 result = conn.execute(text("PRAGMA table_info(scans)"))
@@ -66,6 +78,12 @@ def _ensure_database_compatibility():
                 for col_name, col_type in migrations:
                     if col_name not in existing_cols:
                         conn.execute(text(f"ALTER TABLE scans ADD COLUMN {col_name} {col_type}"))
+                        conn.commit()
+                result = conn.execute(text("PRAGMA table_info(officers)"))
+                officer_cols = {row[1] for row in result.fetchall()}
+                for col_name, col_type in [("password_hash", "VARCHAR(255)"), ("phone", "VARCHAR(32)")]:
+                    if col_name not in officer_cols:
+                        conn.execute(text(f"ALTER TABLE officers ADD COLUMN {col_name} {col_type}"))
                         conn.commit()
             except Exception as e:
                 print(f"[STARTUP] SQLite column check notice: {e}")
@@ -131,9 +149,12 @@ def _seed_demo_officers(db) -> int:
             for k, v in item.items():
                 setattr(existing, k, v)
             updated += 1
-    # Clean out any legacy mock officers
+    # Clean out any legacy mock officers (self-registered password accounts are kept)
     allowed_emails = {item["email"] for item in DEMO_OFFICERS}
-    legacy = db.query(Officer).filter(~Officer.email.in_(allowed_emails)).all()
+    legacy = db.query(Officer).filter(
+        ~Officer.email.in_(allowed_emails),
+        Officer.password_hash.is_(None),
+    ).all()
     for leg in legacy:
         db.delete(leg)
     db.commit()
@@ -216,6 +237,8 @@ app.include_router(reports_router, prefix="/api")
 app.include_router(inspections_reports_router, prefix="/api")
 app.include_router(chat_router, prefix="/api")
 app.include_router(officers_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
+app.include_router(public_complaints_router, prefix="/api")
 
 
 if os.path.isdir(FRONTEND_DIR):
