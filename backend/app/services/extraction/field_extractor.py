@@ -94,6 +94,59 @@ class FieldExtractor:
     PINCODE_PATTERN = re.compile(r"\b[1-9][0-9]{2}\s?[0-9]{3}\b")
 
     @classmethod
+    def _make_window(cls, members: List[OCRResult]) -> Dict[str, Any]:
+        parts, spans, pos = [], [], 0
+        for m in members:
+            t = m.text.strip()
+            spans.append((pos, pos + len(t)))
+            parts.append(t)
+            pos += len(t) + 1
+        return {
+            "text": " ".join(parts),
+            "members": members,
+            "spans": spans,
+            "image_id": members[0].image_id,
+            "confidence": min(m.confidence for m in members),
+        }
+
+    @classmethod
+    def _locate(cls, window: Dict[str, Any], *matches: Any) -> Dict[str, Any]:
+        """Narrow a window match down to the OCR line(s) the matched text sits on."""
+        start = min(m.start() for m in matches)
+        end = max(m.end() for m in matches)
+        hit = [
+            m for m, (s, e) in zip(window["members"], window["spans"])
+            if s < end and start < e
+        ] or window["members"][:1]
+        return {
+            "text": " ".join(m.text.strip() for m in hit),
+            "image_id": hit[0].image_id,
+            "bbox_json": cls._union_bbox_json(hit),
+            "confidence": min(m.confidence for m in hit),
+        }
+
+    @staticmethod
+    def _union_bbox_json(lines: List[OCRResult]) -> Optional[str]:
+        """One line keeps its stored box/polygon; several lines get one enclosing box."""
+        if len(lines) == 1:
+            return lines[0].bbox_json
+        boxes = []
+        for line in lines:
+            try:
+                b = json.loads(line.bbox_json or "{}").get("bbox")
+            except (ValueError, AttributeError):
+                continue
+            if b and len(b) == 4 and b[2] > b[0] and b[3] > b[1]:
+                boxes.append(b)
+        if not boxes:
+            return None
+        return json.dumps({
+            "bbox": [min(b[0] for b in boxes), min(b[1] for b in boxes),
+                     max(b[2] for b in boxes), max(b[3] for b in boxes)],
+            "polygon": None,
+        })
+
+    @classmethod
     def extract_from_scan(cls, scan_id: str, db: Session) -> List[DetectedField]:
         """
         Main entrypoint: extracts mandatory fields from OCR results of a scan session.
@@ -118,30 +171,15 @@ class FieldExtractor:
         full_text = " \n ".join(full_text_lines)
 
         # Multi-line sliding windows (combines 1, 2, and 3 adjacent lines to catch split labels)
+        # Windows never span two photos, and remember which lines they contain so a
+        # match can be traced back to the exact line(s) it came from.
         windows = []
         for i in range(len(ocr_results)):
-            windows.append({
-                "text": ocr_results[i].text.strip(),
-                "image_id": ocr_results[i].image_id,
-                "bbox_json": ocr_results[i].bbox_json,
-                "confidence": ocr_results[i].confidence,
-            })
-            if i + 1 < len(ocr_results):
-                pair_text = f"{ocr_results[i].text.strip()} {ocr_results[i + 1].text.strip()}"
-                windows.append({
-                    "text": pair_text,
-                    "image_id": ocr_results[i].image_id,
-                    "bbox_json": ocr_results[i].bbox_json,
-                    "confidence": min(ocr_results[i].confidence, ocr_results[i + 1].confidence),
-                })
-            if i + 2 < len(ocr_results):
-                triplet_text = f"{ocr_results[i].text.strip()} {ocr_results[i + 1].text.strip()} {ocr_results[i + 2].text.strip()}"
-                windows.append({
-                    "text": triplet_text,
-                    "image_id": ocr_results[i].image_id,
-                    "bbox_json": ocr_results[i].bbox_json,
-                    "confidence": min(ocr_results[i].confidence, ocr_results[i + 1].confidence, ocr_results[i + 2].confidence),
-                })
+            for size in (1, 2, 3):
+                members = ocr_results[i:i + size]
+                if len(members) < size or any(m.image_id != members[0].image_id for m in members):
+                    break
+                windows.append(cls._make_window(members))
 
         # -------------------------------------------------------------
         # 1. Product Name / Identity (Rule 6(1)(b))
@@ -152,8 +190,8 @@ class FieldExtractor:
                 "raw_text": scan.product.name,
                 "confidence": 0.98,
                 "method": "PRODUCT_CATALOG_LOOKUP",
-                "image_id": ocr_results[0].image_id if ocr_results else None,
-                "bbox_json": ocr_results[0].bbox_json if ocr_results else None
+                "image_id": None,
+                "bbox_json": None
             }
         else:
             for r in ocr_results:
@@ -175,17 +213,19 @@ class FieldExtractor:
         # First priority: Look for explicit Net Quantity keyword in sliding windows
         for w in windows:
             t = w["text"]
-            if re.search(r"net\s*(?:qty|quantity|wt|weight|vol|volume|content|contents|mass)|शुद्ध\s*मात्रा", t, re.IGNORECASE):
+            kw_match = re.search(r"net\s*(?:qty|quantity|wt|weight|vol|volume|content|contents|mass)|शुद्ध\s*मात्रा", t, re.IGNORECASE)
+            if kw_match:
                 match = cls.NET_QTY_PATTERN.search(t)
                 if match:
                     val = f"{match.group(1)} {match.group(2)}"
+                    loc = cls._locate(w, kw_match, match)
                     extracted_fields_dict["net_quantity"] = {
                         "value": val,
-                        "raw_text": t,
-                        "confidence": round(w["confidence"], 4),
+                        "raw_text": loc["text"],
+                        "confidence": round(loc["confidence"], 4),
                         "method": "REGEX_KEYWORD_WINDOW",
-                        "image_id": w["image_id"],
-                        "bbox_json": w["bbox_json"]
+                        "image_id": loc["image_id"],
+                        "bbox_json": loc["bbox_json"]
                     }
                     break
 
@@ -230,13 +270,14 @@ class FieldExtractor:
             if price_match and price_match.group(1):
                 has_tax = has_tax_global or bool(cls.TAX_INCLUSIVE_PATTERN.search(t))
                 val = f"₹ {price_match.group(1)}" + (" (incl. of all taxes)" if has_tax else "")
+                loc = cls._locate(w, price_match)
                 extracted_fields_dict["mrp"] = {
                     "value": val,
-                    "raw_text": t,
-                    "confidence": round(w["confidence"], 4),
+                    "raw_text": loc["text"],
+                    "confidence": round(loc["confidence"], 4),
                     "method": "REGEX_KEYWORD_WINDOW",
-                    "image_id": w["image_id"],
-                    "bbox_json": w["bbox_json"]
+                    "image_id": loc["image_id"],
+                    "bbox_json": loc["bbox_json"]
                 }
                 break
 
@@ -279,13 +320,14 @@ class FieldExtractor:
             if usp_match and usp_match.group(1):
                 unit_str = usp_match.group(2) if usp_match.group(2) else "unit"
                 val = f"₹ {usp_match.group(1)} / {unit_str}"
+                loc = cls._locate(w, usp_match)
                 extracted_fields_dict["unit_sale_price"] = {
                     "value": val,
-                    "raw_text": w["text"],
-                    "confidence": round(w["confidence"], 4),
+                    "raw_text": loc["text"],
+                    "confidence": round(loc["confidence"], 4),
                     "method": "REGEX_UNIT_PRICE",
-                    "image_id": w["image_id"],
-                    "bbox_json": w["bbox_json"]
+                    "image_id": loc["image_id"],
+                    "bbox_json": loc["bbox_json"]
                 }
                 break
 
@@ -293,6 +335,7 @@ class FieldExtractor:
         # 5. Manufacturer / Packer / Importer Name & Address (Rule 6(1)(a))
         # -------------------------------------------------------------
         mfg_lines = []
+        mfg_sources: List[OCRResult] = []
         mfg_image_id = None
         mfg_bbox = None
         mfg_conf = 0.8
@@ -301,10 +344,12 @@ class FieldExtractor:
             text_lower = r.text.lower()
             if any(kw in text_lower for kw in cls.MANUFACTURER_KEYWORDS):
                 mfg_lines.append(r.text.strip())
+                mfg_sources.append(r)
                 mfg_image_id = r.image_id
-                mfg_bbox = r.bbox_json
                 mfg_conf = r.confidence
                 for j in range(i + 1, min(i + 5, len(ocr_results))):
+                    if ocr_results[j].image_id != r.image_id:
+                        break
                     next_line = ocr_results[j].text.strip()
                     if cls.PINCODE_PATTERN.search(next_line) or any(
                         w in next_line.lower() for w in [
@@ -312,6 +357,7 @@ class FieldExtractor:
                         ]
                     ):
                         mfg_lines.append(next_line)
+                        mfg_sources.append(ocr_results[j])
                 break
 
         # Check PIN code if keyword line was not identified
@@ -320,12 +366,16 @@ class FieldExtractor:
                 if cls.PINCODE_PATTERN.search(r.text.strip()):
                     start_idx = max(0, i - 2)
                     for k in range(start_idx, min(i + 1, len(ocr_results))):
+                        if ocr_results[k].image_id != r.image_id:
+                            continue
                         mfg_lines.append(ocr_results[k].text.strip())
+                        mfg_sources.append(ocr_results[k])
                     mfg_image_id = r.image_id
-                    mfg_bbox = r.bbox_json
                     mfg_conf = 0.75
                     break
 
+        if mfg_sources:
+            mfg_bbox = cls._union_bbox_json(mfg_sources)
         if mfg_lines:
             extracted_fields_dict["manufacturer_name_and_address"] = {
                 "value": ", ".join(mfg_lines),
@@ -397,13 +447,14 @@ class FieldExtractor:
             if any(k in t.lower() for k in ["mfg", "pkd", "packed", "date", "mfd", "dom", "dop", "use by", "best before"]):
                 match = cls.DATE_PATTERN.search(t)
                 if match and match.group(1):
+                    loc = cls._locate(w, match)
                     extracted_fields_dict["manufacture_or_import_date"] = {
                         "value": match.group(1),
-                        "raw_text": t,
-                        "confidence": round(w["confidence"], 4),
+                        "raw_text": loc["text"],
+                        "confidence": round(loc["confidence"], 4),
                         "method": "REGEX_DATE",
-                        "image_id": w["image_id"],
-                        "bbox_json": w["bbox_json"]
+                        "image_id": loc["image_id"],
+                        "bbox_json": loc["bbox_json"]
                     }
                     break
 
@@ -427,13 +478,14 @@ class FieldExtractor:
         for w in windows:
             dim_match = cls.DIMENSIONS_PATTERN.search(w["text"])
             if dim_match:
+                loc = cls._locate(w, dim_match)
                 extracted_fields_dict["dimensions"] = {
                     "value": dim_match.group(0),
-                    "raw_text": w["text"],
-                    "confidence": round(w["confidence"], 4),
+                    "raw_text": loc["text"],
+                    "confidence": round(loc["confidence"], 4),
                     "method": "REGEX_DIMENSIONS",
-                    "image_id": w["image_id"],
-                    "bbox_json": w["bbox_json"]
+                    "image_id": loc["image_id"],
+                    "bbox_json": loc["bbox_json"]
                 }
                 break
 

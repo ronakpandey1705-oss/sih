@@ -3239,6 +3239,304 @@ html.gate-open .app-workspace { display: none; }
 
 .lookup-card:empty { display: none; }
 
+/* ==========================================================================
+   LABEL EVIDENCE VIEWER (Results page)
+   ========================================================================== */
+.ev-panels {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 10px;
+  margin-top: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ev-panels[hidden] { display: none; }
+
+.ev-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 5px 10px 5px 5px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ev-panel img {
+  width: 44px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: #0f172a;
+}
+
+.ev-panel small {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.ev-panel.active {
+  border-color: var(--gov-blue);
+  box-shadow: inset 0 0 0 1px var(--gov-blue);
+  background: var(--gov-blue-light);
+}
+
+.ev-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 8px;
+  align-items: start;
+}
+
+.ev-stage-wrap { min-width: 0; }
+
+/* Stage shrinks to the rendered photo so the overlay lines up exactly */
+.ev-stage {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #0f172a;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  line-height: 0;
+}
+
+.ev-stage img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 72vh;
+}
+
+.ev-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ev-box {
+  fill: rgba(56, 189, 248, 0.08);
+  stroke: #38bdf8;
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: fill 0.12s ease;
+}
+
+.ev-box:hover { fill: rgba(56, 189, 248, 0.22); }
+
+.ev-box.is-field {
+  fill: rgba(21, 128, 61, 0.14);
+  stroke: #22c55e;
+  stroke-width: 2.5;
+}
+
+.ev-box.is-low {
+  stroke: #f59e0b;
+  stroke-dasharray: 6 4;
+}
+
+.ev-box.is-active {
+  fill: rgba(250, 204, 21, 0.28);
+  stroke: #facc15;
+  stroke-width: 3.5;
+  stroke-dasharray: none;
+}
+
+.ev-tag {
+  fill: #ffffff;
+  stroke-width: 0.35em;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: #14532d;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.ev-tag.is-active { stroke: #713f12; }
+
+.ev-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ev-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+
+.ev-key {
+  width: 14px;
+  height: 10px;
+  border: 2px solid;
+  border-radius: 2px;
+}
+
+.ev-key-field { border-color: #22c55e; background: rgba(21, 128, 61, 0.14); }
+.ev-key-ocr { border-color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
+.ev-key-low { border-color: #f59e0b; border-style: dashed; }
+
+.ev-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ev-toggle input { width: 16px; height: 16px; accent-color: var(--gov-blue); }
+
+.ev-side { min-width: 0; }
+
+.ev-side-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--gov-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 8px;
+}
+
+.ev-side-title:not(:first-child) { margin-top: 18px; }
+
+.ev-list {
+  display: grid;
+  gap: 6px;
+  max-height: 330px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.ev-ocr-list { max-height: 280px; }
+
+.ev-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.ev-row:hover:not(:disabled) { border-color: var(--line-strong); background: #f8fafc; }
+.ev-row:disabled { cursor: default; opacity: 0.85; }
+.ev-field-row:not(:disabled) { border-left-color: #22c55e; }
+
+.ev-row.active {
+  border-color: #eab308;
+  border-left-color: #eab308;
+  background: #fefce8;
+}
+
+.ev-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ev-row-main strong { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); }
+.ev-row-value { font-weight: 700; overflow-wrap: anywhere; }
+.ev-row-raw { font-size: 12px; color: var(--text-dim); font-style: italic; overflow-wrap: anywhere; }
+.ev-ocr-text { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; overflow-wrap: anywhere; }
+
+.ev-where {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gov-green);
+}
+
+.ev-where-none { color: var(--text-dim); font-weight: 600; }
+
+.ev-row-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.ev-method {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.ev-method-aiassisted { background: #f3e8ff; color: #6b21a8; }
+.ev-method-catalog { background: #fef3c7; color: #92400e; }
+
+.ev-conf { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+
+.ev-confbar {
+  position: relative;
+  flex: 0 0 64px;
+  height: 18px;
+  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  align-self: center;
+}
+
+.ev-confbar i { position: absolute; inset: 0 auto 0 0; }
+.ev-conf-high i { background: #bbf7d0; }
+.ev-conf-mid i { background: #fde68a; }
+.ev-conf-low i { background: #fecaca; }
+
+.ev-confbar b {
+  position: relative;
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--text-main);
+}
+
+.ev-link {
+  margin-top: 8px;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--gov-blue);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* =====================================================
    RESPONSIVE LAYOUT & MOBILE OPTIMIZATIONS
    (Eliminates horizontal scrolling, adds drawer menu,
@@ -3593,6 +3891,15 @@ html.gate-open .app-workspace { display: none; }
   .complaint-actions {
     grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
+  }
+  .ev-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ev-toggle {
+    margin-left: 0;
+  }
+  .ev-stage img {
+    max-height: 60vh;
   }
 }
 

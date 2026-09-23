@@ -14,6 +14,19 @@ const DEMO_BARCODES = [
   ["8908877665504", "HydroSoft Bath Towel"],
 ];
 
+const FIELD_LABELS = {
+  product_name: "Product Designation",
+  net_quantity: "Net Quantity",
+  mrp: "Maximum Retail Price (MRP)",
+  unit_sale_price: "Unit Sale Price (USP)",
+  manufacturer_name_and_address: "Manufacturer / Packer Details",
+  consumer_care: "Consumer Care Coordinates",
+  manufacture_or_import_date: "Date of Manufacture / Import",
+  dimensions: "Package Dimensions",
+};
+
+const PANEL_LABELS = ["Front PDP", "Back Declarations", "Side / MRP Panel", "Barcode / Batch Panel", "Supplementary Panel"];
+
 const PAGE_TITLES = {
   dashboard: "Compliance Dashboard",
   inspect: "Packaging Inspector",
@@ -371,7 +384,7 @@ function renderEvidenceGallery() {
   if (preview) preview.style.display = "none";
   gallery.style.display = "grid";
 
-  const panelLabels = ["Front PDP", "Back Declarations", "Side / MRP Panel", "Barcode / Batch Panel", "Supplementary Panel"];
+  const panelLabels = PANEL_LABELS;
 
   gallery.innerHTML = state.evidenceFiles.map((file, idx) => {
     const url = URL.createObjectURL(file);
@@ -486,6 +499,7 @@ async function analyze() {
     });
     saveHistory();
     renderResults();
+    loadEvidence();
     showPage("results");
     toast(`Screening pipeline completed across ${state.evidenceFiles.length} packaging panel${state.evidenceFiles.length > 1 ? "s" : ""}`);
   } catch (err) {
@@ -590,16 +604,7 @@ function renderResults() {
         </div>`).join("")
     : "<p class=\"muted\" style=\"padding:10px 0\">No catalog discrepancies flagged for this item.</p>";
 
-  const labels = {
-    product_name: "Product Designation",
-    net_quantity: "Net Quantity",
-    mrp: "Maximum Retail Price (MRP)",
-    unit_sale_price: "Unit Sale Price (USP)",
-    manufacturer_name_and_address: "Manufacturer / Packer Details",
-    consumer_care: "Consumer Care Coordinates",
-    manufacture_or_import_date: "Date of Manufacture / Import",
-    dimensions: "Package Dimensions",
-  };
+  const labels = FIELD_LABELS;
   document.getElementById("fieldsGrid").innerHTML = (state.fields || []).map((f) => {
     let valHtml = escapeHtml(f.value);
     if (f.field_name === "consumer_care") {
@@ -612,10 +617,259 @@ function renderResults() {
         <div class="muted" style="font-size:11.5px;font-weight:600;text-transform:uppercase">${labels[f.field_name] || escapeHtml(f.field_name)}</div>
         <div style="margin-top:6px;font-weight:700;font-size:14px">${valHtml}</div>
         <div class="muted" style="font-size:12px;margin-top:4px">${Math.round((f.confidence || 0) * 100)}% Extraction Confidence</div>
+        <button type="button" class="ev-link" data-ev-field="${escapeHtml(f.field_name)}">View source on label</button>
       </div>
     `;
   }).join("") || `<p class="muted">No declarations extracted. Ensure the label photograph is sharp and well lit.</p>`;
 }
+
+/* =====================================================
+   LABEL EVIDENCE VIEWER
+   Photo + OCR bounding boxes, linked to extracted declarations
+===================================================== */
+const evidence = { data: null, imageId: null, activeKey: null };
+
+function evBox(item) {
+  const b = item && item.bbox;
+  if (!Array.isArray(b) || b.length !== 4) return null;
+  const [x1, y1, x2, y2] = b.map(Number);
+  if (![x1, y1, x2, y2].every(Number.isFinite) || x2 <= x1 || y2 <= y1) return null;
+  return [x1, y1, x2, y2];
+}
+
+function evSameBox(a, b) {
+  const ba = evBox(a), bb = evBox(b);
+  return !!ba && !!bb && ba.every((v, i) => v === bb[i]);
+}
+
+function evImages() {
+  const imgs = [...(evidence.data?.images || [])];
+  return imgs.sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+}
+
+function evPanelLabel(idx) {
+  return PANEL_LABELS[idx] || `Panel ${idx + 1}`;
+}
+
+// Field -> the OCR line it was read from (same image and same box), if any
+function evFieldSource(field) {
+  if (!field.image_id || !evBox(field)) return null;
+  return (evidence.data.ocr_items || []).find((o) => o.image_id === field.image_id && evSameBox(o, field)) || null;
+}
+
+function evFieldKey(field) {
+  const src = evFieldSource(field);
+  return src ? `ocr:${src.id}` : `field:${field.id}`;
+}
+
+function evMethodLabel(method) {
+  if (method === "AI_LLM_ASSISTED") return "AI-assisted";
+  if (String(method || "").includes("CATALOG")) return "Catalog";
+  return "OCR";
+}
+
+async function loadEvidence() {
+  const card = document.getElementById("evidenceCard");
+  if (!state.scanId) {
+    card.style.display = "none";
+    return;
+  }
+  try {
+    evidence.data = await api(`/api/scans/${state.scanId}/evidence`);
+    evidence.activeKey = null;
+    const images = evImages();
+    if (!images.length) {
+      card.style.display = "none";
+      return;
+    }
+    card.style.display = "block";
+    const withText = images.find((img) => evidence.data.ocr_items.some((o) => o.image_id === img.id));
+    renderEvidencePanels();
+    selectEvidenceImage((withText || images[0]).id);
+  } catch (_) {
+    card.style.display = "none";
+  }
+}
+
+function renderEvidencePanels() {
+  const panels = document.getElementById("evPanels");
+  const images = evImages();
+  panels.innerHTML = images.map((img, idx) => {
+    const lines = evidence.data.ocr_items.filter((o) => o.image_id === img.id).length;
+    return `
+      <button type="button" class="ev-panel" role="tab" data-ev-image="${escapeHtml(img.id)}">
+        <img src="/api/scans/${encodeURIComponent(state.scanId)}/images/${encodeURIComponent(img.id)}/file" alt="" loading="lazy" />
+        <span>${escapeHtml(evPanelLabel(idx))}<small>${lines} text line${lines === 1 ? "" : "s"}</small></span>
+      </button>`;
+  }).join("");
+  panels.hidden = images.length < 2;
+}
+
+function selectEvidenceImage(imageId) {
+  evidence.imageId = imageId;
+  document.querySelectorAll("#evPanels .ev-panel").forEach((b) => {
+    const on = b.dataset.evImage === imageId;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", String(on));
+  });
+  const img = document.getElementById("evImage");
+  img.onload = drawEvidenceOverlay;
+  img.src = `/api/scans/${encodeURIComponent(state.scanId)}/images/${encodeURIComponent(imageId)}/file`;
+  if (img.complete && img.naturalWidth) drawEvidenceOverlay();
+  renderEvidenceLists();
+}
+
+function drawEvidenceOverlay() {
+  const img = document.getElementById("evImage");
+  const svg = document.getElementById("evOverlay");
+  const W = img.naturalWidth, H = img.naturalHeight;
+  if (!W || !H || !evidence.data) return;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const showAll = document.getElementById("evShowAll").checked;
+  const fields = evidence.data.detected_fields.filter((f) => f.image_id === evidence.imageId && evBox(f));
+  const fieldByKey = new Map(fields.map((f) => [evFieldKey(f), f]));
+  // Label text renders at ~12px on screen whatever the photo resolution
+  const fontSize = Math.round(12 * (W / (img.clientWidth || W)));
+  const shapes = [];
+
+  const shape = (key, item, cls, label) => {
+    const [x1, y1, x2, y2] = evBox(item);
+    const poly = Array.isArray(item.polygon) && item.polygon.length >= 4
+      ? item.polygon.map((p) => `${Number(p[0])},${Number(p[1])}`).join(" ")
+      : `${x1},${y1} ${x2},${y1} ${x2},${y2} ${x1},${y2}`;
+    const active = key === evidence.activeKey ? " is-active" : "";
+    let out = `<polygon class="ev-box ${cls}${active}" data-key="${escapeHtml(key)}" points="${poly}" vector-effect="non-scaling-stroke"><title>${escapeHtml(label)}</title></polygon>`;
+    if (active) {
+      const ty = y1 - fontSize * 0.35 > fontSize ? y1 - fontSize * 0.35 : y2 + fontSize;
+      out += `<text class="ev-tag${active}" x="${x1}" y="${ty}" font-size="${fontSize}">${escapeHtml(label)}</text>`;
+    }
+    return out;
+  };
+
+  evidence.data.ocr_items.filter((o) => o.image_id === evidence.imageId && evBox(o)).forEach((o) => {
+    const key = `ocr:${o.id}`;
+    const field = fieldByKey.get(key);
+    if (!field && !showAll && key !== evidence.activeKey) return;
+    const low = (o.confidence ?? 1) < 0.6 ? " is-low" : "";
+    const label = field
+      ? `${FIELD_LABELS[field.field_name] || field.field_name} (${Math.round((o.confidence || 0) * 100)}%)`
+      : `${o.text} (${Math.round((o.confidence || 0) * 100)}%)`;
+    shapes.push(shape(key, o, field ? `is-field${low}` : `is-ocr${low}`, label));
+  });
+  // Fields whose box does not match a stored OCR line still get drawn
+  fields.filter((f) => !evFieldSource(f)).forEach((f) => {
+    shapes.push(shape(`field:${f.id}`, f, "is-field", FIELD_LABELS[f.field_name] || f.field_name));
+  });
+  // Active box last so it sits on top
+  shapes.sort((a, b) => (a.includes("is-active") ? 1 : 0) - (b.includes("is-active") ? 1 : 0));
+  svg.innerHTML = shapes.join("");
+}
+
+function renderEvidenceLists() {
+  const data = evidence.data;
+  const images = evImages();
+  const imageIdx = (id) => images.findIndex((i) => i.id === id);
+
+  document.getElementById("evFields").innerHTML = data.detected_fields.length
+    ? data.detected_fields.map((f) => {
+        const located = f.image_id && evBox(f) && imageIdx(f.image_id) >= 0;
+        const where = !located
+          ? `<span class="ev-where ev-where-none">${{ "AI-assisted": "Inferred by AI from label text; no single location", Catalog: "Taken from the reference catalog, not read from the photo" }[evMethodLabel(f.extraction_method)] || "No location recorded"}</span>`
+          : f.image_id === evidence.imageId
+            ? `<span class="ev-where">On this photo</span>`
+            : `<span class="ev-where">On ${escapeHtml(evPanelLabel(imageIdx(f.image_id)))}</span>`;
+        const key = located ? evFieldKey(f) : "";
+        return `
+          <button type="button" class="ev-row ev-field-row${key && key === evidence.activeKey ? " active" : ""}" ${located ? `data-key="${escapeHtml(key)}" data-image="${escapeHtml(f.image_id)}"` : "disabled"} data-field-name="${escapeHtml(f.field_name)}">
+            <span class="ev-row-main">
+              <strong>${escapeHtml(FIELD_LABELS[f.field_name] || f.field_name)}</strong>
+              <span class="ev-row-value">${escapeHtml(f.value)}</span>
+              ${f.raw_text && f.raw_text !== f.value ? `<span class="ev-row-raw">Read as: "${escapeHtml(f.raw_text)}"</span>` : ""}
+              ${where}
+            </span>
+            <span class="ev-row-meta">
+              <span class="ev-method ev-method-${escapeHtml(evMethodLabel(f.extraction_method).toLowerCase().replace(/[^a-z]/g, ""))}">${escapeHtml(evMethodLabel(f.extraction_method))}</span>
+              <span class="ev-conf">${Math.round((f.confidence || 0) * 100)}%</span>
+            </span>
+          </button>`;
+      }).join("")
+    : `<p class="muted">No declarations were extracted.</p>`;
+
+  const lines = data.ocr_items.filter((o) => o.image_id === evidence.imageId);
+  const fieldKeys = new Map(data.detected_fields.map((f) => [evFieldKey(f), f]));
+  document.getElementById("evOcrCount").textContent = lines.length ? `(${lines.length})` : "";
+  document.getElementById("evOcrLines").innerHTML = lines.length
+    ? lines.map((o) => {
+        const key = `ocr:${o.id}`;
+        const field = fieldKeys.get(key);
+        const pct = Math.round((o.confidence || 0) * 100);
+        const level = pct < 60 ? "low" : pct < 85 ? "mid" : "high";
+        return `
+          <button type="button" class="ev-row ev-ocr-row${key === evidence.activeKey ? " active" : ""}" data-key="${escapeHtml(key)}" data-image="${escapeHtml(o.image_id)}" ${evBox(o) ? "" : "disabled"}>
+            <span class="ev-row-main">
+              <span class="ev-ocr-text">${escapeHtml(o.text)}</span>
+              ${field ? `<span class="ev-where">${escapeHtml(FIELD_LABELS[field.field_name] || field.field_name)}</span>` : ""}
+            </span>
+            <span class="ev-confbar ev-conf-${level}" title="OCR confidence ${pct}%"><i style="width:${pct}%"></i><b>${pct}%</b></span>
+          </button>`;
+      }).join("")
+    : `<p class="muted">No OCR text was recorded for this photo${data.ocr_items.length ? "" : " (the OCR engine did not run for this inspection)"}.</p>`;
+}
+
+function setEvidenceActive(key, imageId, scrollList) {
+  evidence.activeKey = evidence.activeKey === key ? null : key;
+  if (imageId && imageId !== evidence.imageId) {
+    selectEvidenceImage(imageId);
+  } else {
+    drawEvidenceOverlay();
+    renderEvidenceLists();
+  }
+  if (scrollList && evidence.activeKey) {
+    const row = document.querySelector(`#evOcrLines [data-key="${CSS.escape(evidence.activeKey)}"], #evFields [data-key="${CSS.escape(evidence.activeKey)}"]`);
+    if (row) row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+document.getElementById("evPanels").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-ev-image]");
+  if (btn) {
+    evidence.activeKey = null;
+    selectEvidenceImage(btn.dataset.evImage);
+  }
+});
+document.getElementById("evOverlay").addEventListener("click", (e) => {
+  const box = e.target.closest("[data-key]");
+  if (box) setEvidenceActive(box.dataset.key, evidence.imageId, true);
+});
+["evFields", "evOcrLines"].forEach((id) => {
+  document.getElementById(id).addEventListener("click", (e) => {
+    const row = e.target.closest("[data-key]");
+    if (!row || row.disabled) return;
+    setEvidenceActive(row.dataset.key, row.dataset.image, false);
+    if (window.matchMedia("(max-width: 860px)").matches) {
+      document.getElementById("evStage").scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  });
+});
+document.getElementById("evShowAll").addEventListener("change", drawEvidenceOverlay);
+let evResizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(evResizeTimer);
+  evResizeTimer = setTimeout(() => { if (evidence.data && evidence.activeKey) drawEvidenceOverlay(); }, 150);
+});
+document.getElementById("fieldsGrid").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-ev-field]");
+  if (!btn || !evidence.data) return;
+  const card = document.getElementById("evidenceCard");
+  card.scrollIntoView({ block: "start", behavior: "smooth" });
+  const row = document.querySelector(`#evFields [data-field-name="${CSS.escape(btn.dataset.evField)}"]`);
+  if (row && !row.disabled) {
+    evidence.activeKey = null;
+    setEvidenceActive(row.dataset.key, row.dataset.image, false);
+  } else {
+    toast("This declaration has no recorded location on the photos.");
+  }
+});
 
 async function generateReport() {
   if (!state.scanId) return;
