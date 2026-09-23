@@ -2619,6 +2619,16 @@ html.gate-open .app-workspace { display: none; }
   width: auto;
 }
 
+.gate-descriptor {
+  background: var(--gov-navy);
+  color: #ffffff;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 8px 16px;
+}
+
 .gate-body {
   max-width: 1080px;
   margin: 28px auto 0;

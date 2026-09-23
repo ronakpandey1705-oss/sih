@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>PackSure - Legal Metrology Verification System</title>
-  <meta name="description" content="Official Legal Metrology compliance screening portal for pre-packaged commodities under the Legal Metrology (Packaged Commodities) Rules, 2011. Automated barcode lookup, OCR declaration extraction, and rule verification." />
-  <meta name="keywords" content="Legal Metrology, Packaged Commodities Rules 2011, PackSure, Department of Consumer Affairs, MRP verification, Net quantity, SIH26034" />
-  <meta name="application-name" content="PackSure" />
+  <title>PRAMAAN - AI-Powered Legal Metrology Compliance &amp; Verification</title>
+  <meta name="description" content="PRAMAAN: Digital Proof for Product Compliance. Official Legal Metrology compliance screening portal for pre-packaged commodities under the Legal Metrology (Packaged Commodities) Rules, 2011. Automated barcode lookup, OCR declaration extraction, and rule verification." />
+  <meta name="keywords" content="Legal Metrology, Packaged Commodities Rules 2011, PRAMAAN, Department of Consumer Affairs, MRP verification, Net quantity, SIH26034" />
+  <meta name="application-name" content="PRAMAAN" />
   <meta name="theme-color" content="#090d16" />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://packsure.gov.in" />
-  <meta property="og:title" content="PackSure - Legal Metrology Verification System" />
+  <link rel="canonical" href="https://pramaan.gov.in" />
+  <meta property="og:title" content="PRAMAAN - AI-Powered Legal Metrology Compliance &amp; Verification" />
   <meta property="og:description" content="Official statutory compliance screening and declaration verification for packaged commodities under Indian Legal Metrology Rules." />
-  <meta property="og:url" content="https://packsure.gov.in" />
+  <meta property="og:url" content="https://pramaan.gov.in" />
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/styles.css?v=18" />
+  <link rel="stylesheet" href="/static/styles.css?v=19" />
   <script>
     // Show the sign-in gate before first paint when there is no officer session
     try { if (!localStorage.getItem("packsure_token")) document.documentElement.classList.add("gate-open"); }
@@ -30,7 +30,7 @@
   <div class="emblem-watermark" aria-hidden="true"></div>
 
   <!-- Entry Gate: Officer Sign In / Register + Citizen Public Complaint -->
-  <div class="auth-gate" id="authGate" role="main" aria-label="PackSure sign in">
+  <div class="auth-gate" id="authGate" role="main" aria-label="PRAMAAN sign in">
     <div class="gate-strip">
       <svg width="18" height="13" viewBox="0 0 18 13" fill="none" aria-hidden="true">
         <rect width="18" height="4.33" fill="#FF9933"/>
@@ -48,12 +48,13 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m3 7 9-4 9 4"></path><path d="M3 7v10l9 4 9-4V7"></path><path d="M6 10.5 12 14l6-3.5"></path></svg>
         </div>
         <div>
-          <div class="brand-title">PackSure</div>
-          <span class="brand-subtitle">National Compliance Agency</span>
+          <div class="brand-title">PRAMAAN</div>
+          <span class="brand-subtitle">Digital Proof for Product Compliance</span>
         </div>
       </div>
       <img src="/static/emblem.svg" alt="State Emblem of India" class="gate-emblem" width="40" height="50" />
     </div>
+    <p class="gate-descriptor">AI-Powered Legal Metrology Compliance &amp; Verification</p>
 
     <!-- View 1: Sign in / Register + citizen entry point -->
     <div class="gate-body" id="gateAuthView">
@@ -317,9 +318,9 @@
     <!-- 2. Grand Sovereign Masthead Banner -->
     <div class="gov-masthead">
       <div class="gov-masthead-inner">
-        <!-- 1. Left: PackSure Portal Brand & Identity -->
+        <!-- 1. Left: PRAMAAN Portal Brand & Identity -->
         <div class="gov-portal-identity">
-          <a class="brand" href="#dashboard" data-page="dashboard" aria-label="PackSure Home">
+          <a class="brand" href="#dashboard" data-page="dashboard" aria-label="PRAMAAN Home">
             <div class="brand-mark">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 3v18"></path>
@@ -329,8 +330,8 @@
               </svg>
             </div>
             <div>
-              <div class="brand-title">PackSure</div>
-              <span class="brand-subtitle">National Compliance Agency</span>
+              <div class="brand-title">PRAMAAN</div>
+              <span class="brand-subtitle">Digital Proof for Product Compliance</span>
             </div>
           </a>
         </div>
@@ -441,7 +442,7 @@
         </div>
         <div class="gov-marquee-content">
           <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();">
-            Mandatory packaging declaration audit under Rule 6 of the Legal Metrology (Packaged Commodities) Rules, 2011 is active across all consumer categories. &bull; Report dual MRP, font deficit, or missing customer care via Helpline 1915 or PackSure Citizen Redressal. &bull; Automated OCR & AI Vision inspection active for field officers.
+            Mandatory packaging declaration audit under Rule 6 of the Legal Metrology (Packaged Commodities) Rules, 2011 is active across all consumer categories. &bull; Report dual MRP, font deficit, or missing customer care via Helpline 1915 or PRAMAAN Citizen Redressal. &bull; Automated OCR & AI Vision inspection active for field officers.
           </marquee>
         </div>
       </div>
@@ -942,12 +943,12 @@
       <section id="assistant" class="page">
         <div class="page-header">
           <div class="badge-tag">Regulatory Assistant</div>
-          <h1>PackSure Query Terminal</h1>
+          <h1>PRAMAAN Query Terminal</h1>
           <p class="lede">Technical decision-support assistant for Legal Metrology definitions, declaration standards, and scan result interpretation.</p>
         </div>
         <div class="card">
           <div class="messages" id="messages">
-            <div class="msg bot">Greetings. I am the PackSure regulatory assistant. I can assist with Legal Metrology (Packaged Commodities) Rules, 2011 compliance questions, mandatory declaration requirements, and inspection analysis details.</div>
+            <div class="msg bot">Greetings. I am the PRAMAAN regulatory assistant. I can assist with Legal Metrology (Packaged Commodities) Rules, 2011 compliance questions, mandatory declaration requirements, and inspection analysis details.</div>
           </div>
           <div class="row">
             <input id="chatInput" placeholder="Enter inquiry regarding Legal Metrology regulations or inspection findings..." style="flex:1" />
@@ -993,7 +994,7 @@
         <div class="page-header">
           <div class="badge-tag">Regulatory Compliance Document</div>
           <h1>Terms &amp; Conditions</h1>
-          <p class="lede">Standard operating conditions and legal terms governing use of the PackSure Legal Metrology Verification System.</p>
+          <p class="lede">Standard operating conditions and legal terms governing use of the PRAMAAN Legal Metrology Verification System.</p>
         </div>
 
         <div class="legal-doc">
@@ -1005,7 +1006,7 @@
 
           <div class="legal-section">
             <h2>1. Statutory Framework and Purpose</h2>
-            <p>PackSure is an automated screening and decision-support portal established to assist authorized Legal Metrology officers, state enforcement personnel, and internal compliance auditors in verifying packaged commodities against the statutory provisions of:</p>
+            <p>PRAMAAN is an automated screening and decision-support portal established to assist authorized Legal Metrology officers, state enforcement personnel, and internal compliance auditors in verifying packaged commodities against the statutory provisions of:</p>
             <ul>
               <li>The Legal Metrology Act, 2009 (Act No. 1 of 2010).</li>
               <li>The Legal Metrology (Packaged Commodities) Rules, 2011 (as amended).</li>
@@ -1067,7 +1068,7 @@
 
           <div class="legal-section">
             <h2>1. Categories of Information Processed</h2>
-            <p>PackSure processes specific regulatory data categories strictly necessary for statutory packaging verification:</p>
+            <p>PRAMAAN processes specific regulatory data categories strictly necessary for statutory packaging verification:</p>
             <ul>
               <li><strong>Photographic Evidence:</strong> High-resolution digital imagery of consumer product packaging, principal display panels, and mandatory label declaration panels.</li>
               <li><strong>Extracted Declaration Records:</strong> Transcribed OCR text containing product designations, manufacturer/packer/importer names and addresses, net quantities, maximum retail prices (MRP), unit sale prices, and consumer care coordinates.</li>
@@ -1077,12 +1078,12 @@
 
           <div class="legal-section">
             <h2>2. Image Processing and Local Server Storage</h2>
-            <p>Photographs uploaded through the PackSure inspection station are transmitted securely to the server upload repository (backend/uploads/). Files are assigned unique cryptographic UUID identifiers to prevent naming collisions and unauthorized enumeration. Uploaded image files are retained solely for evidence logging, administrative review, and official report generation.</p>
+            <p>Photographs uploaded through the PRAMAAN inspection station are transmitted securely to the server upload repository (backend/uploads/). Files are assigned unique cryptographic UUID identifiers to prevent naming collisions and unauthorized enumeration. Uploaded image files are retained solely for evidence logging, administrative review, and official report generation.</p>
           </div>
 
           <div class="legal-section">
             <h2>3. Absolute Prohibition on External Model Training</h2>
-            <p>Uploaded packaging evidence, trade brand imagery, and proprietary manufacturer label data are strictly sequestered. PackSure enforces an absolute policy that no packaging photographs or extracted text records are shared with public AI models, scraped for commercial advertising, or utilized to train external public foundation models.</p>
+            <p>Uploaded packaging evidence, trade brand imagery, and proprietary manufacturer label data are strictly sequestered. PRAMAAN enforces an absolute policy that no packaging photographs or extracted text records are shared with public AI models, scraped for commercial advertising, or utilized to train external public foundation models.</p>
           </div>
 
           <div class="legal-section">
@@ -1092,7 +1093,7 @@
 
           <div class="legal-section">
             <h2>5. Security Protocols and Access Control</h2>
-            <p>Technical safeguards implemented across the PackSure infrastructure include:</p>
+            <p>Technical safeguards implemented across the PRAMAAN infrastructure include:</p>
             <ul>
               <li>Strict MIME-type validation ensuring only legitimate photographic image payloads (JPEG, PNG, WebP) are processed.</li>
               <li>Sanitization of all text extraction buffers to mitigate script injection and cross-site scripting (XSS).</li>
@@ -1111,8 +1112,8 @@
       <section id="about" class="page">
         <div class="page-header">
           <div class="badge-tag">System Architecture</div>
-          <h1>About PackSure</h1>
-          <p class="lede">PackSure is an automated Legal Metrology compliance screening application engineered for Smart India Hackathon problem statement SIH26034.</p>
+          <h1>About PRAMAAN</h1>
+          <p class="lede">PRAMAAN (Digital Proof for Product Compliance) is an AI-powered Legal Metrology Compliance &amp; Verification application engineered for Smart India Hackathon problem statement SIH26034.</p>
         </div>
 
         <div class="card">
@@ -1120,7 +1121,7 @@
             <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
             System Purpose &amp; Scope
           </h2>
-          <p class="muted">Under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011, every pre-packaged commodity distributed in the country must carry clear, legible, and unalterable mandatory declarations. PackSure accelerates field inspection workflows by automating barcode catalog matching, OCR declaration capture, statutory rule evaluation, and inspection notice compilation.</p>
+          <p class="muted">Under the Legal Metrology Act, 2009 and the Legal Metrology (Packaged Commodities) Rules, 2011, every pre-packaged commodity distributed in the country must carry clear, legible, and unalterable mandatory declarations. PRAMAAN accelerates field inspection workflows by automating barcode catalog matching, OCR declaration capture, statutory rule evaluation, and inspection notice compilation.</p>
 
           <table style="margin-top:16px">
             <tbody>
@@ -1334,9 +1335,9 @@
               <path d="M3 7v10l9 4 9-4V7"></path>
               <path d="M6 10.5 12 14l6-3.5"></path>
             </svg>
-            PackSure Verification System
+            PRAMAAN &middot; Digital Proof for Product Compliance
           </h3>
-          <p>National statutory compliance verification portal for pre-packaged commodities under the Legal Metrology (Packaged Commodities) Rules, 2011. Designed for regulatory officers, quality assurance inspectors, and statutory auditors.</p>
+          <p>AI-Powered Legal Metrology Compliance &amp; Verification. National statutory compliance verification portal for pre-packaged commodities under the Legal Metrology (Packaged Commodities) Rules, 2011. Designed for regulatory officers, quality assurance inspectors, and statutory auditors.</p>
           <div style="margin-top:14px;font-size:12px;line-height:1.7;color:#94a3b8">
             <div><strong>National Consumer Helpline:</strong> <a href="tel:1800114000">1800-11-4000</a> (Toll-Free)</div>
             <div><strong>Department Helpline:</strong> <a href="tel:+911123386123">+91-11-23386123</a></div>
@@ -1597,6 +1598,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="/static/app.js?v=18"></script>
+  <script src="/static/app.js?v=19"></script>
 </body>
 </html>

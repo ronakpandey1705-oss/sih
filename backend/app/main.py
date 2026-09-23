@@ -194,7 +194,7 @@ FRONTEND_DIR = os.path.abspath(
 app = FastAPI(
     title=settings.APP_NAME,
     description=(
-        "PackSure — SIH 2026 (Problem Statement SIH26034) AI-assisted packaged "
+        "PRAMAAN (Digital Proof for Product Compliance) — AI-Powered Legal Metrology Compliance & Verification. SIH 2026 (Problem Statement SIH26034) AI-assisted packaged "
         "commodity Legal Metrology compliance screening."
     ),
     version="0.1.0",
@@ -220,7 +220,7 @@ def health_check():
     """Health check endpoint required by system specification."""
     return {
         "status": "ok",
-        "service": "packsure-backend"
+        "service": "pramaan-backend"
     }
 
 
@@ -246,12 +246,12 @@ if os.path.isdir(FRONTEND_DIR):
 
 
 @app.get("/", include_in_schema=False)
-def serve_packsure():
+def serve_pramaan():
     index_path = os.path.join(FRONTEND_DIR, "index.html")
     if os.path.isfile(index_path):
         return FileResponse(index_path)
     return {
-        "message": "PackSure backend is running. Frontend files were not found.",
+        "message": "PRAMAAN backend is running. Frontend files were not found.",
         "docs": "/docs",
         "health": "/api/health",
     }

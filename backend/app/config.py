@@ -6,7 +6,7 @@ _BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
-    APP_NAME: str = "PackSure"
+    APP_NAME: str = "PRAMAAN"
     APP_ENV: str = "development"
     DEBUG: bool = True
     HOST: str = "0.0.0.0"

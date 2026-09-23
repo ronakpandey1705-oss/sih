@@ -99,7 +99,7 @@ function showPage(id) {
     b.classList.toggle("active", b.dataset.page === id);
   });
   if (PAGE_TITLES[id]) {
-    document.title = `PackSure | ${PAGE_TITLES[id]}`;
+    document.title = `PRAMAAN | ${PAGE_TITLES[id]}`;
     const crumb = document.getElementById("pageCrumb");
     if (crumb) {
       crumb.innerHTML = `<span>National Portal</span> <strong>${escapeHtml(PAGE_TITLES[id])}</strong>`;

@@ -7,7 +7,7 @@ from app.services.groq_chat import GroqChatService
 router = APIRouter(prefix="/chat", tags=["Assistant"])
 
 
-@router.post("", response_model=ChatResponse, summary="PackSure assistant (Groq)")
+@router.post("", response_model=ChatResponse, summary="PRAMAAN assistant (Groq)")
 async def chat(payload: ChatRequest) -> ChatResponse:
     history = [{"role": t.role, "content": t.content} for t in payload.history]
     reply = await GroqChatService.complete(

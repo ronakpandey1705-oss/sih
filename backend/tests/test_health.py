@@ -3,7 +3,7 @@ def test_health_check(client):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
-    assert data["service"] == "packsure-backend"
+    assert data["service"] == "pramaan-backend"
 
 
 def test_root_endpoint(client):
@@ -14,4 +14,4 @@ def test_root_endpoint(client):
         data = response.json()
         assert "docs" in data or "message" in data
     else:
-        assert b"PackSure" in response.content
+        assert b"PRAMAAN" in response.content
